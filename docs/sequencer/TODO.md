@@ -225,6 +225,20 @@ for real-time performance, parameter modulation, and offline loop export.
 - [x] Mux the clearer MIDI-conditioned audition audio into the diagnostic
   prompt-weight video.
 
+### 15. C++ MIDI Prompt Diagnostic
+
+- [x] Add a C++ diagnostic target that drives the official
+  `MLXEngine::set_note_on/off` MIDI path.
+- [x] Parse the provided MIDI file in C++ and schedule note on/off events at
+  25 Hz frame boundaries.
+- [x] Modulate primary prompt embedding mix through
+  `reblend_musiccoca_tokens`.
+- [x] Modulate secondary CFG, expression temperature, and exploration top-k
+  from the same four-slot control matrix.
+- [x] Generate four MIDI-derived audio prompt guide signals in C++ and encode
+  them with `set_audio_prompt_samples`.
+- [x] Verify the C++ target after the local Xcode Metal Toolchain is available.
+
 ## First Target User Flow
 
 1. Launch the sequencer app.

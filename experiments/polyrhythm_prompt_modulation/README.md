@@ -64,3 +64,29 @@ The control matrix is explicit:
 Generated audio/video files are written under `outputs/polyrhythm_prompt_modulation/`.
 The modulation values and prompt plan are written under
 `experiments/polyrhythm_prompt_modulation/data/`.
+
+### C++ MIDI Engine Diagnostic
+
+The C++ diagnostic uses the official `MLXEngine::set_note_on/off` path instead
+of Python-side note-token arrays. It parses the same MIDI file, schedules note
+events into `MidiNoteTracker`, modulates cached prompt embeddings through
+`reblend_musiccoca_tokens`, and changes CFG, temperature, and top-k every 25 Hz
+frame.
+
+```bash
+DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
+  xcodebuild -downloadComponent MetalToolchain
+TOOLCHAINS=com.apple.dt.toolchain.Metal.32023.883 \
+  DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
+  cmake -S . -B build
+TOOLCHAINS=com.apple.dt.toolchain.Metal.32023.883 \
+  DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
+  cmake --build build --target mrt2_midi_prompt_diagnostic -j 8
+./build/examples/midi_prompt_diagnostic/mrt2_midi_prompt_diagnostic \
+  --midi 'assets/Am-Minor Prog 01 (i-VI-v-iv).mid' \
+  --output outputs/polyrhythm_prompt_modulation/magenta_cpp_midi_control_matrix_8s.wav \
+  --report outputs/polyrhythm_prompt_modulation/magenta_cpp_midi_control_matrix_8s.report.json
+```
+
+Use `--text-prompts` to compare text prompt encoding against the default
+MIDI-derived audio prompt embeddings.
