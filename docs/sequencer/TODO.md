@@ -254,6 +254,24 @@ for real-time performance, parameter modulation, and offline loop export.
 - [x] Keep stability controls fixed at 25 Hz frames / 1920 sample chunks while
   modulating prompt embedding mix, CFG, temperature, and top-k.
 
+### 17. Sustained Synth Prompt Sources
+
+- [x] Create a reusable sustained-synth prompt design skill for texture,
+  cinematic, glitch, noise, synthesizer, modular synth, and post-effect
+  long-tone material.
+- [x] Add a `sustained_synth_textures` C++ profile with four high-contrast
+  prompt slots: low analog drone, spectral wavetable pad, cinematic noise bed,
+  and granular glitch sustain.
+- [x] Add `solo` and `modulated` prompt weight modes for rendering individual
+  prompt sources and continuous prompt-weight blends.
+- [x] Write frame-level prompt weight JSON including weights, CFG, temperature,
+  and top-k.
+- [x] Render four 10 second solo text-prompt sources.
+- [x] Render one 30 second prompt-weight modulation across the four sustained
+  synth prompts.
+- [x] Verify duration, non-silence, and normalized prompt weights for all five
+  renders.
+
 ## First Target User Flow
 
 1. Launch the sequencer app.

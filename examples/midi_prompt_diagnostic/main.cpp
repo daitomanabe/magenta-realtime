@@ -169,6 +169,8 @@ struct RenderConfig {
     std::string model_subfolder = "musiccoca";
     std::array<Slot, 4> slots = kSlots;
     std::string profile = "clear_extreme";
+    std::string weight_mode = "sequential";
+    int solo_slot = 0;
     double duration_seconds = 0.0;
     double segment_seconds = 2.0;
     double transition_seconds = 0.20;
@@ -176,6 +178,7 @@ struct RenderConfig {
     bool match_segment_rms = true;
     float target_rms = 0.045f;
     double preroll_seconds = 2.0;
+    std::filesystem::path weights_path;
 };
 
 uint16_t read_u16(const std::vector<uint8_t>& data, size_t& offset) {
@@ -633,6 +636,59 @@ bool apply_profile(RenderConfig& config) {
         }};
         return true;
     }
+    if (config.profile == "sustained_synth_textures") {
+        config.slots = {{
+            {
+                "low_voltage_fog",
+                "Low Voltage Fog",
+                "Create an original sustained synthesizer texture called Low Voltage Fog. A continuous low-register modular VCO drone with slow phase beating, slight pitch drift, and a dark ladder low-pass filter opening over time. Add warm saturation, tape delay feedback, and a wide stable reverb tail. Cinematic, heavy, evolving, no clear melody. Avoid drums, vocals, arpeggios, EDM drops, bright pop chords, and abrupt endings.",
+                "low modular VCO drone with phase beating, filter motion, tape delay, and reverb",
+                "analog_drone",
+                0.66f,
+                48,
+                7.2f,
+                5.8f,
+                0.0f,
+            },
+            {
+                "spectral_glass_bloom",
+                "Spectral Glass Bloom",
+                "Create an original sustained synthesizer texture called Spectral Glass Bloom. A bright high-mid wavetable pad with slow spectral freeze thawing, subtle phase smear, and glassy harmonic drift. Add shimmer reverb, gentle chorus, a resonant high-pass air layer, and very slow stereo widening. Luminous, cinematic, floating, continuously evolving. Avoid drums, vocals, lead melody, fast arpeggios, EDM drops, and abrupt endings.",
+                "bright wavetable-like pad with spectral shimmer, chorus, and slow stereo drift",
+                "spectral_pad",
+                0.72f,
+                72,
+                7.0f,
+                5.6f,
+                0.0f,
+            },
+            {
+                "carbon_cinema_noise",
+                "Carbon Cinema Noise",
+                "Create an original sustained synthesizer texture called Carbon Cinema Noise. A dark cinematic noise bed with filtered broadband noise, distant sub pressure, slow band-pass sweep, and occasional resonant bloom without rhythm. Add convolution reverb, low tape saturation, and a huge distant room tail. Tense, smoky, physical, continuous. Avoid drums, vocals, melody lead, bright chords, riser clichés, EDM drops, and abrupt endings.",
+                "dark filtered noise bed with sub pressure, resonant sweeps, and convolution-like tail",
+                "cinema_noise",
+                0.88f,
+                96,
+                7.4f,
+                3.4f,
+                0.0f,
+            },
+            {
+                "buffer_freeze_dust",
+                "Buffer Freeze Dust",
+                "Create an original sustained synthesizer texture called Buffer Freeze Dust. A glitchy granular sustain made from frozen buffers, bit-depth erosion, small digital crackles, and slowly changing grain density. Add spectral smear, short reverse delay, resonant notch movement, and a wide unstable stereo field. Fragile, electric, textural, continuous. Avoid drums, vocals, obvious melody, fast arpeggios, EDM drops, and clean polished pop chords.",
+                "granular frozen buffer texture with bitcrushed edges, reverse delay, and notch movement",
+                "granular_glitch",
+                1.05f,
+                128,
+                6.8f,
+                2.8f,
+                0.0f,
+            },
+        }};
+        return true;
+    }
     return false;
 }
 
@@ -650,18 +706,48 @@ int segment_for_time(double time_seconds, double segment_seconds) {
     return std::clamp(static_cast<int>(time_seconds / segment_seconds), 0, 3);
 }
 
-std::array<float, 4> prompt_weights(double time_seconds,
-                                    double segment_seconds,
-                                    double transition_seconds) {
-    int segment = segment_for_time(time_seconds, segment_seconds);
-    double local = time_seconds - segment * segment_seconds;
+std::array<float, 4> normalize_prompt_weights(std::array<float, 4> weights) {
+    float sum = std::accumulate(weights.begin(), weights.end(), 0.0f);
+    if (sum <= 0.000001f || !std::isfinite(sum)) {
+        return {1.0f, 0.0f, 0.0f, 0.0f};
+    }
+    for (float& weight : weights) weight /= sum;
+    return weights;
+}
+
+std::array<float, 4> prompt_weights(double time_seconds, const RenderConfig& config) {
+    if (config.weight_mode == "solo") {
+        std::array<float, 4> weights = {0.0f, 0.0f, 0.0f, 0.0f};
+        weights[std::clamp(config.solo_slot, 0, 3)] = 1.0f;
+        return weights;
+    }
+
+    if (config.weight_mode == "modulated" || config.weight_mode == "polyrhythm") {
+        double duration = config.duration_seconds > 0.0
+            ? config.duration_seconds
+            : std::max(0.001, config.segment_seconds * 4.0);
+        double normalized_time = std::clamp(time_seconds / duration, 0.0, 1.0);
+        constexpr std::array<double, 4> cycles = {1.0, 1.5, 2.5, 3.5};
+        constexpr std::array<double, 4> phases = {0.00, 0.23, 0.47, 0.71};
+        std::array<float, 4> weights = {0.0f, 0.0f, 0.0f, 0.0f};
+        for (size_t i = 0; i < weights.size(); ++i) {
+            double phase = 2.0 * kPi * (normalized_time * cycles[i] + phases[i]);
+            double lfo = 0.5 + 0.5 * std::sin(phase);
+            weights[i] = static_cast<float>(0.04 + std::pow(lfo, 1.8));
+        }
+        return normalize_prompt_weights(weights);
+    }
+
+    int segment = segment_for_time(time_seconds, config.segment_seconds);
+    double local = time_seconds - segment * config.segment_seconds;
+    double transition_seconds = std::max(0.0, config.transition_seconds);
     int next = (segment + 1) % 4;
     std::array<float, 4> weights = {0.0f, 0.0f, 0.0f, 0.0f};
-    if (local < segment_seconds - transition_seconds) {
+    if (transition_seconds <= 0.0 || local < config.segment_seconds - transition_seconds) {
         weights[segment] = 1.0f;
     } else {
         float amount = static_cast<float>(
-            std::min(1.0, (local - (segment_seconds - transition_seconds)) / transition_seconds));
+            std::min(1.0, (local - (config.segment_seconds - transition_seconds)) / transition_seconds));
         weights[segment] = 1.0f - amount;
         weights[next] = amount;
     }
@@ -957,6 +1043,136 @@ std::vector<float> synth_minimal_prompt(const MidiData& midi) {
     return samples;
 }
 
+std::vector<float> synth_analog_drone_prompt(const MidiData& midi) {
+    std::vector<float> samples(static_cast<size_t>(midi.duration_seconds * kSampleRate), 0.0f);
+    for (const auto& note : midi.notes) {
+        int start = static_cast<int>(std::lround(note.start_seconds * kSampleRate));
+        int end = std::min(static_cast<int>(samples.size()),
+                           static_cast<int>(std::lround(note.end_seconds * kSampleRate)));
+        double base = midi_frequency(note.pitch - 24);
+        for (int i = start; i < end; ++i) {
+            double t = i / static_cast<double>(kSampleRate);
+            double local = (i - start) / static_cast<double>(kSampleRate);
+            double dur = std::max(0.001, note.end_seconds - note.start_seconds);
+            double env = std::min(1.0, local / 0.9) *
+                         std::min(1.0, std::max(0.0, (dur - local) / 0.8));
+            double cutoff = 0.45 + 0.55 * (0.5 + 0.5 * std::sin(2 * kPi * 0.035 * t));
+            double tone = 0.58 * std::sin(2 * kPi * base * t) +
+                          0.46 * std::sin(2 * kPi * base * 1.006 * t + 0.4) +
+                          0.18 * std::sin(2 * kPi * base * 2.01 * t);
+            samples[i] += static_cast<float>(0.10 * tone * cutoff * env);
+        }
+    }
+    int delay = static_cast<int>(std::lround(0.43 * kSampleRate));
+    for (int i = delay; i < static_cast<int>(samples.size()); ++i) {
+        samples[i] += 0.28f * samples[i - delay];
+    }
+    for (float& sample : samples) sample = std::tanh(sample * 1.6f);
+    fade_edges(samples, 0.08);
+    normalize_audio(samples);
+    return samples;
+}
+
+std::vector<float> synth_spectral_pad_prompt(const MidiData& midi) {
+    std::vector<float> samples(static_cast<size_t>(midi.duration_seconds * kSampleRate), 0.0f);
+    for (const auto& note : midi.notes) {
+        int start = static_cast<int>(std::lround(note.start_seconds * kSampleRate));
+        int end = std::min(static_cast<int>(samples.size()),
+                           static_cast<int>(std::lround(note.end_seconds * kSampleRate)));
+        double base = midi_frequency(note.pitch + 12);
+        for (int i = start; i < end; ++i) {
+            double t = i / static_cast<double>(kSampleRate);
+            double local = (i - start) / static_cast<double>(kSampleRate);
+            double dur = std::max(0.001, note.end_seconds - note.start_seconds);
+            double env = std::min(1.0, local / 1.2) *
+                         std::min(1.0, std::max(0.0, (dur - local) / 0.9));
+            double shimmer = 0.5 + 0.5 * std::sin(2 * kPi * 0.061 * t + note.pitch);
+            double tone = 0.34 * std::sin(2 * kPi * base * t) +
+                          0.28 * std::sin(2 * kPi * base * 1.5 * t + 0.7 * shimmer) +
+                          0.18 * std::sin(2 * kPi * base * 2.01 * t + 1.4) +
+                          0.12 * std::sin(2 * kPi * base * 3.0 * t + 2.0 * shimmer);
+            samples[i] += static_cast<float>(0.11 * tone * env);
+        }
+    }
+    int delay_a = static_cast<int>(std::lround(0.17 * kSampleRate));
+    int delay_b = static_cast<int>(std::lround(0.31 * kSampleRate));
+    for (int i = std::max(delay_a, delay_b); i < static_cast<int>(samples.size()); ++i) {
+        samples[i] += 0.18f * samples[i - delay_a] + 0.13f * samples[i - delay_b];
+    }
+    fade_edges(samples, 0.08);
+    normalize_audio(samples);
+    return samples;
+}
+
+std::vector<float> synth_cinema_noise_prompt(const MidiData& midi) {
+    std::vector<float> samples(static_cast<size_t>(midi.duration_seconds * kSampleRate), 0.0f);
+    std::mt19937 rng(8128);
+    std::normal_distribution<float> noise(0.0f, 1.0f);
+    float low = 0.0f;
+    float band = 0.0f;
+    for (int i = 0; i < static_cast<int>(samples.size()); ++i) {
+        double t = i / static_cast<double>(kSampleRate);
+        float n = noise(rng);
+        float sweep = static_cast<float>(0.003 + 0.0025 * (0.5 + 0.5 * std::sin(2 * kPi * 0.027 * t)));
+        low += sweep * (n - low);
+        band += 0.015f * (low - band);
+        samples[i] += 0.22f * band;
+    }
+    for (const auto& note : midi.notes) {
+        int start = static_cast<int>(std::lround(note.start_seconds * kSampleRate));
+        int end = std::min(static_cast<int>(samples.size()),
+                           static_cast<int>(std::lround(note.end_seconds * kSampleRate)));
+        double base = midi_frequency(note.pitch - 36);
+        for (int i = start; i < end; ++i) {
+            double t = i / static_cast<double>(kSampleRate);
+            double local = (i - start) / static_cast<double>(kSampleRate);
+            double env = std::min(1.0, local / 1.5);
+            samples[i] += static_cast<float>(0.12 * std::sin(2 * kPi * base * t) * env);
+        }
+    }
+    int delay = static_cast<int>(std::lround(0.61 * kSampleRate));
+    for (int i = delay; i < static_cast<int>(samples.size()); ++i) {
+        samples[i] += 0.24f * samples[i - delay];
+    }
+    for (float& sample : samples) sample = std::tanh(sample * 2.0f);
+    fade_edges(samples, 0.08);
+    normalize_audio(samples);
+    return samples;
+}
+
+std::vector<float> synth_granular_glitch_prompt(const MidiData& midi) {
+    std::vector<float> samples(static_cast<size_t>(midi.duration_seconds * kSampleRate), 0.0f);
+    std::mt19937 rng(1601);
+    std::uniform_real_distribution<double> uni(0.0, 1.0);
+    std::normal_distribution<float> noise(0.0f, 1.0f);
+    for (double grain = 0.0; grain < midi.duration_seconds; grain += 0.083) {
+        auto notes = active_notes_at(midi, grain);
+        int pitch = notes.empty() ? 57 : notes[static_cast<size_t>(uni(rng) * notes.size()) % notes.size()] + 12;
+        double base = midi_frequency(pitch) * (0.5 + 1.5 * uni(rng));
+        int start = static_cast<int>(std::lround(grain * kSampleRate));
+        int length = static_cast<int>(std::lround((0.08 + 0.16 * uni(rng)) * kSampleRate));
+        for (int i = 0; i < length && start + i < static_cast<int>(samples.size()); ++i) {
+            double t = i / static_cast<double>(kSampleRate);
+            double env = std::sin(kPi * i / std::max(1, length));
+            double smear = 0.5 + 0.5 * std::sin(2 * kPi * 0.41 * (grain + t));
+            double tone = std::sin(2 * kPi * base * t + 4.0 * smear) +
+                          0.22 * noise(rng);
+            samples[start + i] += static_cast<float>(0.07 * tone * env);
+        }
+    }
+    int delay = static_cast<int>(std::lround(0.12 * kSampleRate));
+    for (int i = delay; i < static_cast<int>(samples.size()); ++i) {
+        samples[i] += 0.32f * samples[i - delay];
+    }
+    for (float& sample : samples) {
+        sample = std::tanh(sample * 2.4f);
+        sample = std::round(sample * 96.0f) / 96.0f;
+    }
+    fade_edges(samples, 0.08);
+    normalize_audio(samples);
+    return samples;
+}
+
 std::vector<float> synth_for_guide_kind(const MidiData& midi,
                                         const std::string& guide_kind,
                                         double segment_seconds) {
@@ -968,6 +1184,10 @@ std::vector<float> synth_for_guide_kind(const MidiData& midi,
     if (guide_kind == "footwork") return synth_footwork_prompt(midi);
     if (guide_kind == "metallic") return synth_metallic_prompt(midi);
     if (guide_kind == "minimal") return synth_minimal_prompt(midi);
+    if (guide_kind == "analog_drone") return synth_analog_drone_prompt(midi);
+    if (guide_kind == "spectral_pad") return synth_spectral_pad_prompt(midi);
+    if (guide_kind == "cinema_noise") return synth_cinema_noise_prompt(midi);
+    if (guide_kind == "granular_glitch") return synth_granular_glitch_prompt(midi);
     return synth_pad_prompt(midi);
 }
 
@@ -1122,6 +1342,9 @@ bool write_report(const std::filesystem::path& path,
     out << "  \"output_wav\": \"" << json_escape(config.output_path.string()) << "\",\n";
     out << "  \"midi_path\": \"" << json_escape(config.midi_path.string()) << "\",\n";
     out << "  \"profile\": \"" << json_escape(config.profile) << "\",\n";
+    out << "  \"weight_mode\": \"" << json_escape(config.weight_mode) << "\",\n";
+    out << "  \"solo_slot\": " << config.solo_slot << ",\n";
+    out << "  \"weights_output\": \"" << json_escape(config.weights_path.string()) << "\",\n";
     out << "  \"model\": \"" << json_escape(config.model_name) << "\",\n";
     out << "  \"model_path\": \"" << json_escape(model_path) << "\",\n";
     out << "  \"embedding_source\": \"" << (config.use_audio_prompts ? "audio" : "text") << "\",\n";
@@ -1159,9 +1382,7 @@ bool write_report(const std::filesystem::path& path,
         int end = std::min(total_frames, static_cast<int>(std::lround((segment + 1) * config.segment_seconds * kSampleRate)));
         SegmentMetrics metrics = metrics_segment(interleaved, start, end);
         auto notes = active_notes_at(midi, segment * config.segment_seconds);
-        auto weights = prompt_weights(segment * config.segment_seconds,
-                                      config.segment_seconds,
-                                      config.transition_seconds);
+        auto weights = prompt_weights(segment * config.segment_seconds, config);
         out << "    {\n";
         out << "      \"segment\": " << (segment + 1) << ",\n";
         out << "      \"slot_id\": \"" << config.slots[segment].id << "\",\n";
@@ -1190,6 +1411,51 @@ bool write_report(const std::filesystem::path& path,
     return out.good();
 }
 
+bool write_weight_frames(const std::filesystem::path& path,
+                         const RenderConfig& config,
+                         int frame_count) {
+    if (path.empty()) return true;
+    if (!path.parent_path().empty()) {
+        std::filesystem::create_directories(path.parent_path());
+    }
+    std::ofstream out(path);
+    if (!out) return false;
+
+    out << std::fixed << std::setprecision(6);
+    out << "{\n";
+    out << "  \"schema\": \"mrt-cpp-prompt-weight-frames-v1\",\n";
+    out << "  \"profile\": \"" << json_escape(config.profile) << "\",\n";
+    out << "  \"weight_mode\": \"" << json_escape(config.weight_mode) << "\",\n";
+    out << "  \"solo_slot\": " << config.solo_slot << ",\n";
+    out << "  \"duration_seconds\": " << config.duration_seconds << ",\n";
+    out << "  \"frame_rate\": " << kFps << ",\n";
+    out << "  \"slots\": [\n";
+    for (int i = 0; i < 4; ++i) {
+        out << "    {\"index\": " << i << ", \"id\": \"" << json_escape(config.slots[i].id)
+            << "\", \"label\": \"" << json_escape(config.slots[i].label) << "\"}"
+            << (i == 3 ? "\n" : ",\n");
+    }
+    out << "  ],\n";
+    out << "  \"frames\": [\n";
+    for (int frame = 0; frame < frame_count; ++frame) {
+        double time_seconds = frame * kFrameSeconds;
+        auto weights = prompt_weights(time_seconds, config);
+        out << "    {\"frame\": " << frame
+            << ", \"time_seconds\": " << time_seconds
+            << ", \"weights\": [" << weights[0] << ", " << weights[1] << ", "
+            << weights[2] << ", " << weights[3] << "]"
+            << ", \"cfg_musiccoca\": " << blend_float(weights, config.slots, &Slot::cfg_musiccoca)
+            << ", \"cfg_notes\": " << blend_float(weights, config.slots, &Slot::cfg_notes)
+            << ", \"cfg_drums\": " << blend_float(weights, config.slots, &Slot::cfg_drums)
+            << ", \"temperature\": " << blend_float(weights, config.slots, &Slot::temperature)
+            << ", \"top_k\": " << blend_top_k(weights, config.slots)
+            << "}" << (frame + 1 == frame_count ? "\n" : ",\n");
+    }
+    out << "  ]\n";
+    out << "}\n";
+    return out.good();
+}
+
 void wait_for_prompts(MLXEngine& engine, int slot_count) {
     while (engine.get_text_encoder_status() == 1 ||
            engine.get_quantizer_status() == 1) {
@@ -1211,7 +1477,11 @@ void print_usage(const char* argv0) {
         "  --model NAME             Model folder under Magenta models (default: mrt2_small)\n"
         "  --resources PATH         Resource dir containing musiccoca/\n"
         "  --profile NAME           clear_extreme, microcinematic_footwork, negative_space_club,\n"
-        "                           glass_trap_pressure, or metallic_ambient_bounce\n"
+        "                           glass_trap_pressure, metallic_ambient_bounce,\n"
+        "                           or sustained_synth_textures\n"
+        "  --weight-mode NAME       sequential, solo, modulated, or polyrhythm\n"
+        "  --solo-slot INDEX        1-4 prompt slot used when --weight-mode solo\n"
+        "  --weights-output PATH    Output frame-level prompt weight JSON\n"
         "  --duration SECONDS       Repeat/clip the MIDI progression to this duration\n"
         "  --transition SECONDS     Prompt crossfade duration at segment boundaries\n"
         "  --text-prompts           Use text prompts instead of MIDI-derived audio prompt embeddings\n"
@@ -1244,6 +1514,12 @@ bool parse_args(int argc, char** argv, RenderConfig& config) {
             config.audio_prompt_dir = need_value("--audio-prompt-dir");
         } else if (arg == "--profile") {
             config.profile = need_value("--profile");
+        } else if (arg == "--weight-mode") {
+            config.weight_mode = need_value("--weight-mode");
+        } else if (arg == "--solo-slot") {
+            config.solo_slot = std::stoi(need_value("--solo-slot")) - 1;
+        } else if (arg == "--weights-output") {
+            config.weights_path = need_value("--weights-output");
         } else if (arg == "--duration") {
             config.duration_seconds = std::stod(need_value("--duration"));
         } else if (arg == "--transition") {
@@ -1275,6 +1551,14 @@ int main(int argc, char** argv) {
         std::fprintf(stderr, "Unknown profile: %s\n", config.profile.c_str());
         return 1;
     }
+    if (config.weight_mode != "sequential" &&
+        config.weight_mode != "solo" &&
+        config.weight_mode != "modulated" &&
+        config.weight_mode != "polyrhythm") {
+        std::fprintf(stderr, "Unknown weight mode: %s\n", config.weight_mode.c_str());
+        return 1;
+    }
+    config.solo_slot = std::clamp(config.solo_slot, 0, 3);
 
     try {
         MidiData midi = parse_midi(config.midi_path);
@@ -1364,9 +1648,7 @@ int main(int argc, char** argv) {
                 ++next_event;
             }
 
-            auto weights4 = prompt_weights(time_seconds,
-                                           config.segment_seconds,
-                                           config.transition_seconds);
+            auto weights4 = prompt_weights(time_seconds, config);
             std::array<float, 6> weights = {
                 weights4[0], weights4[1], weights4[2], weights4[3], 0.0f, 0.0f};
             engine.reblend_musiccoca_tokens(weights.data(), static_cast<int>(weights.size()));
@@ -1411,8 +1693,15 @@ int main(int argc, char** argv) {
             std::fprintf(stderr, "Failed to write %s\n", config.report_path.string().c_str());
             return 1;
         }
+        if (!write_weight_frames(config.weights_path, config, frame_count)) {
+            std::fprintf(stderr, "Failed to write %s\n", config.weights_path.string().c_str());
+            return 1;
+        }
         std::printf("Wrote %s\n", config.output_path.string().c_str());
         std::printf("Wrote %s\n", config.report_path.string().c_str());
+        if (!config.weights_path.empty()) {
+            std::printf("Wrote %s\n", config.weights_path.string().c_str());
+        }
         return 0;
     } catch (const std::exception& e) {
         std::fprintf(stderr, "Error: %s\n", e.what());

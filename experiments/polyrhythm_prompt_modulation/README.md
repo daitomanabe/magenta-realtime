@@ -131,3 +131,36 @@ combined manifest are written to:
 ```text
 outputs/polyrhythm_prompt_modulation/cpp_prompt_experiments/
 ```
+
+### Sustained Synth Prompt Sources
+
+This test uses the `sustained_synth_textures` C++ profile for long-tone prompt
+material instead of rhythm-forward genre prompts. The profile contains four
+high-contrast text prompt slots:
+
+1. `Low Voltage Fog`: low modular VCO drone, phase beating, low-pass filter,
+   tape delay, reverb.
+2. `Spectral Glass Bloom`: bright wavetable pad, spectral freeze, shimmer,
+   chorus, stereo widening.
+3. `Carbon Cinema Noise`: dark cinematic noise bed, sub pressure, band-pass
+   sweep, convolution-like space.
+4. `Buffer Freeze Dust`: granular frozen buffer sustain, bit-depth erosion,
+   reverse delay, resonant notch movement.
+
+Run four 10 second solo prompt sources and one 30 second prompt-weight
+modulation:
+
+```bash
+python3 experiments/polyrhythm_prompt_modulation/run_sustained_synth_sources.py
+```
+
+This runner uses text prompt embeddings by default so prompt wording changes
+are audible in the generated material. Use `--audio-prompts` to switch the same
+profile to MIDI-derived synthetic audio prompt embeddings.
+
+Generated WAVs, reports, frame-level prompt weight JSON files, and the manifest
+are written to:
+
+```text
+outputs/polyrhythm_prompt_modulation/sustained_synth_prompt_sources/
+```
