@@ -39,7 +39,7 @@ for real-time performance, parameter modulation, and offline loop export.
 - [ ] Add native sequencer clock with BPM, bars, steps-per-bar, swing, and loop
   length.
 - [ ] Add play, stop, reset, panic, and loop position.
-- [ ] Sync React pattern state to native with a bulk `sequencerPattern` message.
+- [x] Sync React pattern state to native with a bulk `sequencerPattern` message.
 - [ ] Apply due events on the native/control thread, not from React timers.
 - [ ] Clear stuck notes on stop, reset, panic, and pattern replacement.
 - [ ] Surface transformer timing, buffer fill, and dropped frames.
@@ -49,16 +49,16 @@ for real-time performance, parameter modulation, and offline loop export.
 - [ ] Add a step grid with per-step active state, note, velocity-style strength,
   gate, probability, ratchet, octave, and humanize.
 - [ ] Add chord lanes with named chord symbols and explicit MIDI note output.
-- [ ] Add jazz chord generator presets:
-  - [ ] ii-V-I with substitutions.
-  - [ ] Modal interchange loops.
-  - [ ] Diminished passing chords.
-  - [ ] Tritone substitution movement.
-  - [ ] Upper-structure triads.
-  - [ ] Quartal voicings.
-  - [ ] Dense tension voicings with 9, b9, #9, 11, #11, 13, b13.
-- [ ] Add 8-bar loop templates for complex jazzy chord materials.
-- [ ] Add arp extraction from chord lanes with up, down, random, outside-tone,
+- [x] Add jazz chord generator presets:
+  - [x] ii-V-I with substitutions.
+  - [x] Modal interchange loops.
+  - [x] Diminished passing chords.
+  - [x] Tritone substitution movement.
+  - [x] Upper-structure triads.
+  - [x] Quartal voicings.
+  - [x] Dense tension voicings with 9, b9, #9, 11, #11, 13, b13.
+- [x] Add 8-bar loop templates for complex jazzy chord materials.
+- [x] Add arp extraction from chord lanes with up, down, random, outside-tone,
   skip, Euclidean, and polymetric modes.
 - [ ] Add scale/avoid-note helpers for jazz tensions.
 
@@ -140,10 +140,10 @@ for real-time performance, parameter modulation, and offline loop export.
 
 ### 8. Material Generators
 
-- [ ] Add chord progression generator for 8-bar jazz loops.
+- [x] Add chord progression generator for 8-bar jazz loops.
 - [ ] Add voicing generator with close, drop-2, spread, quartal, and cluster
   options.
-- [ ] Add arp generator from generated voicings.
+- [x] Add arp generator from generated voicings.
 - [ ] Add prompt/parameter recipe generator for interesting audio materials.
 - [ ] Add batch export queue for many variations from one recipe.
 - [ ] Add metadata sidecars for exported loops.
@@ -159,7 +159,7 @@ for real-time performance, parameter modulation, and offline loop export.
 
 - [ ] Build `hello_mrt2` after C++ core changes.
 - [x] Build `deploy_mrt2_sequencer` after app changes.
-- [ ] Run relevant React build/type checks.
+- [x] Run relevant React build/type checks.
 - [ ] Run focused Python tests when Python export/generation code changes.
 - [ ] Generate at least one short WAV after render changes.
 - [ ] Verify rendered audio with metadata and non-silence checks.

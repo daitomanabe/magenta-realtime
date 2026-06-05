@@ -12,6 +12,8 @@ import {
   Square,
   Wand2,
 } from 'lucide-react';
+import {buildJazzTensionPattern, recipeById, RECIPES} from './jazzMaterials';
+import type {RecipeId, SequencerStep} from './sequencerTypes';
 
 declare global {
   interface Window {
@@ -36,48 +38,6 @@ type HostState = {
   panicCount?: number;
 };
 
-type Step = {
-  active: boolean;
-  note: string;
-  chord: string;
-  weight: number;
-  cfg: number;
-  temp: number;
-};
-
-const chordCycle = [
-  'Dm9',
-  'G13b9',
-  'Cmaj9#11',
-  'F#7alt',
-  'Fm11',
-  'Bb13',
-  'Em7b5',
-  'A7#9b13',
-];
-
-const notes = ['D3', 'F3', 'A3', 'C4', 'E4', 'G4', 'B4', 'Db5'];
-
-function buildSteps(): Step[] {
-  return Array.from({length: 32}, (_, index) => ({
-    active: index % 2 === 0 || index % 7 === 0,
-    note: notes[index % notes.length],
-    chord: chordCycle[Math.floor(index / 4) % chordCycle.length],
-    weight: index % 8 === 0 ? 0.95 : 0.35 + ((index % 5) * 0.11),
-    cfg: 1.2 + ((index % 6) * 0.42),
-    temp: 0.8 + ((index % 4) * 0.18),
-  }));
-}
-
-const promptSlots = [
-  'complex jazzy tension chords, warm electric piano',
-  'fast glassy arpeggio figures',
-  'dry broken beat drums, tight room',
-  'sub bass following altered dominants',
-  'granular tape texture and vinyl air',
-  'muted guitar harmonics',
-];
-
 const automationLanes = [
   ['CFG Notes', 'bar ramp', '0.8 - 4.6'],
   ['CFG MusicCoCa', 'scene morph', '1.0 - 5.0'],
@@ -92,12 +52,15 @@ function post(msg: unknown) {
 }
 
 export default function App() {
+  const [recipeId, setRecipeId] = useState<RecipeId>('ii-v-substitutions');
+  const [variation, setVariation] = useState(0);
+  const pattern = useMemo(() => buildJazzTensionPattern(recipeId, variation), [recipeId, variation]);
   const [host, setHost] = useState<HostState>({
     isPlaying: false,
     modelName: 'No model loaded',
-    patternName: '8 Bar Tension Chords',
+    patternName: recipeById(recipeId).label,
   });
-  const [steps, setSteps] = useState(buildSteps);
+  const [steps, setSteps] = useState<SequencerStep[]>(pattern.steps);
 
   const activeCount = useMemo(() => steps.filter(step => step.active).length, [steps]);
   const avgCfg = useMemo(
@@ -116,15 +79,16 @@ export default function App() {
     post({
       type: 'sequencerPattern',
       pattern: {
-        name: host.patternName ?? '8 Bar Tension Chords',
-        bpm: 104,
-        bars: 8,
-        stepsPerBar: 16,
-        prompts: promptSlots.map((text, index) => ({text, weight: index === 0 ? 1 : 0})),
+        name: pattern.name,
+        recipeId: pattern.recipeId,
+        bpm: pattern.bpm,
+        bars: pattern.bars,
+        stepsPerBar: pattern.stepsPerBar,
+        prompts: pattern.prompts,
         steps,
       },
     });
-  }, [host.patternName, steps]);
+  }, [pattern, steps]);
 
   const toggleTransport = () => {
     const playing = !host.isPlaying;
@@ -132,17 +96,16 @@ export default function App() {
     post({type: 'sequencerTransport', playing});
   };
 
+  const applyPattern = (nextRecipeId: RecipeId, nextVariation: number) => {
+    const nextPattern = buildJazzTensionPattern(nextRecipeId, nextVariation);
+    setRecipeId(nextRecipeId);
+    setVariation(nextVariation);
+    setSteps(nextPattern.steps);
+    setHost(current => ({...current, patternName: nextPattern.name}));
+  };
+
   const randomize = () => {
-    setSteps(current =>
-      current.map((step, index) => ({
-        ...step,
-        active: Math.random() > 0.34,
-        weight: Number((0.15 + Math.random() * 0.85).toFixed(2)),
-        cfg: Number((0.7 + Math.random() * 4.1).toFixed(2)),
-        temp: Number((0.65 + Math.random() * 0.85).toFixed(2)),
-        note: notes[(index + Math.floor(Math.random() * notes.length)) % notes.length],
-      })),
-    );
+    applyPattern(recipeId, variation + 1);
   };
 
   const toggleStep = (index: number) => {
@@ -176,7 +139,7 @@ export default function App() {
           <button className="iconButton" onClick={randomize} title="Randomize variation">
             <Shuffle size={18} />
           </button>
-          <button className="iconButton" onClick={() => setSteps(buildSteps())} title="Reset pattern">
+          <button className="iconButton" onClick={() => applyPattern(recipeId, 0)} title="Reset pattern">
             <RefreshCw size={18} />
           </button>
           <button className="commandButton" onClick={() => post({type: 'sequencerRender'})}>
@@ -192,10 +155,39 @@ export default function App() {
         </div>
       </header>
 
+      <section className="recipeBand">
+        <label>
+          <span>Recipe</span>
+          <select
+            value={recipeId}
+            onChange={event => applyPattern(event.target.value as RecipeId, variation)}
+          >
+            {RECIPES.map(recipe => (
+              <option key={recipe.id} value={recipe.id}>
+                {recipe.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          <span>Variation</span>
+          <input
+            value={variation}
+            type="number"
+            min={0}
+            onChange={event => applyPattern(recipeId, Math.max(0, Number(event.target.value) || 0))}
+          />
+        </label>
+        <div>
+          <strong>{pattern.name}</strong>
+          <span>{pattern.steps.length} chord/arp events ready for native scheduling</span>
+        </div>
+      </section>
+
       <section className="overviewBand">
         <div className="metric">
           <Gauge size={18} />
-          <strong>104</strong>
+          <strong>{pattern.bpm}</strong>
           <span>BPM</span>
         </div>
         <div className="metric">
@@ -228,6 +220,7 @@ export default function App() {
                 <span className="stepIndex">{String(index + 1).padStart(2, '0')}</span>
                 <strong>{step.chord}</strong>
                 <span>{step.note}</span>
+                <small>{step.arpMode}</small>
                 <i style={{height: `${Math.max(12, step.weight * 58)}px`}} />
               </button>
             ))}
@@ -240,11 +233,11 @@ export default function App() {
             <Wand2 size={18} />
           </div>
           <div className="promptList">
-            {promptSlots.map((prompt, index) => (
-              <div className="promptRow" key={prompt}>
+            {pattern.prompts.map((prompt, index) => (
+              <div className="promptRow" key={prompt.text}>
                 <span>{index + 1}</span>
-                <p>{prompt}</p>
-                <meter min={0} max={1} value={index === 0 ? 1 : steps[index * 3]?.weight ?? 0.2} />
+                <p>{prompt.text}</p>
+                <meter min={0} max={1} value={prompt.weight} />
               </div>
             ))}
           </div>
