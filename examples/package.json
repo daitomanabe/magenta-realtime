@@ -5,6 +5,7 @@
     "common/react_ui",
     "mrt2/react_ui",
     "jam/ui",
-    "collider/ui"
+    "collider/ui",
+    "sequencer/ui"
   ]
 }

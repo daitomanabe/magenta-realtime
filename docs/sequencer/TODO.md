@@ -29,10 +29,10 @@ for real-time performance, parameter modulation, and offline loop export.
 - [x] Initialize submodules.
 - [x] Add this TODO.
 - [x] Push this TODO branch to GitHub.
-- [ ] Create `examples/sequencer/` app scaffold.
-- [ ] Add CMake target and local deploy target.
+- [x] Create `examples/sequencer/` app scaffold.
+- [x] Add CMake target and local deploy target.
 - [ ] Reuse Jam/Standalone model manager, settings, audio engine, and MIDI setup.
-- [ ] Add minimal React shell that boots as the sequencer first screen.
+- [x] Add minimal React shell that boots as the sequencer first screen.
 
 ### 1. Transport And Timing Core
 
@@ -158,7 +158,7 @@ for real-time performance, parameter modulation, and offline loop export.
 ### 10. Quality Gates
 
 - [ ] Build `hello_mrt2` after C++ core changes.
-- [ ] Build `deploy_mrt2_sequencer` after app changes.
+- [x] Build `deploy_mrt2_sequencer` after app changes.
 - [ ] Run relevant React build/type checks.
 - [ ] Run focused Python tests when Python export/generation code changes.
 - [ ] Generate at least one short WAV after render changes.
