@@ -34,20 +34,31 @@ source "${HOME}/.config/secrets.zsh"
 ## Clear MIDI Prompt Diagnostic
 
 This diagnostic uses `assets/Am-Minor Prog 01 (i-VI-v-iv).mid`, whose four
-2-second chord regions line up with four exaggerated audio prompts:
+2-second chord regions line up with four exaggerated prompt slots:
 
 1. Solo acoustic piano chords.
 2. 8-bit chiptune square-wave arps.
 3. Distorted 808 sub bass and trap drums.
 4. Choir and string drone.
 
+The control matrix is explicit:
+
+- Primary control: prompt embedding mix.
+- Secondary control: CFG weights.
+- Expression control: temperature.
+- Exploration control: top-k.
+- Stability control: fixed 25 Hz frames / 1920 sample chunks.
+- Advanced control: optional audio prompt embeddings synthesized from the MIDI
+  progression.
+
 ```bash
 .venv/bin/python experiments/polyrhythm_prompt_modulation/generate_clear_prompt_midi_test.py \
   --midi 'assets/Am-Minor Prog 01 (i-VI-v-iv).mid'
 .venv/bin/python experiments/polyrhythm_prompt_modulation/render_clear_prompt_midi_audio.py \
+  --embedding-source audio \
   --match-segment-rms \
-  --output outputs/polyrhythm_prompt_modulation/magenta_clear_prompt_midi_8s_matched.wav \
-  --report outputs/polyrhythm_prompt_modulation/magenta_clear_prompt_midi_8s_matched.report.json
+  --output outputs/polyrhythm_prompt_modulation/magenta_audio_prompt_control_matrix_8s_matched.wav \
+  --report outputs/polyrhythm_prompt_modulation/magenta_audio_prompt_control_matrix_8s_matched.report.json
 ```
 
 Generated audio/video files are written under `outputs/polyrhythm_prompt_modulation/`.

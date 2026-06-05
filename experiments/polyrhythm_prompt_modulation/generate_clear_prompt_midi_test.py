@@ -29,12 +29,13 @@ SLOTS = [
             "minor jazz chord voicings, no drums, no bass, no synths"
         ),
         "controls": {
-            "temperature": 0.82,
-            "top_k": 36,
-            "cfg_musiccoca": 6.2,
-            "cfg_notes": 5.8,
+            "temperature": 0.72,
+            "top_k": 28,
+            "cfg_musiccoca": 6.8,
+            "cfg_notes": 6.4,
             "cfg_drums": 0.0,
         },
+        "audio_prompt_recipe": "percussive piano-like chord attacks from the provided MIDI progression",
     },
     {
         "id": "chiptune_square_arps",
@@ -44,12 +45,13 @@ SLOTS = [
             "rapid staccato arpeggios, sharp digital beeps, no drums"
         ),
         "controls": {
-            "temperature": 1.32,
-            "top_k": 176,
+            "temperature": 1.34,
+            "top_k": 192,
             "cfg_musiccoca": 7.0,
-            "cfg_notes": 3.6,
+            "cfg_notes": 4.0,
             "cfg_drums": 0.0,
         },
+        "audio_prompt_recipe": "bright square-wave 16th-note arpeggio from each MIDI chord",
     },
     {
         "id": "distorted_808_drums",
@@ -60,11 +62,12 @@ SLOTS = [
         ),
         "controls": {
             "temperature": 1.18,
-            "top_k": 144,
-            "cfg_musiccoca": 6.6,
-            "cfg_notes": 4.8,
-            "cfg_drums": 6.2,
+            "top_k": 156,
+            "cfg_musiccoca": 6.4,
+            "cfg_notes": 3.2,
+            "cfg_drums": 7.0,
         },
+        "audio_prompt_recipe": "808 kick/sub rhythm, snare, and hat pattern with MIDI roots",
     },
     {
         "id": "choir_string_drone",
@@ -74,12 +77,13 @@ SLOTS = [
             "drone, huge reverb, soft tape noise, no percussion"
         ),
         "controls": {
-            "temperature": 0.74,
-            "top_k": 58,
-            "cfg_musiccoca": 6.0,
-            "cfg_notes": 5.6,
+            "temperature": 0.62,
+            "top_k": 44,
+            "cfg_musiccoca": 6.6,
+            "cfg_notes": 6.2,
             "cfg_drums": 0.0,
         },
+        "audio_prompt_recipe": "long slow string and choir-like sustained pad from each MIDI chord",
     },
 ]
 
@@ -289,6 +293,21 @@ def style_weights(time_seconds: float, segment_seconds: float = 2.0) -> list[flo
     return normalize(weights)
 
 
+def blend_controls(weights: list[float]) -> dict[str, float]:
+    controls: dict[str, float] = {}
+    for key in ["temperature", "top_k", "cfg_musiccoca", "cfg_notes", "cfg_drums"]:
+        controls[key] = sum(slot["controls"][key] * weights[index] for index, slot in enumerate(SLOTS))
+    return {
+        "cfg_musiccoca": round(controls["cfg_musiccoca"], 4),
+        "cfg_notes": round(controls["cfg_notes"], 4),
+        "cfg_drums": round(controls["cfg_drums"], 4),
+        "temperature": round(controls["temperature"], 4),
+        "top_k": int(round(controls["top_k"])),
+        "buffer_fps": FPS,
+        "chunk_samples": 1920,
+    }
+
+
 def active_notes_for_frame(notes: list[MidiNote], time_seconds: float, frame_seconds: float) -> tuple[list[int], list[int]]:
     active: list[int] = []
     onset: list[int] = []
@@ -328,6 +347,7 @@ def build_test_data(midi_path: Path, midi: MidiSummary) -> dict[str, Any]:
                 "active_note_names": [note_name(pitch) for pitch in active_notes],
                 "onset_midi_notes": onset_notes,
                 "onset_note_names": [note_name(pitch) for pitch in onset_notes],
+                "controls": blend_controls(weights),
             }
         )
     return {
@@ -349,6 +369,14 @@ def build_test_data(midi_path: Path, midi: MidiSummary) -> dict[str, Any]:
                 "four 2-second one-hot prompt regions aligned to the MIDI "
                 "i-VI-v-iv chord changes, with 0.20-second transitions"
             ),
+            "control_roles": {
+                "primary": "prompt embedding mix",
+                "secondary": "CFG weights from the dominant prompt slot",
+                "expression": "temperature from the dominant prompt slot",
+                "exploration": "top_k from the dominant prompt slot",
+                "stability": "fixed 25 Hz frames / 1920 sample chunks",
+                "advanced": "optional audio prompt embedding slots",
+            },
         },
         "slots": SLOTS,
         "midi_notes": [

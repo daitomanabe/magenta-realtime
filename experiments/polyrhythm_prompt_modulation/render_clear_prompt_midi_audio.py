@@ -21,6 +21,7 @@ ROOT = Path(__file__).resolve().parents[2]
 EXPERIMENT = Path(__file__).resolve().parent
 DEFAULT_DATA = EXPERIMENT / "data" / "clear_prompt_midi_test_8s.json"
 DEFAULT_OUTPUT_DIR = ROOT / "outputs" / "polyrhythm_prompt_modulation"
+DEFAULT_AUDIO_PROMPT_DIR = DEFAULT_OUTPUT_DIR / "audio_prompt_guides"
 
 
 def load_test_data(path: Path) -> dict[str, Any]:
@@ -41,6 +42,196 @@ def blend_controls(slots: list[dict[str, Any]], weights: np.ndarray) -> dict[str
         controls[key] = float(np.sum(values * weights))
     controls["top_k"] = int(round(controls["top_k"]))
     return controls
+
+
+def midi_frequency(pitch: int) -> float:
+    return 440.0 * (2.0 ** ((pitch - 69) / 12.0))
+
+
+def normalize_audio(samples: np.ndarray, peak: float = 0.85) -> np.ndarray:
+    max_abs = float(np.max(np.abs(samples))) if samples.size else 0.0
+    if max_abs <= 0:
+        return samples.astype(np.float32)
+    return (samples * (peak / max_abs)).astype(np.float32)
+
+
+def fade_edges(samples: np.ndarray, sample_rate: int, seconds: float = 0.01) -> np.ndarray:
+    count = min(len(samples) // 2, int(round(sample_rate * seconds)))
+    if count <= 0:
+        return samples
+    ramp = np.linspace(0.0, 1.0, count, endpoint=False, dtype=np.float32)
+    samples[:count] *= ramp
+    samples[-count:] *= ramp[::-1]
+    return samples
+
+
+def midi_notes_by_segment(data: dict[str, Any]) -> list[list[int]]:
+    result: list[list[int]] = []
+    for segment_index in range(4):
+        start = segment_index * 2.0
+        frame_index = int(round(start * data["metadata"]["fps"]))
+        result.append(data["frames"][frame_index]["active_midi_notes"])
+    return result
+
+
+def synth_piano_prompt(data: dict[str, Any], sample_rate: int) -> np.ndarray:
+    duration = data["metadata"]["duration_seconds"]
+    samples = np.zeros(int(round(duration * sample_rate)), dtype=np.float32)
+    for note in data["midi_notes"]:
+        start = int(round(note["start_seconds"] * sample_rate))
+        end = min(len(samples), int(round(note["end_seconds"] * sample_rate)))
+        if end <= start:
+            continue
+        t = np.arange(end - start, dtype=np.float32) / sample_rate
+        freq = midi_frequency(note["pitch"])
+        decay = np.exp(-3.2 * t)
+        tone = (
+            1.0 * np.sin(2 * np.pi * freq * t)
+            + 0.42 * np.sin(2 * np.pi * freq * 2.01 * t)
+            + 0.18 * np.sin(2 * np.pi * freq * 3.0 * t)
+        ) * decay
+        samples[start:end] += 0.18 * tone.astype(np.float32)
+    return normalize_audio(fade_edges(samples, sample_rate))
+
+
+def synth_chiptune_prompt(data: dict[str, Any], sample_rate: int) -> np.ndarray:
+    duration = data["metadata"]["duration_seconds"]
+    samples = np.zeros(int(round(duration * sample_rate)), dtype=np.float32)
+    step_seconds = 0.125
+    segments = midi_notes_by_segment(data)
+    step_count = int(round(duration / step_seconds))
+    for step in range(step_count):
+        start_seconds = step * step_seconds
+        segment_index = min(3, int(start_seconds // 2.0))
+        notes = segments[segment_index]
+        if not notes:
+            continue
+        pitch = notes[step % len(notes)] + 24
+        freq = midi_frequency(pitch)
+        start = int(round(start_seconds * sample_rate))
+        end = min(len(samples), int(round((start_seconds + step_seconds * 0.82) * sample_rate)))
+        t = np.arange(end - start, dtype=np.float32) / sample_rate
+        square = np.sign(np.sin(2 * np.pi * freq * t))
+        env = np.minimum(1.0, t / 0.006) * np.exp(-5.5 * t)
+        samples[start:end] += 0.25 * square.astype(np.float32) * env
+    return normalize_audio(fade_edges(samples, sample_rate))
+
+
+def synth_808_prompt(data: dict[str, Any], sample_rate: int) -> np.ndarray:
+    duration = data["metadata"]["duration_seconds"]
+    samples = np.zeros(int(round(duration * sample_rate)), dtype=np.float32)
+    roots = [segment[0] if segment else 36 for segment in midi_notes_by_segment(data)]
+
+    def add_hit(time_seconds: float, tone: np.ndarray) -> None:
+        start = int(round(time_seconds * sample_rate))
+        end = min(len(samples), start + len(tone))
+        if end > start:
+            samples[start:end] += tone[: end - start]
+
+    for beat in np.arange(0.0, duration, 0.5):
+        segment_index = min(3, int(beat // 2.0))
+        root = roots[segment_index] - 12
+        length = int(round(0.36 * sample_rate))
+        t = np.arange(length, dtype=np.float32) / sample_rate
+        freq = midi_frequency(root) * (1.7 - 0.55 * np.minimum(1.0, t / 0.16))
+        phase = 2 * np.pi * np.cumsum(freq) / sample_rate
+        kick = np.sin(phase) * np.exp(-8.0 * t)
+        add_hit(float(beat), 0.55 * kick.astype(np.float32))
+    for snare in np.arange(1.0, duration, 2.0):
+        length = int(round(0.18 * sample_rate))
+        t = np.arange(length, dtype=np.float32) / sample_rate
+        noise = np.random.default_rng(int(snare * 1000)).normal(0.0, 1.0, length).astype(np.float32)
+        tone = noise * np.exp(-22.0 * t)
+        add_hit(float(snare), 0.18 * tone)
+    for hat in np.arange(0.0, duration, 0.125):
+        length = int(round(0.035 * sample_rate))
+        t = np.arange(length, dtype=np.float32) / sample_rate
+        noise = np.random.default_rng(int(hat * 8000) + 7).normal(0.0, 1.0, length).astype(np.float32)
+        tone = noise * np.sin(2 * np.pi * 7600.0 * t) * np.exp(-70.0 * t)
+        add_hit(float(hat), 0.045 * tone)
+    distorted = np.tanh(samples * 2.8)
+    return normalize_audio(fade_edges(distorted, sample_rate))
+
+
+def synth_pad_prompt(data: dict[str, Any], sample_rate: int) -> np.ndarray:
+    duration = data["metadata"]["duration_seconds"]
+    samples = np.zeros(int(round(duration * sample_rate)), dtype=np.float32)
+    for note in data["midi_notes"]:
+        start = int(round(note["start_seconds"] * sample_rate))
+        end = min(len(samples), int(round(note["end_seconds"] * sample_rate)))
+        if end <= start:
+            continue
+        t = np.arange(end - start, dtype=np.float32) / sample_rate
+        freq = midi_frequency(note["pitch"] + 12)
+        attack = np.minimum(1.0, t / 0.65)
+        release = np.minimum(1.0, np.maximum(0.0, (note["end_seconds"] - note["start_seconds"] - t) / 0.45))
+        env = np.minimum(attack, release)
+        tone = (
+            0.58 * np.sin(2 * np.pi * freq * t)
+            + 0.32 * np.sin(2 * np.pi * freq * 1.5 * t)
+            + 0.22 * np.sin(2 * np.pi * freq * 2.01 * t)
+        )
+        samples[start:end] += 0.12 * tone.astype(np.float32) * env
+    delay = int(round(0.19 * sample_rate))
+    if delay < len(samples):
+        samples[delay:] += 0.34 * samples[:-delay]
+    return normalize_audio(fade_edges(samples, sample_rate))
+
+
+def build_audio_prompt_guides(data: dict[str, Any], sample_rate: int = 48_000) -> dict[str, Waveform]:
+    synths = {
+        "solo_piano_chords": synth_piano_prompt,
+        "chiptune_square_arps": synth_chiptune_prompt,
+        "distorted_808_drums": synth_808_prompt,
+        "choir_string_drone": synth_pad_prompt,
+    }
+    guides: dict[str, Waveform] = {}
+    for slot in data["slots"]:
+        guide = synths[slot["id"]](data, sample_rate)
+        guides[slot["id"]] = Waveform(guide[:, np.newaxis], sample_rate=sample_rate)
+    return guides
+
+
+def build_prompt_embeddings(
+    mrt: MagentaRT2Mlxfn,
+    data: dict[str, Any],
+    embedding_source: str,
+    audio_prompt_dir: Path,
+    write_audio_prompts: bool,
+) -> tuple[np.ndarray, list[dict[str, Any]]]:
+    slots = data["slots"]
+    audio_guides = build_audio_prompt_guides(data)
+    prompt_embeddings: list[np.ndarray] = []
+    embedding_reports: list[dict[str, Any]] = []
+    if write_audio_prompts:
+        audio_prompt_dir.mkdir(parents=True, exist_ok=True)
+    for index, slot in enumerate(slots):
+        text_embedding = mrt.embed_style(slot["magenta_prompt"], use_mapper=True, seed=480 + index)
+        audio_waveform = audio_guides[slot["id"]]
+        if write_audio_prompts:
+            audio_path = audio_prompt_dir / f"{index + 1:02d}_{slot['id']}.wav"
+            audio_waveform.as_stereo().write(str(audio_path))
+        audio_embedding = mrt.embed_style(audio_waveform, pool_across_time=True)
+        if embedding_source == "text":
+            embedding = text_embedding
+        elif embedding_source == "audio":
+            embedding = audio_embedding
+        elif embedding_source == "hybrid":
+            embedding = (0.28 * text_embedding) + (0.72 * audio_embedding)
+        else:
+            raise ValueError(f"Unsupported embedding source: {embedding_source}")
+        prompt_embeddings.append(embedding)
+        embedding_reports.append(
+            {
+                "slot_id": slot["id"],
+                "embedding_source": embedding_source,
+                "text_prompt": slot["magenta_prompt"],
+                "audio_prompt_recipe": slot.get("audio_prompt_recipe", ""),
+                "audio_prompt_seconds": audio_waveform.seconds,
+                "audio_prompt_peak": float(audio_waveform.peak_amplitude),
+            }
+        )
+    return np.stack(prompt_embeddings, axis=0).astype(np.float32), embedding_reports
 
 
 def note_tokens(frame: dict[str, Any]) -> list[int]:
@@ -127,7 +318,7 @@ def build_frame_args(
     weights = np.array(frame["weights_array"], dtype=np.float32)
     blended_style = np.sum(prompt_embeddings_np * weights[:, None], axis=0).astype(np.float32)
     style_tokens = mrt.tokenize_style(blended_style).tolist()
-    controls = blend_controls(slots, weights)
+    controls = frame.get("controls") or blend_controls(slots, weights)
     return mrt._build_mlxfn_args(  # pylint: disable=protected-access
         style_tokens=style_tokens,
         notes=note_tokens(frame),
@@ -149,6 +340,9 @@ def render(
     preroll_seconds: float,
     match_rms: bool,
     target_rms: float,
+    embedding_source: str,
+    audio_prompt_dir: Path,
+    write_audio_prompts: bool,
 ) -> None:
     metadata = data["metadata"]
     slots = data["slots"]
@@ -163,11 +357,13 @@ def render(
         cfg_drums=0.0,
     )
 
-    prompt_embeddings = [
-        mrt.embed_style(slot["magenta_prompt"], use_mapper=True, seed=480 + index)
-        for index, slot in enumerate(slots)
-    ]
-    prompt_embeddings_np = np.stack(prompt_embeddings, axis=0).astype(np.float32)
+    prompt_embeddings_np, embedding_reports = build_prompt_embeddings(
+        mrt,
+        data,
+        embedding_source,
+        audio_prompt_dir,
+        write_audio_prompts,
+    )
 
     state = None
     audio_frames: list[np.ndarray] = []
@@ -254,6 +450,11 @@ def render(
         "frames": len(frames),
         "dominant_counts": dominant_counts,
         "preroll_seconds": preroll_seconds,
+        "embedding_source": embedding_source,
+        "prompt_embeddings": embedding_reports,
+        "control_roles": metadata.get("control_roles", {}),
+        "buffer_fps": metadata["fps"],
+        "chunk_samples": 1920,
         "midi_source": metadata["midi_source"],
         "midi_track_name": metadata["midi_track_name"],
         "segments": segment_reports,
@@ -273,6 +474,9 @@ def main() -> int:
     parser.add_argument("--preroll-seconds", type=float, default=2.0)
     parser.add_argument("--match-segment-rms", action="store_true")
     parser.add_argument("--target-rms", type=float, default=0.06)
+    parser.add_argument("--embedding-source", choices=["text", "audio", "hybrid"], default="audio")
+    parser.add_argument("--audio-prompt-dir", type=Path, default=DEFAULT_AUDIO_PROMPT_DIR)
+    parser.add_argument("--write-audio-prompts", action=argparse.BooleanOptionalAction, default=True)
     args = parser.parse_args()
 
     data = load_test_data(args.data)
@@ -285,6 +489,9 @@ def main() -> int:
         args.preroll_seconds,
         args.match_segment_rms,
         args.target_rms,
+        args.embedding_source,
+        args.audio_prompt_dir,
+        args.write_audio_prompts,
     )
     return 0
 

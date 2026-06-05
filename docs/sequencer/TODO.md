@@ -205,9 +205,17 @@ for real-time performance, parameter modulation, and offline loop export.
 - [x] Parse the provided `Am-Minor Prog 01 (i-VI-v-iv).mid` progression.
 - [x] Generate an 8 second prompt-weight test aligned to the four MIDI chord
   regions.
+- [x] Save a frame-level control matrix:
+  - [x] Primary control: prompt embedding mix.
+  - [x] Secondary control: CFG weights.
+  - [x] Expression control: temperature.
+  - [x] Exploration control: top-k.
+  - [x] Stability control: fixed 25 Hz frames / 1920 sample chunks.
 - [x] Replace subtle jazz/texture prompts with four exaggerated diagnostic
   prompts: solo piano, chiptune square arps, distorted 808 drums, and choir
   string drone.
+- [x] Generate four MIDI-derived audio prompt guide files and embed them with
+  MusicCoCa audio prompt embedding.
 - [x] Render `mrt2_small` audio with frame-level prompt blending and 128-note
   MIDI conditioning.
 - [x] Add an audition render option that loudness-matches 2 second sections so
