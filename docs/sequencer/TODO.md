@@ -188,6 +188,18 @@ for real-time performance, parameter modulation, and offline loop export.
 - [x] Assemble the segmented videos with the continuous Magenta WAV.
 - [x] Verify final duration, video stream, audio stream, and non-silence.
 
+### 13. Diagnostic Prompt Weight Verification
+
+- [x] Clarify that the 10 second test uses base Runway video, four Aleph style
+  variants, and prompt-weight compositing.
+- [x] Clarify that the 3 minute test uses direct segmented Runway videos, not
+  four Aleph style variants.
+- [x] Generate an 8 second diagnostic modulation file with obvious one-hot
+  prompt weight regions and short crossfades.
+- [x] Composite the four Aleph videos with the diagnostic modulation file.
+- [x] Verify solo regions by comparing composite frames against the expected
+  source Aleph style video.
+
 ## First Target User Flow
 
 1. Launch the sequencer app.
