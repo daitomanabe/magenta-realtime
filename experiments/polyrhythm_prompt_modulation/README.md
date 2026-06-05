@@ -90,3 +90,44 @@ TOOLCHAINS=com.apple.dt.toolchain.Metal.32023.883 \
 
 Use `--text-prompts` to compare text prompt encoding against the default
 MIDI-derived audio prompt embeddings.
+
+### Clear C++ Prompt Experiment Suite
+
+For clearer A/B-style listening tests, the C++ diagnostic can run named
+profiles with fixed MIDI input, repeated to a requested duration. Each profile
+uses four cached prompt slots, four MIDI-derived audio prompt guide signals,
+and frame-level modulation of prompt embedding mix, CFG, temperature, and
+top-k.
+
+The profile prompts follow the same concrete genre vocabulary used for Lyria
+loop prompt design: original instrumental loop material, explicit BPM/rhythmic
+identity, sound sources, mood/space, and exclusions.
+
+Available profiles:
+
+- `clear_extreme`: piano chords, chiptune arps, distorted 808 drums, choir
+  string drone.
+- `microcinematic_footwork`: footwork grid, sub trap stabs, granular metal
+  cuts, noir string pressure.
+- `glass_trap_pressure`: glass mallets, 808 trap weight, microcut texture,
+  cinematic afterglow.
+- `negative_space_club`: dry minimal pulse, dub chord stabs, sub pressure,
+  air field.
+- `metallic_ambient_bounce`: metallic bounce, ambient pad floor, sub minimal
+  knock, digital insect grid.
+
+Run the short tests first, then the 30 second experiments:
+
+```bash
+python3 experiments/polyrhythm_prompt_modulation/run_cpp_prompt_experiment_suite.py \
+  --stage clear_10s
+python3 experiments/polyrhythm_prompt_modulation/run_cpp_prompt_experiment_suite.py \
+  --stage long_30s
+```
+
+Generated WAVs, per-run reports, MIDI-derived audio prompt guides, and the
+combined manifest are written to:
+
+```text
+outputs/polyrhythm_prompt_modulation/cpp_prompt_experiments/
+```

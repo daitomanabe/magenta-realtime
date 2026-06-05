@@ -239,6 +239,21 @@ for real-time performance, parameter modulation, and offline loop export.
   them with `set_audio_prompt_samples`.
 - [x] Verify the C++ target after the local Xcode Metal Toolchain is available.
 
+### 16. Clear C++ Genre Prompt Experiments
+
+- [x] Add C++ profile selection for clearer prompt tests inspired by Lyria-style
+  loop prompt design.
+- [x] Add duration and transition controls so the same MIDI progression can be
+  repeated into 10 second and 30 second tests.
+- [x] Add profiles for clear extremes, microcinematic footwork, glass trap
+  pressure, negative space club, and metallic ambient bounce.
+- [x] Run three 10 second tests with exaggerated prompt/audio-guide contrast.
+- [x] Run three 30 second experiments for longer evolution checks.
+- [x] Save a combined manifest with WAV path, report path, duration, peak, RMS,
+  and non-silence verification for all six renders.
+- [x] Keep stability controls fixed at 25 Hz frames / 1920 sample chunks while
+  modulating prompt embedding mix, CFG, temperature, and top-k.
+
 ## First Target User Flow
 
 1. Launch the sequencer app.

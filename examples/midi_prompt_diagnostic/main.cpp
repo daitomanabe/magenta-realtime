@@ -92,6 +92,7 @@ struct Slot {
     std::string label;
     std::string prompt;
     std::string audio_recipe;
+    std::string guide_kind;
     float temperature = 1.0f;
     int top_k = 80;
     float cfg_musiccoca = 5.0f;
@@ -110,6 +111,7 @@ const std::array<Slot, 4> kSlots = {{
         "Solo Piano Chords",
         "solo acoustic grand piano only, dry close microphone, sustained minor jazz chord voicings, no drums, no bass, no synths",
         "percussive piano-like chord attacks from the provided MIDI progression",
+        "piano",
         0.72f,
         28,
         6.8f,
@@ -121,6 +123,7 @@ const std::array<Slot, 4> kSlots = {{
         "Chiptune Square Arps",
         "8-bit chiptune square wave lead, bright retro video game synth, rapid staccato arpeggios, sharp digital beeps, no drums",
         "bright square-wave 16th-note arpeggio from each MIDI chord",
+        "chiptune",
         1.34f,
         192,
         7.0f,
@@ -132,6 +135,7 @@ const std::array<Slot, 4> kSlots = {{
         "Distorted 808 Drums",
         "heavy distorted 808 sub bass with punchy trap drums, loud kick and snare, aggressive electronic club rhythm",
         "808 kick/sub rhythm, snare, and hat pattern with MIDI roots",
+        "drums808",
         1.18f,
         156,
         6.4f,
@@ -143,6 +147,7 @@ const std::array<Slot, 4> kSlots = {{
         "Choir String Drone",
         "wide cinematic string orchestra and choir pad, slow ambient drone, huge reverb, soft tape noise, no percussion",
         "long slow string and choir-like sustained pad from each MIDI chord",
+        "pad",
         0.62f,
         44,
         6.6f,
@@ -162,6 +167,11 @@ struct RenderConfig {
     std::string model_name = "mrt2_small";
     std::string resource_dir = magentart::paths::get_resources_dir();
     std::string model_subfolder = "musiccoca";
+    std::array<Slot, 4> slots = kSlots;
+    std::string profile = "clear_extreme";
+    double duration_seconds = 0.0;
+    double segment_seconds = 2.0;
+    double transition_seconds = 0.20;
     bool use_audio_prompts = true;
     bool match_segment_rms = true;
     float target_rms = 0.045f;
@@ -359,6 +369,273 @@ MidiData parse_midi(const std::filesystem::path& path) {
     return midi;
 }
 
+MidiData repeat_midi_to_duration(const MidiData& source, double duration_seconds) {
+    if (duration_seconds <= 0.0 ||
+        source.duration_seconds <= 0.0 ||
+        std::abs(duration_seconds - source.duration_seconds) < 0.001) {
+        return source;
+    }
+
+    MidiData midi = source;
+    midi.duration_seconds = duration_seconds;
+    midi.notes.clear();
+    midi.events.clear();
+
+    int cycles = static_cast<int>(std::ceil(duration_seconds / source.duration_seconds));
+    for (int cycle = 0; cycle < cycles; ++cycle) {
+        double offset_seconds = cycle * source.duration_seconds;
+        for (const auto& src_note : source.notes) {
+            double start = src_note.start_seconds + offset_seconds;
+            double end = src_note.end_seconds + offset_seconds;
+            if (start >= duration_seconds) continue;
+            end = std::min(end, duration_seconds);
+            if (end <= start) continue;
+
+            MidiNote note = src_note;
+            note.start_seconds = start;
+            note.end_seconds = end;
+            note.start_tick = src_note.start_tick + cycle * source.end_tick;
+            note.end_tick = src_note.end_tick + cycle * source.end_tick;
+            midi.notes.push_back(note);
+            midi.events.push_back({note.start_seconds, note.pitch, true});
+            midi.events.push_back({note.end_seconds, note.pitch, false});
+        }
+    }
+
+    std::sort(midi.notes.begin(), midi.notes.end(),
+              [](const MidiNote& a, const MidiNote& b) {
+                  if (a.start_seconds != b.start_seconds) return a.start_seconds < b.start_seconds;
+                  return a.pitch < b.pitch;
+              });
+    std::sort(midi.events.begin(), midi.events.end(),
+              [](const MidiEvent& a, const MidiEvent& b) {
+                  if (a.time_seconds != b.time_seconds) return a.time_seconds < b.time_seconds;
+                  if (a.on != b.on) return a.on && !b.on;
+                  return a.pitch < b.pitch;
+              });
+    return midi;
+}
+
+bool apply_profile(RenderConfig& config) {
+    if (config.profile == "clear_extreme" || config.profile == "default") {
+        config.slots = kSlots;
+        return true;
+    }
+    if (config.profile == "microcinematic_footwork") {
+        config.slots = {{
+            {
+                "footwork_grid",
+                "Microcinematic Footwork",
+                "original microcinematic footwork loop material, 160 BPM feel, rapid footwork percussion cells, dry clipped snares, short sub hits, microscopic glitch cuts, dark film-sound tension, no vocals, no long intro",
+                "rapid footwork kick, snare, hat, and glitch guide pattern",
+                "footwork",
+                1.28f,
+                192,
+                7.2f,
+                2.8f,
+                7.4f,
+            },
+            {
+                "sub_trap_stabs",
+                "Sub Trap Stabs",
+                "original subpixel trap loop material, heavy 808 bass stabs, half-time low-end punctuation, sparse swung hats, chopped minor chord accents, clear downbeat, no vocals, no EDM drop",
+                "808 sub bass and sparse trap drum guide from MIDI roots",
+                "subbass",
+                1.12f,
+                144,
+                6.8f,
+                3.2f,
+                6.4f,
+            },
+            {
+                "granular_metal_cuts",
+                "Granular Metal Cuts",
+                "original glitch percussion loop material, metallic micro-edits, granular fragments, short digital cuts, tiny reversed impacts, high contrast stereo space, tempo-stable, no melody lead",
+                "metallic FM hits and buffer-cut noise guide",
+                "metallic",
+                1.42f,
+                220,
+                6.6f,
+                2.4f,
+                3.5f,
+            },
+            {
+                "noir_string_pressure",
+                "Noir String Pressure",
+                "original cinematic noir drone loop material, tense low strings, distant choir pad, slow pressure rise, wide reverb field, harmonically stable minor center, no drums, no vocals",
+                "slow cinematic pad and string guide from MIDI chords",
+                "pad",
+                0.66f,
+                40,
+                7.0f,
+                6.3f,
+                0.0f,
+            },
+        }};
+        return true;
+    }
+    if (config.profile == "negative_space_club") {
+        config.slots = {{
+            {
+                "dry_minimal_pulse",
+                "Dry Minimal Pulse",
+                "original negative space club loop material, 128 BPM feel, dry four-on-floor kick, reduced pulse, tiny timbral shifts, restrained percussion, no vocals, no big drop",
+                "minimal techno kick and click guide",
+                "minimal",
+                0.82f,
+                54,
+                6.0f,
+                2.6f,
+                6.8f,
+            },
+            {
+                "dub_chord_stabs",
+                "Dub Chord Stabs",
+                "original dub techno chord loop material, short filtered minor chord stabs, tape delay space, stable low-end pulse, sparse percussion, clear downbeat, no vocals",
+                "short piano-like chord stab guide from MIDI voicings",
+                "piano",
+                0.92f,
+                72,
+                6.8f,
+                5.8f,
+                1.8f,
+            },
+            {
+                "sub_pressure",
+                "Sub Pressure",
+                "original cinematic bass minimalism loop material, deep sub bass pressure, slow sidechain-like movement, dark room tone, simple pulse, no lead melody, no vocals",
+                "deep sine sub guide from MIDI roots",
+                "subbass",
+                0.78f,
+                48,
+                6.4f,
+                3.6f,
+                2.8f,
+            },
+            {
+                "air_field",
+                "Air Field",
+                "original ambient club field loop material, airy granular noise, long reverb tail, slow stereo motion, low pressure atmosphere, no drums, no vocals, no tempo drift",
+                "soft pad and noise field guide",
+                "pad",
+                0.58f,
+                28,
+                6.6f,
+                5.8f,
+                0.0f,
+            },
+        }};
+        return true;
+    }
+    if (config.profile == "glass_trap_pressure") {
+        config.slots = {{
+            {
+                "glass_mallets",
+                "Glass Mallets",
+                "original glass trap pressure loop material, bright glass mallet arpeggios, sharp transients, minor chord sparkle, tempo-stable, clear downbeat, no vocals",
+                "bright glass and metallic FM mallet guide from MIDI notes",
+                "metallic",
+                1.20f,
+                180,
+                7.0f,
+                4.8f,
+                0.4f,
+            },
+            {
+                "808_trap_weight",
+                "808 Trap Weight",
+                "original trap weight loop material, distorted 808 sub, punchy kick, clipped snare, swung hi-hats, low-end punctuation, no vocals, no long intro",
+                "808 drum and sub guide from MIDI roots",
+                "drums808",
+                1.16f,
+                156,
+                6.8f,
+                2.8f,
+                7.2f,
+            },
+            {
+                "microcut_texture",
+                "Microcut Texture",
+                "original glitch texture loop material, short buffer edits, sliced noise bursts, digital chirps, broken rhythmic accents, high contrast, no vocals, no sustained pad",
+                "rapid chiptune and glitch guide",
+                "chiptune",
+                1.46f,
+                230,
+                6.5f,
+                2.5f,
+                2.4f,
+            },
+            {
+                "cinematic_afterglow",
+                "Cinematic Afterglow",
+                "original cinematic afterglow loop material, warm strings, distant choir, soft tape noise, wide late-night room, minor harmonic center, no drums, no vocals",
+                "slow string and choir pad guide from MIDI chords",
+                "pad",
+                0.62f,
+                36,
+                6.9f,
+                6.2f,
+                0.0f,
+            },
+        }};
+        return true;
+    }
+    if (config.profile == "metallic_ambient_bounce") {
+        config.slots = {{
+            {
+                "metallic_bounce",
+                "Metallic Ambient Bounce",
+                "original metallic ambient bounce loop material, soft syncopated percussion, tuned metal taps, gentle club bounce, spacious and precise, no vocals, no EDM drop",
+                "metallic tap guide with soft pulse",
+                "metallic",
+                1.04f,
+                112,
+                6.7f,
+                4.2f,
+                3.8f,
+            },
+            {
+                "granular_air",
+                "Granular Air",
+                "original granular ambient loop material, drifting noise grains, soft reversed fragments, slow stereo motion, low-pressure atmosphere, no drums, no vocals",
+                "pad and granular air guide",
+                "pad",
+                0.60f,
+                34,
+                6.7f,
+                5.6f,
+                0.0f,
+            },
+            {
+                "minimal_low_end",
+                "Minimal Low End",
+                "original low-end minimal loop material, quiet sub pulse, restrained kick, small percussion clicks, dark negative space, tempo-stable, no vocals",
+                "minimal kick and sub pulse guide",
+                "minimal",
+                0.78f,
+                52,
+                6.2f,
+                3.0f,
+                5.4f,
+            },
+            {
+                "glass_chord_cloud",
+                "Glass Chord Cloud",
+                "original glass chord cloud loop material, shimmering mallets, sustained minor chord haze, soft resonance, no drums, no vocals, seamless loop boundary",
+                "glass mallet and chord shimmer guide",
+                "chiptune",
+                0.92f,
+                96,
+                6.8f,
+                5.4f,
+                0.0f,
+            },
+        }};
+        return true;
+    }
+    return false;
+}
+
 std::string note_name(int pitch) {
     static const std::array<const char*, 12> names = {
         "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
@@ -369,14 +646,14 @@ double midi_frequency(int pitch) {
     return 440.0 * std::pow(2.0, (pitch - 69) / 12.0);
 }
 
-int segment_for_time(double time_seconds) {
-    return std::clamp(static_cast<int>(time_seconds / 2.0), 0, 3);
+int segment_for_time(double time_seconds, double segment_seconds) {
+    return std::clamp(static_cast<int>(time_seconds / segment_seconds), 0, 3);
 }
 
-std::array<float, 4> prompt_weights(double time_seconds) {
-    constexpr double segment_seconds = 2.0;
-    constexpr double transition_seconds = 0.20;
-    int segment = segment_for_time(time_seconds);
+std::array<float, 4> prompt_weights(double time_seconds,
+                                    double segment_seconds,
+                                    double transition_seconds) {
+    int segment = segment_for_time(time_seconds, segment_seconds);
     double local = time_seconds - segment * segment_seconds;
     int next = (segment + 1) % 4;
     std::array<float, 4> weights = {0.0f, 0.0f, 0.0f, 0.0f};
@@ -391,15 +668,17 @@ std::array<float, 4> prompt_weights(double time_seconds) {
     return weights;
 }
 
-float blend_float(const std::array<float, 4>& weights, float Slot::*member) {
+float blend_float(const std::array<float, 4>& weights,
+                  const std::array<Slot, 4>& slots,
+                  float Slot::*member) {
     float value = 0.0f;
-    for (size_t i = 0; i < weights.size(); ++i) value += weights[i] * (kSlots[i].*member);
+    for (size_t i = 0; i < weights.size(); ++i) value += weights[i] * (slots[i].*member);
     return value;
 }
 
-int blend_top_k(const std::array<float, 4>& weights) {
+int blend_top_k(const std::array<float, 4>& weights, const std::array<Slot, 4>& slots) {
     float value = 0.0f;
-    for (size_t i = 0; i < weights.size(); ++i) value += weights[i] * kSlots[i].top_k;
+    for (size_t i = 0; i < weights.size(); ++i) value += weights[i] * slots[i].top_k;
     return static_cast<int>(std::lround(value));
 }
 
@@ -438,10 +717,10 @@ void add_to(std::vector<float>& samples, int start, const std::vector<float>& to
     for (int i = start; i < end; ++i) samples[i] += tone[i - start];
 }
 
-std::array<std::vector<int>, 4> segment_notes(const MidiData& midi) {
+std::array<std::vector<int>, 4> segment_notes(const MidiData& midi, double segment_seconds) {
     std::array<std::vector<int>, 4> result;
     for (int segment = 0; segment < 4; ++segment) {
-        result[segment] = active_notes_at(midi, segment * 2.0);
+        result[segment] = active_notes_at(midi, segment * segment_seconds);
     }
     return result;
 }
@@ -467,14 +746,14 @@ std::vector<float> synth_piano_prompt(const MidiData& midi) {
     return samples;
 }
 
-std::vector<float> synth_chiptune_prompt(const MidiData& midi) {
+std::vector<float> synth_chiptune_prompt(const MidiData& midi, double segment_seconds) {
     std::vector<float> samples(static_cast<size_t>(midi.duration_seconds * kSampleRate), 0.0f);
-    auto notes = segment_notes(midi);
+    auto notes = segment_notes(midi, segment_seconds);
     constexpr double step_seconds = 0.125;
     int step_count = static_cast<int>(std::lround(midi.duration_seconds / step_seconds));
     for (int step = 0; step < step_count; ++step) {
         double start_seconds = step * step_seconds;
-        int segment = segment_for_time(start_seconds);
+        int segment = segment_for_time(start_seconds, segment_seconds);
         if (notes[segment].empty()) continue;
         int pitch = notes[segment][step % notes[segment].size()] + 24;
         double f = midi_frequency(pitch);
@@ -492,14 +771,14 @@ std::vector<float> synth_chiptune_prompt(const MidiData& midi) {
     return samples;
 }
 
-std::vector<float> synth_808_prompt(const MidiData& midi) {
+std::vector<float> synth_808_prompt(const MidiData& midi, double segment_seconds) {
     std::vector<float> samples(static_cast<size_t>(midi.duration_seconds * kSampleRate), 0.0f);
-    auto notes = segment_notes(midi);
+    auto notes = segment_notes(midi, segment_seconds);
     std::mt19937 rng(2405);
     std::normal_distribution<float> noise(0.0f, 1.0f);
 
     for (double beat = 0.0; beat < midi.duration_seconds; beat += 0.5) {
-        int segment = segment_for_time(beat);
+        int segment = segment_for_time(beat, segment_seconds);
         int root = notes[segment].empty() ? 36 : notes[segment].front() - 12;
         int length = static_cast<int>(std::lround(0.36 * kSampleRate));
         std::vector<float> tone(length);
@@ -566,9 +845,139 @@ std::vector<float> synth_pad_prompt(const MidiData& midi) {
     return samples;
 }
 
-std::array<std::vector<float>, 4> build_audio_prompts(const MidiData& midi) {
-    return {synth_piano_prompt(midi), synth_chiptune_prompt(midi),
-            synth_808_prompt(midi), synth_pad_prompt(midi)};
+std::vector<float> synth_subbass_prompt(const MidiData& midi, double segment_seconds) {
+    std::vector<float> samples(static_cast<size_t>(midi.duration_seconds * kSampleRate), 0.0f);
+    auto notes = segment_notes(midi, segment_seconds);
+    for (double beat = 0.0; beat < midi.duration_seconds; beat += 0.5) {
+        int segment = segment_for_time(beat, segment_seconds);
+        int root = notes[segment].empty() ? 36 : notes[segment].front() - 24;
+        int start = static_cast<int>(std::lround(beat * kSampleRate));
+        int length = static_cast<int>(std::lround(0.42 * kSampleRate));
+        double phase = 0.0;
+        for (int i = 0; i < length && start + i < static_cast<int>(samples.size()); ++i) {
+            double t = i / static_cast<double>(kSampleRate);
+            double f = midi_frequency(root) * (1.35 - 0.25 * std::min(1.0, t / 0.20));
+            phase += 2 * kPi * f / kSampleRate;
+            double env = std::min(1.0, t / 0.012) * std::exp(-5.2 * t);
+            samples[start + i] += static_cast<float>(0.55 * std::sin(phase) * env);
+        }
+    }
+    for (float& sample : samples) sample = std::tanh(sample * 2.2f);
+    fade_edges(samples);
+    normalize_audio(samples);
+    return samples;
+}
+
+std::vector<float> synth_footwork_prompt(const MidiData& midi) {
+    std::vector<float> samples(static_cast<size_t>(midi.duration_seconds * kSampleRate), 0.0f);
+    std::mt19937 rng(9907);
+    std::normal_distribution<float> noise(0.0f, 1.0f);
+    const std::array<double, 8> kicks = {0.0, 0.375, 0.75, 1.125, 1.5, 1.875, 2.25, 2.875};
+    for (double bar = 0.0; bar < midi.duration_seconds; bar += 4.0) {
+        for (double offset : kicks) {
+            int start = static_cast<int>(std::lround((bar + offset) * kSampleRate));
+            int length = static_cast<int>(std::lround(0.12 * kSampleRate));
+            double phase = 0.0;
+            for (int i = 0; i < length && start + i < static_cast<int>(samples.size()); ++i) {
+                double t = i / static_cast<double>(kSampleRate);
+                double f = 96.0 * (1.8 - 0.7 * std::min(1.0, t / 0.07));
+                phase += 2 * kPi * f / kSampleRate;
+                samples[start + i] += static_cast<float>(0.42 * std::sin(phase) * std::exp(-22.0 * t));
+            }
+        }
+    }
+    for (double snare = 0.5; snare < midi.duration_seconds; snare += 0.75) {
+        int start = static_cast<int>(std::lround(snare * kSampleRate));
+        int length = static_cast<int>(std::lround(0.07 * kSampleRate));
+        for (int i = 0; i < length && start + i < static_cast<int>(samples.size()); ++i) {
+            double t = i / static_cast<double>(kSampleRate);
+            samples[start + i] += static_cast<float>(0.20 * noise(rng) * std::exp(-35.0 * t));
+        }
+    }
+    for (double hat = 0.0; hat < midi.duration_seconds; hat += 0.0625) {
+        int start = static_cast<int>(std::lround(hat * kSampleRate));
+        int length = static_cast<int>(std::lround(0.025 * kSampleRate));
+        for (int i = 0; i < length && start + i < static_cast<int>(samples.size()); ++i) {
+            double t = i / static_cast<double>(kSampleRate);
+            samples[start + i] += static_cast<float>(0.035 * noise(rng) *
+                                                     std::sin(2 * kPi * 9200.0 * t) *
+                                                     std::exp(-90.0 * t));
+        }
+    }
+    for (float& sample : samples) sample = std::tanh(sample * 2.0f);
+    fade_edges(samples);
+    normalize_audio(samples);
+    return samples;
+}
+
+std::vector<float> synth_metallic_prompt(const MidiData& midi) {
+    std::vector<float> samples(static_cast<size_t>(midi.duration_seconds * kSampleRate), 0.0f);
+    for (const auto& note : midi.notes) {
+        int start = static_cast<int>(std::lround(note.start_seconds * kSampleRate));
+        int length = static_cast<int>(std::lround(0.32 * kSampleRate));
+        double f = midi_frequency(note.pitch + 24);
+        for (int i = 0; i < length && start + i < static_cast<int>(samples.size()); ++i) {
+            double t = i / static_cast<double>(kSampleRate);
+            double env = std::min(1.0, t / 0.004) * std::exp(-9.5 * t);
+            double mod = std::sin(2 * kPi * f * 2.71 * t) * 7.0 * std::exp(-7.0 * t);
+            double tone = std::sin(2 * kPi * f * t + mod) +
+                          0.35 * std::sin(2 * kPi * f * 3.17 * t);
+            samples[start + i] += static_cast<float>(0.18 * tone * env);
+        }
+    }
+    fade_edges(samples);
+    normalize_audio(samples);
+    return samples;
+}
+
+std::vector<float> synth_minimal_prompt(const MidiData& midi) {
+    std::vector<float> samples(static_cast<size_t>(midi.duration_seconds * kSampleRate), 0.0f);
+    for (double beat = 0.0; beat < midi.duration_seconds; beat += 0.5) {
+        int start = static_cast<int>(std::lround(beat * kSampleRate));
+        int length = static_cast<int>(std::lround(0.11 * kSampleRate));
+        double phase = 0.0;
+        for (int i = 0; i < length && start + i < static_cast<int>(samples.size()); ++i) {
+            double t = i / static_cast<double>(kSampleRate);
+            double f = 72.0 * (1.9 - 0.6 * std::min(1.0, t / 0.05));
+            phase += 2 * kPi * f / kSampleRate;
+            samples[start + i] += static_cast<float>(0.40 * std::sin(phase) * std::exp(-24.0 * t));
+        }
+    }
+    for (const auto& note : midi.notes) {
+        int start = static_cast<int>(std::lround((note.start_seconds + 0.02) * kSampleRate));
+        int length = static_cast<int>(std::lround(0.16 * kSampleRate));
+        double f = midi_frequency(note.pitch);
+        for (int i = 0; i < length && start + i < static_cast<int>(samples.size()); ++i) {
+            double t = i / static_cast<double>(kSampleRate);
+            samples[start + i] += static_cast<float>(0.045 * std::sin(2 * kPi * f * t) * std::exp(-10.0 * t));
+        }
+    }
+    fade_edges(samples);
+    normalize_audio(samples);
+    return samples;
+}
+
+std::vector<float> synth_for_guide_kind(const MidiData& midi,
+                                        const std::string& guide_kind,
+                                        double segment_seconds) {
+    if (guide_kind == "piano") return synth_piano_prompt(midi);
+    if (guide_kind == "chiptune") return synth_chiptune_prompt(midi, segment_seconds);
+    if (guide_kind == "drums808") return synth_808_prompt(midi, segment_seconds);
+    if (guide_kind == "pad") return synth_pad_prompt(midi);
+    if (guide_kind == "subbass") return synth_subbass_prompt(midi, segment_seconds);
+    if (guide_kind == "footwork") return synth_footwork_prompt(midi);
+    if (guide_kind == "metallic") return synth_metallic_prompt(midi);
+    if (guide_kind == "minimal") return synth_minimal_prompt(midi);
+    return synth_pad_prompt(midi);
+}
+
+std::array<std::vector<float>, 4> build_audio_prompts(const MidiData& midi,
+                                                      const std::array<Slot, 4>& slots,
+                                                      double segment_seconds) {
+    return {synth_for_guide_kind(midi, slots[0].guide_kind, segment_seconds),
+            synth_for_guide_kind(midi, slots[1].guide_kind, segment_seconds),
+            synth_for_guide_kind(midi, slots[2].guide_kind, segment_seconds),
+            synth_for_guide_kind(midi, slots[3].guide_kind, segment_seconds)};
 }
 
 bool write_wav(const std::filesystem::path& path,
@@ -647,12 +1056,15 @@ SegmentMetrics metrics_segment(const std::vector<float>& interleaved, int start_
     return metrics;
 }
 
-void match_segment_rms(std::vector<float>& interleaved, double duration_seconds, float target_rms) {
+void match_segment_rms(std::vector<float>& interleaved,
+                       double duration_seconds,
+                       double segment_seconds,
+                       float target_rms) {
     int total_frames = static_cast<int>(interleaved.size() / 2);
     for (int segment = 0; segment < 4; ++segment) {
-        int start = static_cast<int>(std::lround(segment * 2.0 * kSampleRate));
-        int end = std::min(total_frames, static_cast<int>(std::lround((segment + 1) * 2.0 * kSampleRate)));
-        if (segment * 2.0 >= duration_seconds) break;
+        int start = static_cast<int>(std::lround(segment * segment_seconds * kSampleRate));
+        int end = std::min(total_frames, static_cast<int>(std::lround((segment + 1) * segment_seconds * kSampleRate)));
+        if (segment * segment_seconds >= duration_seconds) break;
         float rms = rms_segment(interleaved, start, end);
         float gain = rms > 0.000001f ? std::min(8.0f, target_rms / rms) : 1.0f;
         for (int frame = start; frame < end; ++frame) {
@@ -709,6 +1121,7 @@ bool write_report(const std::filesystem::path& path,
     out << "  \"schema\": \"mrt-cpp-midi-control-matrix-report-v1\",\n";
     out << "  \"output_wav\": \"" << json_escape(config.output_path.string()) << "\",\n";
     out << "  \"midi_path\": \"" << json_escape(config.midi_path.string()) << "\",\n";
+    out << "  \"profile\": \"" << json_escape(config.profile) << "\",\n";
     out << "  \"model\": \"" << json_escape(config.model_name) << "\",\n";
     out << "  \"model_path\": \"" << json_escape(model_path) << "\",\n";
     out << "  \"embedding_source\": \"" << (config.use_audio_prompts ? "audio" : "text") << "\",\n";
@@ -718,6 +1131,8 @@ bool write_report(const std::filesystem::path& path,
     out << "  \"channels\": 2,\n";
     out << "  \"frames_25hz\": " << static_cast<int>(std::lround(midi.duration_seconds * kFps)) << ",\n";
     out << "  \"chunk_samples\": " << kFrameSamples << ",\n";
+    out << "  \"segment_seconds\": " << config.segment_seconds << ",\n";
+    out << "  \"transition_seconds\": " << config.transition_seconds << ",\n";
     out << "  \"peak\": " << peak << ",\n";
     out << "  \"rms\": " << rms << ",\n";
     out << "  \"non_silent\": " << ((peak > 0.0001f && rms > 0.00001) ? "true" : "false") << ",\n";
@@ -740,21 +1155,25 @@ bool write_report(const std::filesystem::path& path,
     out << "  },\n";
     out << "  \"segments\": [\n";
     for (int segment = 0; segment < 4; ++segment) {
-        int start = static_cast<int>(std::lround(segment * 2.0 * kSampleRate));
-        int end = std::min(total_frames, static_cast<int>(std::lround((segment + 1) * 2.0 * kSampleRate)));
+        int start = static_cast<int>(std::lround(segment * config.segment_seconds * kSampleRate));
+        int end = std::min(total_frames, static_cast<int>(std::lround((segment + 1) * config.segment_seconds * kSampleRate)));
         SegmentMetrics metrics = metrics_segment(interleaved, start, end);
-        auto notes = active_notes_at(midi, segment * 2.0);
-        auto weights = prompt_weights(segment * 2.0);
+        auto notes = active_notes_at(midi, segment * config.segment_seconds);
+        auto weights = prompt_weights(segment * config.segment_seconds,
+                                      config.segment_seconds,
+                                      config.transition_seconds);
         out << "    {\n";
         out << "      \"segment\": " << (segment + 1) << ",\n";
-        out << "      \"slot_id\": \"" << kSlots[segment].id << "\",\n";
-        out << "      \"slot_label\": \"" << kSlots[segment].label << "\",\n";
+        out << "      \"slot_id\": \"" << config.slots[segment].id << "\",\n";
+        out << "      \"slot_label\": \"" << config.slots[segment].label << "\",\n";
+        out << "      \"prompt\": \"" << json_escape(config.slots[segment].prompt) << "\",\n";
+        out << "      \"guide_kind\": \"" << json_escape(config.slots[segment].guide_kind) << "\",\n";
         out << "      \"weight\": " << weights[segment] << ",\n";
-        out << "      \"cfg_musiccoca\": " << kSlots[segment].cfg_musiccoca << ",\n";
-        out << "      \"cfg_notes\": " << kSlots[segment].cfg_notes << ",\n";
-        out << "      \"cfg_drums\": " << kSlots[segment].cfg_drums << ",\n";
-        out << "      \"temperature\": " << kSlots[segment].temperature << ",\n";
-        out << "      \"top_k\": " << kSlots[segment].top_k << ",\n";
+        out << "      \"cfg_musiccoca\": " << config.slots[segment].cfg_musiccoca << ",\n";
+        out << "      \"cfg_notes\": " << config.slots[segment].cfg_notes << ",\n";
+        out << "      \"cfg_drums\": " << config.slots[segment].cfg_drums << ",\n";
+        out << "      \"temperature\": " << config.slots[segment].temperature << ",\n";
+        out << "      \"top_k\": " << config.slots[segment].top_k << ",\n";
         out << "      \"rms\": " << metrics.rms << ",\n";
         out << "      \"peak\": " << metrics.peak << ",\n";
         out << "      \"active_note_names\": [";
@@ -771,12 +1190,12 @@ bool write_report(const std::filesystem::path& path,
     return out.good();
 }
 
-void wait_for_prompts(MLXEngine& engine) {
+void wait_for_prompts(MLXEngine& engine, int slot_count) {
     while (engine.get_text_encoder_status() == 1 ||
            engine.get_quantizer_status() == 1) {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
-    for (int i = 0; i < static_cast<int>(kSlots.size()); ++i) {
+    for (int i = 0; i < slot_count; ++i) {
         while (engine.get_prompt_status(i) == 1) {
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
@@ -791,8 +1210,12 @@ void print_usage(const char* argv0) {
         "  --report PATH            Output JSON report path\n"
         "  --model NAME             Model folder under Magenta models (default: mrt2_small)\n"
         "  --resources PATH         Resource dir containing musiccoca/\n"
+        "  --profile NAME           clear_extreme, microcinematic_footwork, negative_space_club,\n"
+        "                           glass_trap_pressure, or metallic_ambient_bounce\n"
+        "  --duration SECONDS       Repeat/clip the MIDI progression to this duration\n"
+        "  --transition SECONDS     Prompt crossfade duration at segment boundaries\n"
         "  --text-prompts           Use text prompts instead of MIDI-derived audio prompt embeddings\n"
-        "  --no-match-rms           Do not RMS-match four 2-second sections\n"
+        "  --no-match-rms           Do not RMS-match the four prompt sections\n"
         "  --target-rms VALUE       Target RMS when matching sections (default: 0.045)\n",
         argv0);
 }
@@ -819,6 +1242,12 @@ bool parse_args(int argc, char** argv, RenderConfig& config) {
             config.resource_dir = need_value("--resources");
         } else if (arg == "--audio-prompt-dir") {
             config.audio_prompt_dir = need_value("--audio-prompt-dir");
+        } else if (arg == "--profile") {
+            config.profile = need_value("--profile");
+        } else if (arg == "--duration") {
+            config.duration_seconds = std::stod(need_value("--duration"));
+        } else if (arg == "--transition") {
+            config.transition_seconds = std::stod(need_value("--transition"));
         } else if (arg == "--text-prompts") {
             config.use_audio_prompts = false;
         } else if (arg == "--no-match-rms") {
@@ -842,9 +1271,19 @@ bool parse_args(int argc, char** argv, RenderConfig& config) {
 int main(int argc, char** argv) {
     RenderConfig config;
     if (!parse_args(argc, argv, config)) return 1;
+    if (!apply_profile(config)) {
+        std::fprintf(stderr, "Unknown profile: %s\n", config.profile.c_str());
+        return 1;
+    }
 
     try {
         MidiData midi = parse_midi(config.midi_path);
+        double render_duration = config.duration_seconds > 0.0
+            ? config.duration_seconds
+            : midi.duration_seconds;
+        midi = repeat_midi_to_duration(midi, render_duration);
+        config.duration_seconds = midi.duration_seconds;
+        config.segment_seconds = midi.duration_seconds / 4.0;
         int frame_count = static_cast<int>(std::lround(midi.duration_seconds * kFps));
         std::string model_dir = magentart::paths::get_models_dir() + "/" + config.model_name;
         std::string mlxfn_path = magentart::paths::find_mlxfn_in_dir(model_dir);
@@ -864,16 +1303,16 @@ int main(int argc, char** argv) {
         }
 
         if (config.use_audio_prompts) {
-            auto prompt_audio = build_audio_prompts(midi);
+            auto prompt_audio = build_audio_prompts(midi, config.slots, config.segment_seconds);
             std::filesystem::create_directories(config.audio_prompt_dir);
             for (int i = 0; i < 4; ++i) {
                 auto audio_path = config.audio_prompt_dir /
-                                  (std::to_string(i + 1) + "_" + kSlots[i].id + ".wav");
+                                  (std::to_string(i + 1) + "_" + config.slots[i].id + ".wav");
                 write_wav(audio_path, to_stereo_interleaved(prompt_audio[i]), kSampleRate, 2);
                 engine.set_audio_prompt_samples(i, audio_path.filename().string(),
                                                 prompt_audio[i].data(), prompt_audio[i].size());
             }
-            wait_for_prompts(engine);
+            wait_for_prompts(engine, static_cast<int>(config.slots.size()));
             std::array<float, 6> initial_weights = {1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
             if (!engine.reblend_musiccoca_tokens(initial_weights.data(), static_cast<int>(initial_weights.size()))) {
                 std::fprintf(stderr, "Initial audio prompt reblend failed\n");
@@ -883,11 +1322,11 @@ int main(int argc, char** argv) {
             std::vector<std::string> prompts;
             std::vector<float> initial_weights;
             for (int i = 0; i < 4; ++i) {
-                prompts.push_back(kSlots[i].prompt);
+                prompts.push_back(config.slots[i].prompt);
                 initial_weights.push_back(i == 0 ? 1.0f : 0.0f);
             }
             engine.set_text_prompts(prompts, initial_weights);
-            wait_for_prompts(engine);
+            wait_for_prompts(engine, static_cast<int>(config.slots.size()));
         }
 
         engine.set_onset_mode(1);
@@ -925,15 +1364,17 @@ int main(int argc, char** argv) {
                 ++next_event;
             }
 
-            auto weights4 = prompt_weights(time_seconds);
+            auto weights4 = prompt_weights(time_seconds,
+                                           config.segment_seconds,
+                                           config.transition_seconds);
             std::array<float, 6> weights = {
                 weights4[0], weights4[1], weights4[2], weights4[3], 0.0f, 0.0f};
             engine.reblend_musiccoca_tokens(weights.data(), static_cast<int>(weights.size()));
-            engine.set_cfg_musiccoca(blend_float(weights4, &Slot::cfg_musiccoca));
-            engine.set_cfg_notes(blend_float(weights4, &Slot::cfg_notes));
-            engine.set_cfg_drums(blend_float(weights4, &Slot::cfg_drums));
-            engine.set_temperature(blend_float(weights4, &Slot::temperature));
-            engine.set_top_k(blend_top_k(weights4));
+            engine.set_cfg_musiccoca(blend_float(weights4, config.slots, &Slot::cfg_musiccoca));
+            engine.set_cfg_notes(blend_float(weights4, config.slots, &Slot::cfg_notes));
+            engine.set_cfg_drums(blend_float(weights4, config.slots, &Slot::cfg_drums));
+            engine.set_temperature(blend_float(weights4, config.slots, &Slot::temperature));
+            engine.set_top_k(blend_top_k(weights4, config.slots));
 
             if (!engine.generate_frame(L.data(), R.data())) {
                 std::fprintf(stderr, "generate_frame failed at frame %d\n", frame);
@@ -957,7 +1398,7 @@ int main(int argc, char** argv) {
         }
 
         if (config.match_segment_rms) {
-            match_segment_rms(interleaved, midi.duration_seconds, config.target_rms);
+            match_segment_rms(interleaved, midi.duration_seconds, config.segment_seconds, config.target_rms);
         }
 
         auto end_time = std::chrono::steady_clock::now();
