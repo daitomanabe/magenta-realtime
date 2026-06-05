@@ -1,8 +1,8 @@
 # Polyrhythm Prompt Modulation Test
 
-This experiment renders a 10 second Magenta RealTime test loop from four prompt
-slots whose weights move in rhythmic polyrhythm. The same modulation data can be
-used to blend four Runway/Aleph video variants.
+This experiment renders Magenta RealTime test material from four prompt slots
+whose weights move in rhythmic polyrhythm. The same modulation data can be used
+to blend video sources or to drive segmented Runway video prompts.
 
 ## Prompt Slots
 
@@ -19,6 +19,16 @@ used to blend four Runway/Aleph video variants.
 source "${HOME}/.config/secrets.zsh"
 .venv/bin/python experiments/polyrhythm_prompt_modulation/runway_generate_videos.py --execute
 .venv/bin/python experiments/polyrhythm_prompt_modulation/composite_videos_from_modulation.py
+```
+
+## Three Minute Version
+
+```bash
+.venv/bin/python experiments/polyrhythm_prompt_modulation/generate_longform_modulation.py
+.venv/bin/python experiments/polyrhythm_prompt_modulation/render_longform_magenta_audio.py
+source "${HOME}/.config/secrets.zsh"
+.venv/bin/python experiments/polyrhythm_prompt_modulation/runway_generate_longform_segments.py --execute
+.venv/bin/python experiments/polyrhythm_prompt_modulation/assemble_longform_video.py
 ```
 
 Generated audio/video files are written under `outputs/polyrhythm_prompt_modulation/`.

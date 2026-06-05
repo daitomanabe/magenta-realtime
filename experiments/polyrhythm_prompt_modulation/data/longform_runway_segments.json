@@ -1,0 +1,310 @@
+{
+  "segments": [
+    {
+      "index": 1,
+      "start": 0.0,
+      "end": 10.0,
+      "section": "intro",
+      "top_slots": [
+        "granular_texture",
+        "tension_chords"
+      ],
+      "avg_weights": {
+        "tension_chords": 0.300674,
+        "glassy_arps": 0.156514,
+        "broken_beat": 0.117849,
+        "granular_texture": 0.424962
+      },
+      "promptText": "Cinematic dynamic landscape, strong camera movement, photoreal high detail, no people, no logos, no readable text, no captions. Segment 01 of an 18-part three-minute audiovisual piece. Section: Intro. Scene: pre-dawn mountain valley above cloud, very slow drone push, distant water and fog, warm harmonic light barely appearing. Dominant visual systems: granular tape atmosphere, fog layers, film grain, analog color bleed, drifting dust, warped parallax; warm harmonic architecture, amber and copper light planes, stacked chord-like cliffs, glowing terraces, slow harmonic color changes. Energy level 0.14; camera movement should feel continuous from the previous segment but with a clear new phrase. No humans, no instruments, no UI, no subtitles."
+    },
+    {
+      "index": 2,
+      "start": 10.0,
+      "end": 20.0,
+      "section": "intro",
+      "top_slots": [
+        "granular_texture",
+        "tension_chords"
+      ],
+      "avg_weights": {
+        "tension_chords": 0.291379,
+        "glassy_arps": 0.165447,
+        "broken_beat": 0.124813,
+        "granular_texture": 0.418361
+      },
+      "promptText": "Cinematic dynamic landscape, strong camera movement, photoreal high detail, no people, no logos, no readable text, no captions. Segment 02 of an 18-part three-minute audiovisual piece. Section: Intro. Scene: pre-dawn mountain valley above cloud, very slow drone push, distant water and fog, warm harmonic light barely appearing. Dominant visual systems: granular tape atmosphere, fog layers, film grain, analog color bleed, drifting dust, warped parallax; warm harmonic architecture, amber and copper light planes, stacked chord-like cliffs, glowing terraces, slow harmonic color changes. Energy level 0.23; camera movement should feel continuous from the previous segment but with a clear new phrase. No humans, no instruments, no UI, no subtitles."
+    },
+    {
+      "index": 3,
+      "start": 20.0,
+      "end": 30.0,
+      "section": "pulse_entry",
+      "top_slots": [
+        "tension_chords",
+        "granular_texture"
+      ],
+      "avg_weights": {
+        "tension_chords": 0.311593,
+        "glassy_arps": 0.212062,
+        "broken_beat": 0.165785,
+        "granular_texture": 0.31056
+      },
+      "promptText": "Cinematic dynamic landscape, strong camera movement, photoreal high detail, no people, no logos, no readable text, no captions. Segment 03 of an 18-part three-minute audiovisual piece. Section: Pulse Entry. Scene: camera descends into the valley, glassy streams and reflective ridges appear, first rhythmic cuts in terrain and shadow. Dominant visual systems: warm harmonic architecture, amber and copper light planes, stacked chord-like cliffs, glowing terraces, slow harmonic color changes; granular tape atmosphere, fog layers, film grain, analog color bleed, drifting dust, warped parallax. Energy level 0.28; camera movement should feel continuous from the previous segment but with a clear new phrase. No humans, no instruments, no UI, no subtitles."
+    },
+    {
+      "index": 4,
+      "start": 30.0,
+      "end": 40.0,
+      "section": "pulse_entry",
+      "top_slots": [
+        "tension_chords",
+        "granular_texture"
+      ],
+      "avg_weights": {
+        "tension_chords": 0.306711,
+        "glassy_arps": 0.245686,
+        "broken_beat": 0.196862,
+        "granular_texture": 0.250741
+      },
+      "promptText": "Cinematic dynamic landscape, strong camera movement, photoreal high detail, no people, no logos, no readable text, no captions. Segment 04 of an 18-part three-minute audiovisual piece. Section: Pulse Entry. Scene: camera descends into the valley, glassy streams and reflective ridges appear, first rhythmic cuts in terrain and shadow. Dominant visual systems: warm harmonic architecture, amber and copper light planes, stacked chord-like cliffs, glowing terraces, slow harmonic color changes; granular tape atmosphere, fog layers, film grain, analog color bleed, drifting dust, warped parallax. Energy level 0.35; camera movement should feel continuous from the previous segment but with a clear new phrase. No humans, no instruments, no UI, no subtitles."
+    },
+    {
+      "index": 5,
+      "start": 40.0,
+      "end": 50.0,
+      "section": "pulse_entry",
+      "top_slots": [
+        "tension_chords",
+        "granular_texture"
+      ],
+      "avg_weights": {
+        "tension_chords": 0.315149,
+        "glassy_arps": 0.240103,
+        "broken_beat": 0.196191,
+        "granular_texture": 0.248556
+      },
+      "promptText": "Cinematic dynamic landscape, strong camera movement, photoreal high detail, no people, no logos, no readable text, no captions. Segment 05 of an 18-part three-minute audiovisual piece. Section: Pulse Entry. Scene: camera descends into the valley, glassy streams and reflective ridges appear, first rhythmic cuts in terrain and shadow. Dominant visual systems: warm harmonic architecture, amber and copper light planes, stacked chord-like cliffs, glowing terraces, slow harmonic color changes; granular tape atmosphere, fog layers, film grain, analog color bleed, drifting dust, warped parallax. Energy level 0.45; camera movement should feel continuous from the previous segment but with a clear new phrase. No humans, no instruments, no UI, no subtitles."
+    },
+    {
+      "index": 6,
+      "start": 50.0,
+      "end": 60.0,
+      "section": "harmony_expansion",
+      "top_slots": [
+        "tension_chords",
+        "glassy_arps"
+      ],
+      "avg_weights": {
+        "tension_chords": 0.338684,
+        "glassy_arps": 0.25519,
+        "broken_beat": 0.192918,
+        "granular_texture": 0.213207
+      },
+      "promptText": "Cinematic dynamic landscape, strong camera movement, photoreal high detail, no people, no logos, no readable text, no captions. Segment 06 of an 18-part three-minute audiovisual piece. Section: Harmony Expansion. Scene: wide canyon flight, stacked terraces and glowing chord-like planes unfold, camera sweeps around cliffs and water. Dominant visual systems: warm harmonic architecture, amber and copper light planes, stacked chord-like cliffs, glowing terraces, slow harmonic color changes; crystalline arpeggio energy, prismatic ice rivers, thin light trails, fast ascending reflective patterns, clean kinetic details. Energy level 0.44; camera movement should feel continuous from the previous segment but with a clear new phrase. No humans, no instruments, no UI, no subtitles."
+    },
+    {
+      "index": 7,
+      "start": 60.0,
+      "end": 70.0,
+      "section": "harmony_expansion",
+      "top_slots": [
+        "tension_chords",
+        "glassy_arps"
+      ],
+      "avg_weights": {
+        "tension_chords": 0.354309,
+        "glassy_arps": 0.255122,
+        "broken_beat": 0.189261,
+        "granular_texture": 0.201309
+      },
+      "promptText": "Cinematic dynamic landscape, strong camera movement, photoreal high detail, no people, no logos, no readable text, no captions. Segment 07 of an 18-part three-minute audiovisual piece. Section: Harmony Expansion. Scene: wide canyon flight, stacked terraces and glowing chord-like planes unfold, camera sweeps around cliffs and water. Dominant visual systems: warm harmonic architecture, amber and copper light planes, stacked chord-like cliffs, glowing terraces, slow harmonic color changes; crystalline arpeggio energy, prismatic ice rivers, thin light trails, fast ascending reflective patterns, clean kinetic details. Energy level 0.51; camera movement should feel continuous from the previous segment but with a clear new phrase. No humans, no instruments, no UI, no subtitles."
+    },
+    {
+      "index": 8,
+      "start": 70.0,
+      "end": 80.0,
+      "section": "harmony_expansion",
+      "top_slots": [
+        "tension_chords",
+        "glassy_arps"
+      ],
+      "avg_weights": {
+        "tension_chords": 0.339938,
+        "glassy_arps": 0.263101,
+        "broken_beat": 0.192398,
+        "granular_texture": 0.204564
+      },
+      "promptText": "Cinematic dynamic landscape, strong camera movement, photoreal high detail, no people, no logos, no readable text, no captions. Segment 08 of an 18-part three-minute audiovisual piece. Section: Harmony Expansion. Scene: wide canyon flight, stacked terraces and glowing chord-like planes unfold, camera sweeps around cliffs and water. Dominant visual systems: warm harmonic architecture, amber and copper light planes, stacked chord-like cliffs, glowing terraces, slow harmonic color changes; crystalline arpeggio energy, prismatic ice rivers, thin light trails, fast ascending reflective patterns, clean kinetic details. Energy level 0.61; camera movement should feel continuous from the previous segment but with a clear new phrase. No humans, no instruments, no UI, no subtitles."
+    },
+    {
+      "index": 9,
+      "start": 80.0,
+      "end": 90.0,
+      "section": "first_peak",
+      "top_slots": [
+        "tension_chords",
+        "glassy_arps"
+      ],
+      "avg_weights": {
+        "tension_chords": 0.296624,
+        "glassy_arps": 0.269286,
+        "broken_beat": 0.232122,
+        "granular_texture": 0.201969
+      },
+      "promptText": "Cinematic dynamic landscape, strong camera movement, photoreal high detail, no people, no logos, no readable text, no captions. Segment 09 of an 18-part three-minute audiovisual piece. Section: First Peak. Scene: fast drone rush through crystalline valley structures, rhythmic shadows and bright arpeggio trails cross the camera. Dominant visual systems: warm harmonic architecture, amber and copper light planes, stacked chord-like cliffs, glowing terraces, slow harmonic color changes; crystalline arpeggio energy, prismatic ice rivers, thin light trails, fast ascending reflective patterns, clean kinetic details. Energy level 0.64; camera movement should feel continuous from the previous segment but with a clear new phrase. No humans, no instruments, no UI, no subtitles."
+    },
+    {
+      "index": 10,
+      "start": 90.0,
+      "end": 100.0,
+      "section": "first_peak",
+      "top_slots": [
+        "glassy_arps",
+        "tension_chords"
+      ],
+      "avg_weights": {
+        "tension_chords": 0.271456,
+        "glassy_arps": 0.277318,
+        "broken_beat": 0.251452,
+        "granular_texture": 0.199774
+      },
+      "promptText": "Cinematic dynamic landscape, strong camera movement, photoreal high detail, no people, no logos, no readable text, no captions. Segment 10 of an 18-part three-minute audiovisual piece. Section: First Peak. Scene: fast drone rush through crystalline valley structures, rhythmic shadows and bright arpeggio trails cross the camera. Dominant visual systems: crystalline arpeggio energy, prismatic ice rivers, thin light trails, fast ascending reflective patterns, clean kinetic details; warm harmonic architecture, amber and copper light planes, stacked chord-like cliffs, glowing terraces, slow harmonic color changes. Energy level 0.67; camera movement should feel continuous from the previous segment but with a clear new phrase. No humans, no instruments, no UI, no subtitles."
+    },
+    {
+      "index": 11,
+      "start": 100.0,
+      "end": 110.0,
+      "section": "first_peak",
+      "top_slots": [
+        "glassy_arps",
+        "tension_chords"
+      ],
+      "avg_weights": {
+        "tension_chords": 0.268785,
+        "glassy_arps": 0.278374,
+        "broken_beat": 0.250208,
+        "granular_texture": 0.202633
+      },
+      "promptText": "Cinematic dynamic landscape, strong camera movement, photoreal high detail, no people, no logos, no readable text, no captions. Segment 11 of an 18-part three-minute audiovisual piece. Section: First Peak. Scene: fast drone rush through crystalline valley structures, rhythmic shadows and bright arpeggio trails cross the camera. Dominant visual systems: crystalline arpeggio energy, prismatic ice rivers, thin light trails, fast ascending reflective patterns, clean kinetic details; warm harmonic architecture, amber and copper light planes, stacked chord-like cliffs, glowing terraces, slow harmonic color changes. Energy level 0.75; camera movement should feel continuous from the previous segment but with a clear new phrase. No humans, no instruments, no UI, no subtitles."
+    },
+    {
+      "index": 12,
+      "start": 110.0,
+      "end": 120.0,
+      "section": "first_peak",
+      "top_slots": [
+        "glassy_arps",
+        "tension_chords"
+      ],
+      "avg_weights": {
+        "tension_chords": 0.264987,
+        "glassy_arps": 0.27183,
+        "broken_beat": 0.248293,
+        "granular_texture": 0.21489
+      },
+      "promptText": "Cinematic dynamic landscape, strong camera movement, photoreal high detail, no people, no logos, no readable text, no captions. Segment 12 of an 18-part three-minute audiovisual piece. Section: First Peak. Scene: fast drone rush through crystalline valley structures, rhythmic shadows and bright arpeggio trails cross the camera. Dominant visual systems: crystalline arpeggio energy, prismatic ice rivers, thin light trails, fast ascending reflective patterns, clean kinetic details; warm harmonic architecture, amber and copper light planes, stacked chord-like cliffs, glowing terraces, slow harmonic color changes. Energy level 0.79; camera movement should feel continuous from the previous segment but with a clear new phrase. No humans, no instruments, no UI, no subtitles."
+    },
+    {
+      "index": 13,
+      "start": 120.0,
+      "end": 130.0,
+      "section": "modulation_spiral",
+      "top_slots": [
+        "granular_texture",
+        "tension_chords"
+      ],
+      "avg_weights": {
+        "tension_chords": 0.258011,
+        "glassy_arps": 0.248695,
+        "broken_beat": 0.234861,
+        "granular_texture": 0.258432
+      },
+      "promptText": "Cinematic dynamic landscape, strong camera movement, photoreal high detail, no people, no logos, no readable text, no captions. Segment 13 of an 18-part three-minute audiovisual piece. Section: Modulation Spiral. Scene: storm of harmonic light, fog, crystal trails, and percussive terrain pulses, camera rotates and dives through layered mountain space. Dominant visual systems: granular tape atmosphere, fog layers, film grain, analog color bleed, drifting dust, warped parallax; warm harmonic architecture, amber and copper light planes, stacked chord-like cliffs, glowing terraces, slow harmonic color changes. Energy level 0.75; camera movement should feel continuous from the previous segment but with a clear new phrase. No humans, no instruments, no UI, no subtitles."
+    },
+    {
+      "index": 14,
+      "start": 130.0,
+      "end": 140.0,
+      "section": "modulation_spiral",
+      "top_slots": [
+        "granular_texture",
+        "tension_chords"
+      ],
+      "avg_weights": {
+        "tension_chords": 0.255143,
+        "glassy_arps": 0.249813,
+        "broken_beat": 0.23655,
+        "granular_texture": 0.258494
+      },
+      "promptText": "Cinematic dynamic landscape, strong camera movement, photoreal high detail, no people, no logos, no readable text, no captions. Segment 14 of an 18-part three-minute audiovisual piece. Section: Modulation Spiral. Scene: storm of harmonic light, fog, crystal trails, and percussive terrain pulses, camera rotates and dives through layered mountain space. Dominant visual systems: granular tape atmosphere, fog layers, film grain, analog color bleed, drifting dust, warped parallax; warm harmonic architecture, amber and copper light planes, stacked chord-like cliffs, glowing terraces, slow harmonic color changes. Energy level 0.84; camera movement should feel continuous from the previous segment but with a clear new phrase. No humans, no instruments, no UI, no subtitles."
+    },
+    {
+      "index": 15,
+      "start": 140.0,
+      "end": 150.0,
+      "section": "modulation_spiral",
+      "top_slots": [
+        "granular_texture",
+        "tension_chords"
+      ],
+      "avg_weights": {
+        "tension_chords": 0.257148,
+        "glassy_arps": 0.24937,
+        "broken_beat": 0.234593,
+        "granular_texture": 0.25889
+      },
+      "promptText": "Cinematic dynamic landscape, strong camera movement, photoreal high detail, no people, no logos, no readable text, no captions. Segment 15 of an 18-part three-minute audiovisual piece. Section: Modulation Spiral. Scene: storm of harmonic light, fog, crystal trails, and percussive terrain pulses, camera rotates and dives through layered mountain space. Dominant visual systems: granular tape atmosphere, fog layers, film grain, analog color bleed, drifting dust, warped parallax; warm harmonic architecture, amber and copper light planes, stacked chord-like cliffs, glowing terraces, slow harmonic color changes. Energy level 0.92; camera movement should feel continuous from the previous segment but with a clear new phrase. No humans, no instruments, no UI, no subtitles."
+    },
+    {
+      "index": 16,
+      "start": 150.0,
+      "end": 160.0,
+      "section": "final_peak",
+      "top_slots": [
+        "tension_chords",
+        "glassy_arps"
+      ],
+      "avg_weights": {
+        "tension_chords": 0.296344,
+        "glassy_arps": 0.262251,
+        "broken_beat": 0.237158,
+        "granular_texture": 0.204247
+      },
+      "promptText": "Cinematic dynamic landscape, strong camera movement, photoreal high detail, no people, no logos, no readable text, no captions. Segment 16 of an 18-part three-minute audiovisual piece. Section: Final Peak. Scene: largest reveal of the valley, radiant harmonic architecture and kinetic crystal lines, sweeping camera rise into sunset. Dominant visual systems: warm harmonic architecture, amber and copper light planes, stacked chord-like cliffs, glowing terraces, slow harmonic color changes; crystalline arpeggio energy, prismatic ice rivers, thin light trails, fast ascending reflective patterns, clean kinetic details. Energy level 0.92; camera movement should feel continuous from the previous segment but with a clear new phrase. No humans, no instruments, no UI, no subtitles."
+    },
+    {
+      "index": 17,
+      "start": 160.0,
+      "end": 170.0,
+      "section": "final_peak",
+      "top_slots": [
+        "tension_chords",
+        "glassy_arps"
+      ],
+      "avg_weights": {
+        "tension_chords": 0.293322,
+        "glassy_arps": 0.25998,
+        "broken_beat": 0.234692,
+        "granular_texture": 0.212007
+      },
+      "promptText": "Cinematic dynamic landscape, strong camera movement, photoreal high detail, no people, no logos, no readable text, no captions. Segment 17 of an 18-part three-minute audiovisual piece. Section: Final Peak. Scene: largest reveal of the valley, radiant harmonic architecture and kinetic crystal lines, sweeping camera rise into sunset. Dominant visual systems: warm harmonic architecture, amber and copper light planes, stacked chord-like cliffs, glowing terraces, slow harmonic color changes; crystalline arpeggio energy, prismatic ice rivers, thin light trails, fast ascending reflective patterns, clean kinetic details. Energy level 0.98; camera movement should feel continuous from the previous segment but with a clear new phrase. No humans, no instruments, no UI, no subtitles."
+    },
+    {
+      "index": 18,
+      "start": 170.0,
+      "end": 180.0,
+      "section": "outro",
+      "top_slots": [
+        "granular_texture",
+        "tension_chords"
+      ],
+      "avg_weights": {
+        "tension_chords": 0.343044,
+        "glassy_arps": 0.164378,
+        "broken_beat": 0.124489,
+        "granular_texture": 0.368089
+      },
+      "promptText": "Cinematic dynamic landscape, strong camera movement, photoreal high detail, no people, no logos, no readable text, no captions. Segment 18 of an 18-part three-minute audiovisual piece. Section: Outro. Scene: camera leaves the valley into fading fog and warm residual light, harmonic structures dissolve into granular mist. Dominant visual systems: granular tape atmosphere, fog layers, film grain, analog color bleed, drifting dust, warped parallax; warm harmonic architecture, amber and copper light planes, stacked chord-like cliffs, glowing terraces, slow harmonic color changes. Energy level 0.23; camera movement should feel continuous from the previous segment but with a clear new phrase. No humans, no instruments, no UI, no subtitles."
+    }
+  ]
+}

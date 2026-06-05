@@ -176,6 +176,18 @@ for real-time performance, parameter modulation, and offline loop export.
 - [x] Composite the four Aleph videos with the saved modulation data.
 - [x] Attach the 10 second Magenta WAV to the video composite.
 
+### 12. Three Minute Longform Test
+
+- [x] Add intro-to-outro arrangement sections for an approximately 3 minute
+  version.
+- [x] Generate evolving prompt modulation that intensifies toward the second
+  half.
+- [x] Render one continuous 180 second Magenta WAV from start to finish.
+- [x] Save longform modulation values and 18 Runway segment prompts.
+- [x] Generate 18 segmented Runway landscape videos.
+- [x] Assemble the segmented videos with the continuous Magenta WAV.
+- [x] Verify final duration, video stream, audio stream, and non-silence.
+
 ## First Target User Flow
 
 1. Launch the sequencer app.

@@ -1,0 +1,99 @@
+{
+  "title": "Three Minute Polyrhythm Prompt Modulation",
+  "bpm": 104,
+  "duration_seconds": 180.0,
+  "fps": 25,
+  "segment_seconds": 10.0,
+  "base_runway_rules": "Cinematic dynamic landscape, strong camera movement, photoreal high detail, no people, no logos, no readable text, no captions.",
+  "slots": [
+    {
+      "id": "tension_chords",
+      "label": "Tension chords",
+      "magenta_prompt": "evolving complex jazzy tension chords, warm electric piano, altered dominants, chromatic voice leading, suspended ninths, sharp elevens, thirteenths, deep harmonic bass foundation",
+      "visual_language": "warm harmonic architecture, amber and copper light planes, stacked chord-like cliffs, glowing terraces, slow harmonic color changes"
+    },
+    {
+      "id": "glassy_arps",
+      "label": "Glassy arpeggios",
+      "magenta_prompt": "fast glassy arpeggio figures, crystalline mallets, syncopated upper-register patterns, bright modal runs, shimmering rhythmic motion",
+      "visual_language": "crystalline arpeggio energy, prismatic ice rivers, thin light trails, fast ascending reflective patterns, clean kinetic details"
+    },
+    {
+      "id": "broken_beat",
+      "label": "Broken beat drums",
+      "magenta_prompt": "dry broken beat drums, tight room, crisp rim clicks, syncopated jazz break, fractured kick patterns, late-night club pulse",
+      "visual_language": "syncopated terrain cuts, punchy camera accelerations, rhythmic shadow blocks, tight contrast, percussive edits"
+    },
+    {
+      "id": "granular_texture",
+      "label": "Granular texture",
+      "magenta_prompt": "granular tape texture and vinyl air, misty noise bed, soft degraded ambience, analog dust, drifting harmonic fog",
+      "visual_language": "granular tape atmosphere, fog layers, film grain, analog color bleed, drifting dust, warped parallax"
+    }
+  ],
+  "sections": [
+    {
+      "id": "intro",
+      "label": "Intro",
+      "start": 0.0,
+      "end": 24.0,
+      "energy": [0.12, 0.28],
+      "focus": {"tension_chords": 0.32, "glassy_arps": 0.08, "broken_beat": 0.02, "granular_texture": 0.58},
+      "runway_scene": "pre-dawn mountain valley above cloud, very slow drone push, distant water and fog, warm harmonic light barely appearing"
+    },
+    {
+      "id": "pulse_entry",
+      "label": "Pulse Entry",
+      "start": 24.0,
+      "end": 52.0,
+      "energy": [0.28, 0.48],
+      "focus": {"tension_chords": 0.36, "glassy_arps": 0.24, "broken_beat": 0.16, "granular_texture": 0.24},
+      "runway_scene": "camera descends into the valley, glassy streams and reflective ridges appear, first rhythmic cuts in terrain and shadow"
+    },
+    {
+      "id": "harmony_expansion",
+      "label": "Harmony Expansion",
+      "start": 52.0,
+      "end": 84.0,
+      "energy": [0.42, 0.66],
+      "focus": {"tension_chords": 0.46, "glassy_arps": 0.28, "broken_beat": 0.14, "granular_texture": 0.12},
+      "runway_scene": "wide canyon flight, stacked terraces and glowing chord-like planes unfold, camera sweeps around cliffs and water"
+    },
+    {
+      "id": "first_peak",
+      "label": "First Peak",
+      "start": 84.0,
+      "end": 118.0,
+      "energy": [0.62, 0.82],
+      "focus": {"tension_chords": 0.26, "glassy_arps": 0.34, "broken_beat": 0.30, "granular_texture": 0.10},
+      "runway_scene": "fast drone rush through crystalline valley structures, rhythmic shadows and bright arpeggio trails cross the camera"
+    },
+    {
+      "id": "modulation_spiral",
+      "label": "Modulation Spiral",
+      "start": 118.0,
+      "end": 150.0,
+      "energy": [0.72, 0.94],
+      "focus": {"tension_chords": 0.22, "glassy_arps": 0.26, "broken_beat": 0.26, "granular_texture": 0.26},
+      "runway_scene": "storm of harmonic light, fog, crystal trails, and percussive terrain pulses, camera rotates and dives through layered mountain space"
+    },
+    {
+      "id": "final_peak",
+      "label": "Final Peak",
+      "start": 150.0,
+      "end": 170.0,
+      "energy": [0.90, 1.00],
+      "focus": {"tension_chords": 0.34, "glassy_arps": 0.30, "broken_beat": 0.26, "granular_texture": 0.10},
+      "runway_scene": "largest reveal of the valley, radiant harmonic architecture and kinetic crystal lines, sweeping camera rise into sunset"
+    },
+    {
+      "id": "outro",
+      "label": "Outro",
+      "start": 170.0,
+      "end": 180.0,
+      "energy": [0.34, 0.12],
+      "focus": {"tension_chords": 0.42, "glassy_arps": 0.08, "broken_beat": 0.02, "granular_texture": 0.48},
+      "runway_scene": "camera leaves the valley into fading fog and warm residual light, harmonic structures dissolve into granular mist"
+    }
+  ]
+}
