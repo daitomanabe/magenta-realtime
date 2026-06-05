@@ -1,0 +1,7520 @@
+{
+  "schema": "mrt-clear-prompt-midi-test-v1",
+  "metadata": {
+    "title": "Clear Prompt MIDI Diagnostic",
+    "fps": 25,
+    "duration_seconds": 8.0,
+    "frame_count": 200,
+    "bpm": 120.0,
+    "time_signature": "4/4",
+    "midi_source": "assets/Am-Minor Prog 01 (i-VI-v-iv).mid",
+    "midi_track_name": "Minor Prog 01 (i-VI-v-iv)",
+    "midi_format": 0,
+    "midi_tracks": 1,
+    "midi_ppq": 96,
+    "midi_end_tick": 1536,
+    "test_design": "four 2-second one-hot prompt regions aligned to the MIDI i-VI-v-iv chord changes, with 0.20-second transitions"
+  },
+  "slots": [
+    {
+      "id": "solo_piano_chords",
+      "label": "Solo Piano Chords",
+      "magenta_prompt": "solo acoustic grand piano only, dry close microphone, sustained minor jazz chord voicings, no drums, no bass, no synths",
+      "controls": {
+        "temperature": 0.82,
+        "top_k": 36,
+        "cfg_musiccoca": 6.2,
+        "cfg_notes": 5.8,
+        "cfg_drums": 0.0
+      }
+    },
+    {
+      "id": "chiptune_square_arps",
+      "label": "Chiptune Square Arps",
+      "magenta_prompt": "8-bit chiptune square wave lead, bright retro video game synth, rapid staccato arpeggios, sharp digital beeps, no drums",
+      "controls": {
+        "temperature": 1.32,
+        "top_k": 176,
+        "cfg_musiccoca": 7.0,
+        "cfg_notes": 3.6,
+        "cfg_drums": 0.0
+      }
+    },
+    {
+      "id": "distorted_808_drums",
+      "label": "Distorted 808 Drums",
+      "magenta_prompt": "heavy distorted 808 sub bass with punchy trap drums, loud kick and snare, aggressive electronic club rhythm",
+      "controls": {
+        "temperature": 1.18,
+        "top_k": 144,
+        "cfg_musiccoca": 6.6,
+        "cfg_notes": 4.8,
+        "cfg_drums": 6.2
+      }
+    },
+    {
+      "id": "choir_string_drone",
+      "label": "Choir String Drone",
+      "magenta_prompt": "wide cinematic string orchestra and choir pad, slow ambient drone, huge reverb, soft tape noise, no percussion",
+      "controls": {
+        "temperature": 0.74,
+        "top_k": 58,
+        "cfg_musiccoca": 6.0,
+        "cfg_notes": 5.6,
+        "cfg_drums": 0.0
+      }
+    }
+  ],
+  "midi_notes": [
+    {
+      "start_tick": 0,
+      "end_tick": 384,
+      "start_seconds": 0.0,
+      "end_seconds": 2.0,
+      "pitch": 45,
+      "note_name": "A2",
+      "velocity": 101,
+      "channel": 0
+    },
+    {
+      "start_tick": 0,
+      "end_tick": 384,
+      "start_seconds": 0.0,
+      "end_seconds": 2.0,
+      "pitch": 55,
+      "note_name": "G3",
+      "velocity": 101,
+      "channel": 0
+    },
+    {
+      "start_tick": 0,
+      "end_tick": 384,
+      "start_seconds": 0.0,
+      "end_seconds": 2.0,
+      "pitch": 60,
+      "note_name": "C4",
+      "velocity": 101,
+      "channel": 0
+    },
+    {
+      "start_tick": 0,
+      "end_tick": 384,
+      "start_seconds": 0.0,
+      "end_seconds": 2.0,
+      "pitch": 62,
+      "note_name": "D4",
+      "velocity": 101,
+      "channel": 0
+    },
+    {
+      "start_tick": 0,
+      "end_tick": 384,
+      "start_seconds": 0.0,
+      "end_seconds": 2.0,
+      "pitch": 64,
+      "note_name": "E4",
+      "velocity": 101,
+      "channel": 0
+    },
+    {
+      "start_tick": 384,
+      "end_tick": 768,
+      "start_seconds": 2.0,
+      "end_seconds": 4.0,
+      "pitch": 41,
+      "note_name": "F2",
+      "velocity": 101,
+      "channel": 0
+    },
+    {
+      "start_tick": 384,
+      "end_tick": 768,
+      "start_seconds": 2.0,
+      "end_seconds": 4.0,
+      "pitch": 55,
+      "note_name": "G3",
+      "velocity": 101,
+      "channel": 0
+    },
+    {
+      "start_tick": 384,
+      "end_tick": 768,
+      "start_seconds": 2.0,
+      "end_seconds": 4.0,
+      "pitch": 59,
+      "note_name": "B3",
+      "velocity": 101,
+      "channel": 0
+    },
+    {
+      "start_tick": 384,
+      "end_tick": 768,
+      "start_seconds": 2.0,
+      "end_seconds": 4.0,
+      "pitch": 60,
+      "note_name": "C4",
+      "velocity": 101,
+      "channel": 0
+    },
+    {
+      "start_tick": 384,
+      "end_tick": 768,
+      "start_seconds": 2.0,
+      "end_seconds": 4.0,
+      "pitch": 62,
+      "note_name": "D4",
+      "velocity": 101,
+      "channel": 0
+    },
+    {
+      "start_tick": 768,
+      "end_tick": 1152,
+      "start_seconds": 4.0,
+      "end_seconds": 6.0,
+      "pitch": 40,
+      "note_name": "E2",
+      "velocity": 101,
+      "channel": 0
+    },
+    {
+      "start_tick": 768,
+      "end_tick": 1152,
+      "start_seconds": 4.0,
+      "end_seconds": 6.0,
+      "pitch": 55,
+      "note_name": "G3",
+      "velocity": 101,
+      "channel": 0
+    },
+    {
+      "start_tick": 768,
+      "end_tick": 1152,
+      "start_seconds": 4.0,
+      "end_seconds": 6.0,
+      "pitch": 57,
+      "note_name": "A3",
+      "velocity": 101,
+      "channel": 0
+    },
+    {
+      "start_tick": 768,
+      "end_tick": 1152,
+      "start_seconds": 4.0,
+      "end_seconds": 6.0,
+      "pitch": 59,
+      "note_name": "B3",
+      "velocity": 101,
+      "channel": 0
+    },
+    {
+      "start_tick": 768,
+      "end_tick": 1152,
+      "start_seconds": 4.0,
+      "end_seconds": 6.0,
+      "pitch": 62,
+      "note_name": "D4",
+      "velocity": 101,
+      "channel": 0
+    },
+    {
+      "start_tick": 1152,
+      "end_tick": 1536,
+      "start_seconds": 6.0,
+      "end_seconds": 8.0,
+      "pitch": 38,
+      "note_name": "D2",
+      "velocity": 101,
+      "channel": 0
+    },
+    {
+      "start_tick": 1152,
+      "end_tick": 1536,
+      "start_seconds": 6.0,
+      "end_seconds": 8.0,
+      "pitch": 53,
+      "note_name": "F3",
+      "velocity": 101,
+      "channel": 0
+    },
+    {
+      "start_tick": 1152,
+      "end_tick": 1536,
+      "start_seconds": 6.0,
+      "end_seconds": 8.0,
+      "pitch": 57,
+      "note_name": "A3",
+      "velocity": 101,
+      "channel": 0
+    },
+    {
+      "start_tick": 1152,
+      "end_tick": 1536,
+      "start_seconds": 6.0,
+      "end_seconds": 8.0,
+      "pitch": 60,
+      "note_name": "C4",
+      "velocity": 101,
+      "channel": 0
+    },
+    {
+      "start_tick": 1152,
+      "end_tick": 1536,
+      "start_seconds": 6.0,
+      "end_seconds": 8.0,
+      "pitch": 64,
+      "note_name": "E4",
+      "velocity": 101,
+      "channel": 0
+    }
+  ],
+  "frames": [
+    {
+      "frame": 0,
+      "time_seconds": 0.0,
+      "beat_position": 0.0,
+      "bar_position": 0.0,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "onset_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ]
+    },
+    {
+      "frame": 1,
+      "time_seconds": 0.04,
+      "beat_position": 0.08,
+      "bar_position": 0.02,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 2,
+      "time_seconds": 0.08,
+      "beat_position": 0.16,
+      "bar_position": 0.04,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 3,
+      "time_seconds": 0.12,
+      "beat_position": 0.24,
+      "bar_position": 0.06,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 4,
+      "time_seconds": 0.16,
+      "beat_position": 0.32,
+      "bar_position": 0.08,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 5,
+      "time_seconds": 0.2,
+      "beat_position": 0.4,
+      "bar_position": 0.1,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 6,
+      "time_seconds": 0.24,
+      "beat_position": 0.48,
+      "bar_position": 0.12,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 7,
+      "time_seconds": 0.28,
+      "beat_position": 0.56,
+      "bar_position": 0.14,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 8,
+      "time_seconds": 0.32,
+      "beat_position": 0.64,
+      "bar_position": 0.16,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 9,
+      "time_seconds": 0.36,
+      "beat_position": 0.72,
+      "bar_position": 0.18,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 10,
+      "time_seconds": 0.4,
+      "beat_position": 0.8,
+      "bar_position": 0.2,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 11,
+      "time_seconds": 0.44,
+      "beat_position": 0.88,
+      "bar_position": 0.22,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 12,
+      "time_seconds": 0.48,
+      "beat_position": 0.96,
+      "bar_position": 0.24,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 13,
+      "time_seconds": 0.52,
+      "beat_position": 1.04,
+      "bar_position": 0.26,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 14,
+      "time_seconds": 0.56,
+      "beat_position": 1.12,
+      "bar_position": 0.28,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 15,
+      "time_seconds": 0.6,
+      "beat_position": 1.2,
+      "bar_position": 0.3,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 16,
+      "time_seconds": 0.64,
+      "beat_position": 1.28,
+      "bar_position": 0.32,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 17,
+      "time_seconds": 0.68,
+      "beat_position": 1.36,
+      "bar_position": 0.34,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 18,
+      "time_seconds": 0.72,
+      "beat_position": 1.44,
+      "bar_position": 0.36,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 19,
+      "time_seconds": 0.76,
+      "beat_position": 1.52,
+      "bar_position": 0.38,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 20,
+      "time_seconds": 0.8,
+      "beat_position": 1.6,
+      "bar_position": 0.4,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 21,
+      "time_seconds": 0.84,
+      "beat_position": 1.68,
+      "bar_position": 0.42,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 22,
+      "time_seconds": 0.88,
+      "beat_position": 1.76,
+      "bar_position": 0.44,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 23,
+      "time_seconds": 0.92,
+      "beat_position": 1.84,
+      "bar_position": 0.46,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 24,
+      "time_seconds": 0.96,
+      "beat_position": 1.92,
+      "bar_position": 0.48,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 25,
+      "time_seconds": 1.0,
+      "beat_position": 2.0,
+      "bar_position": 0.5,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 26,
+      "time_seconds": 1.04,
+      "beat_position": 2.08,
+      "bar_position": 0.52,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 27,
+      "time_seconds": 1.08,
+      "beat_position": 2.16,
+      "bar_position": 0.54,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 28,
+      "time_seconds": 1.12,
+      "beat_position": 2.24,
+      "bar_position": 0.56,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 29,
+      "time_seconds": 1.16,
+      "beat_position": 2.32,
+      "bar_position": 0.58,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 30,
+      "time_seconds": 1.2,
+      "beat_position": 2.4,
+      "bar_position": 0.6,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 31,
+      "time_seconds": 1.24,
+      "beat_position": 2.48,
+      "bar_position": 0.62,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 32,
+      "time_seconds": 1.28,
+      "beat_position": 2.56,
+      "bar_position": 0.64,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 33,
+      "time_seconds": 1.32,
+      "beat_position": 2.64,
+      "bar_position": 0.66,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 34,
+      "time_seconds": 1.36,
+      "beat_position": 2.72,
+      "bar_position": 0.68,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 35,
+      "time_seconds": 1.4,
+      "beat_position": 2.8,
+      "bar_position": 0.7,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 36,
+      "time_seconds": 1.44,
+      "beat_position": 2.88,
+      "bar_position": 0.72,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 37,
+      "time_seconds": 1.48,
+      "beat_position": 2.96,
+      "bar_position": 0.74,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 38,
+      "time_seconds": 1.52,
+      "beat_position": 3.04,
+      "bar_position": 0.76,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 39,
+      "time_seconds": 1.56,
+      "beat_position": 3.12,
+      "bar_position": 0.78,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 40,
+      "time_seconds": 1.6,
+      "beat_position": 3.2,
+      "bar_position": 0.8,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 41,
+      "time_seconds": 1.64,
+      "beat_position": 3.28,
+      "bar_position": 0.82,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 42,
+      "time_seconds": 1.68,
+      "beat_position": 3.36,
+      "bar_position": 0.84,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 43,
+      "time_seconds": 1.72,
+      "beat_position": 3.44,
+      "bar_position": 0.86,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 44,
+      "time_seconds": 1.76,
+      "beat_position": 3.52,
+      "bar_position": 0.88,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 45,
+      "time_seconds": 1.8,
+      "beat_position": 3.6,
+      "bar_position": 0.9,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 1.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 46,
+      "time_seconds": 1.84,
+      "beat_position": 3.68,
+      "bar_position": 0.92,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 0.8,
+        "chiptune_square_arps": 0.2,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.8,
+        0.2,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 47,
+      "time_seconds": 1.88,
+      "beat_position": 3.76,
+      "bar_position": 0.94,
+      "chord_label": "Am11",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 0.6,
+        "chiptune_square_arps": 0.4,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.6,
+        0.4,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 48,
+      "time_seconds": 1.92,
+      "beat_position": 3.84,
+      "bar_position": 0.96,
+      "chord_label": "Am11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.4,
+        "chiptune_square_arps": 0.6,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.4,
+        0.6,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 49,
+      "time_seconds": 1.96,
+      "beat_position": 3.92,
+      "bar_position": 0.98,
+      "chord_label": "Am11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.2,
+        "chiptune_square_arps": 0.8,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.2,
+        0.8,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        45,
+        55,
+        60,
+        62,
+        64
+      ],
+      "active_note_names": [
+        "A2",
+        "G3",
+        "C4",
+        "D4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 50,
+      "time_seconds": 2.0,
+      "beat_position": 4.0,
+      "bar_position": 1.0,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "onset_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ]
+    },
+    {
+      "frame": 51,
+      "time_seconds": 2.04,
+      "beat_position": 4.08,
+      "bar_position": 1.02,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 52,
+      "time_seconds": 2.08,
+      "beat_position": 4.16,
+      "bar_position": 1.04,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 53,
+      "time_seconds": 2.12,
+      "beat_position": 4.24,
+      "bar_position": 1.06,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 54,
+      "time_seconds": 2.16,
+      "beat_position": 4.32,
+      "bar_position": 1.08,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 55,
+      "time_seconds": 2.2,
+      "beat_position": 4.4,
+      "bar_position": 1.1,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 56,
+      "time_seconds": 2.24,
+      "beat_position": 4.48,
+      "bar_position": 1.12,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 57,
+      "time_seconds": 2.28,
+      "beat_position": 4.56,
+      "bar_position": 1.14,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 58,
+      "time_seconds": 2.32,
+      "beat_position": 4.64,
+      "bar_position": 1.16,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 59,
+      "time_seconds": 2.36,
+      "beat_position": 4.72,
+      "bar_position": 1.18,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 60,
+      "time_seconds": 2.4,
+      "beat_position": 4.8,
+      "bar_position": 1.2,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 61,
+      "time_seconds": 2.44,
+      "beat_position": 4.88,
+      "bar_position": 1.22,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 62,
+      "time_seconds": 2.48,
+      "beat_position": 4.96,
+      "bar_position": 1.24,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 63,
+      "time_seconds": 2.52,
+      "beat_position": 5.04,
+      "bar_position": 1.26,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 64,
+      "time_seconds": 2.56,
+      "beat_position": 5.12,
+      "bar_position": 1.28,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 65,
+      "time_seconds": 2.6,
+      "beat_position": 5.2,
+      "bar_position": 1.3,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 66,
+      "time_seconds": 2.64,
+      "beat_position": 5.28,
+      "bar_position": 1.32,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 67,
+      "time_seconds": 2.68,
+      "beat_position": 5.36,
+      "bar_position": 1.34,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 68,
+      "time_seconds": 2.72,
+      "beat_position": 5.44,
+      "bar_position": 1.36,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 69,
+      "time_seconds": 2.76,
+      "beat_position": 5.52,
+      "bar_position": 1.38,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 70,
+      "time_seconds": 2.8,
+      "beat_position": 5.6,
+      "bar_position": 1.4,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 71,
+      "time_seconds": 2.84,
+      "beat_position": 5.68,
+      "bar_position": 1.42,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 72,
+      "time_seconds": 2.88,
+      "beat_position": 5.76,
+      "bar_position": 1.44,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 73,
+      "time_seconds": 2.92,
+      "beat_position": 5.84,
+      "bar_position": 1.46,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 74,
+      "time_seconds": 2.96,
+      "beat_position": 5.92,
+      "bar_position": 1.48,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 75,
+      "time_seconds": 3.0,
+      "beat_position": 6.0,
+      "bar_position": 1.5,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 76,
+      "time_seconds": 3.04,
+      "beat_position": 6.08,
+      "bar_position": 1.52,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 77,
+      "time_seconds": 3.08,
+      "beat_position": 6.16,
+      "bar_position": 1.54,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 78,
+      "time_seconds": 3.12,
+      "beat_position": 6.24,
+      "bar_position": 1.56,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 79,
+      "time_seconds": 3.16,
+      "beat_position": 6.32,
+      "bar_position": 1.58,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 80,
+      "time_seconds": 3.2,
+      "beat_position": 6.4,
+      "bar_position": 1.6,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 81,
+      "time_seconds": 3.24,
+      "beat_position": 6.48,
+      "bar_position": 1.62,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 82,
+      "time_seconds": 3.28,
+      "beat_position": 6.56,
+      "bar_position": 1.64,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 83,
+      "time_seconds": 3.32,
+      "beat_position": 6.64,
+      "bar_position": 1.66,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 84,
+      "time_seconds": 3.36,
+      "beat_position": 6.72,
+      "bar_position": 1.68,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 85,
+      "time_seconds": 3.4,
+      "beat_position": 6.8,
+      "bar_position": 1.7,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 86,
+      "time_seconds": 3.44,
+      "beat_position": 6.88,
+      "bar_position": 1.72,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 87,
+      "time_seconds": 3.48,
+      "beat_position": 6.96,
+      "bar_position": 1.74,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 88,
+      "time_seconds": 3.52,
+      "beat_position": 7.04,
+      "bar_position": 1.76,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 89,
+      "time_seconds": 3.56,
+      "beat_position": 7.12,
+      "bar_position": 1.78,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 90,
+      "time_seconds": 3.6,
+      "beat_position": 7.2,
+      "bar_position": 1.8,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 91,
+      "time_seconds": 3.64,
+      "beat_position": 7.28,
+      "bar_position": 1.82,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 92,
+      "time_seconds": 3.68,
+      "beat_position": 7.36,
+      "bar_position": 1.84,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 93,
+      "time_seconds": 3.72,
+      "beat_position": 7.44,
+      "bar_position": 1.86,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 94,
+      "time_seconds": 3.76,
+      "beat_position": 7.52,
+      "bar_position": 1.88,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 95,
+      "time_seconds": 3.8,
+      "beat_position": 7.6,
+      "bar_position": 1.9,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 1.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 96,
+      "time_seconds": 3.84,
+      "beat_position": 7.68,
+      "bar_position": 1.92,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.8,
+        "distorted_808_drums": 0.2,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.8,
+        0.2,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 97,
+      "time_seconds": 3.88,
+      "beat_position": 7.76,
+      "bar_position": 1.94,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "chiptune_square_arps",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.6,
+        "distorted_808_drums": 0.4,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.6,
+        0.4,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 98,
+      "time_seconds": 3.92,
+      "beat_position": 7.84,
+      "bar_position": 1.96,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.4,
+        "distorted_808_drums": 0.6,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.4,
+        0.6,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 99,
+      "time_seconds": 3.96,
+      "beat_position": 7.92,
+      "bar_position": 1.98,
+      "chord_label": "F6/9#11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.2,
+        "distorted_808_drums": 0.8,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.2,
+        0.8,
+        0.0
+      ],
+      "active_midi_notes": [
+        41,
+        55,
+        59,
+        60,
+        62
+      ],
+      "active_note_names": [
+        "F2",
+        "G3",
+        "B3",
+        "C4",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 100,
+      "time_seconds": 4.0,
+      "beat_position": 8.0,
+      "bar_position": 2.0,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "onset_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ]
+    },
+    {
+      "frame": 101,
+      "time_seconds": 4.04,
+      "beat_position": 8.08,
+      "bar_position": 2.02,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 102,
+      "time_seconds": 4.08,
+      "beat_position": 8.16,
+      "bar_position": 2.04,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 103,
+      "time_seconds": 4.12,
+      "beat_position": 8.24,
+      "bar_position": 2.06,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 104,
+      "time_seconds": 4.16,
+      "beat_position": 8.32,
+      "bar_position": 2.08,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 105,
+      "time_seconds": 4.2,
+      "beat_position": 8.4,
+      "bar_position": 2.1,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 106,
+      "time_seconds": 4.24,
+      "beat_position": 8.48,
+      "bar_position": 2.12,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 107,
+      "time_seconds": 4.28,
+      "beat_position": 8.56,
+      "bar_position": 2.14,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 108,
+      "time_seconds": 4.32,
+      "beat_position": 8.64,
+      "bar_position": 2.16,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 109,
+      "time_seconds": 4.36,
+      "beat_position": 8.72,
+      "bar_position": 2.18,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 110,
+      "time_seconds": 4.4,
+      "beat_position": 8.8,
+      "bar_position": 2.2,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 111,
+      "time_seconds": 4.44,
+      "beat_position": 8.88,
+      "bar_position": 2.22,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 112,
+      "time_seconds": 4.48,
+      "beat_position": 8.96,
+      "bar_position": 2.24,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 113,
+      "time_seconds": 4.52,
+      "beat_position": 9.04,
+      "bar_position": 2.26,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 114,
+      "time_seconds": 4.56,
+      "beat_position": 9.12,
+      "bar_position": 2.28,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 115,
+      "time_seconds": 4.6,
+      "beat_position": 9.2,
+      "bar_position": 2.3,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 116,
+      "time_seconds": 4.64,
+      "beat_position": 9.28,
+      "bar_position": 2.32,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 117,
+      "time_seconds": 4.68,
+      "beat_position": 9.36,
+      "bar_position": 2.34,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 118,
+      "time_seconds": 4.72,
+      "beat_position": 9.44,
+      "bar_position": 2.36,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 119,
+      "time_seconds": 4.76,
+      "beat_position": 9.52,
+      "bar_position": 2.38,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 120,
+      "time_seconds": 4.8,
+      "beat_position": 9.6,
+      "bar_position": 2.4,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 121,
+      "time_seconds": 4.84,
+      "beat_position": 9.68,
+      "bar_position": 2.42,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 122,
+      "time_seconds": 4.88,
+      "beat_position": 9.76,
+      "bar_position": 2.44,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 123,
+      "time_seconds": 4.92,
+      "beat_position": 9.84,
+      "bar_position": 2.46,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 124,
+      "time_seconds": 4.96,
+      "beat_position": 9.92,
+      "bar_position": 2.48,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 125,
+      "time_seconds": 5.0,
+      "beat_position": 10.0,
+      "bar_position": 2.5,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 126,
+      "time_seconds": 5.04,
+      "beat_position": 10.08,
+      "bar_position": 2.52,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 127,
+      "time_seconds": 5.08,
+      "beat_position": 10.16,
+      "bar_position": 2.54,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 128,
+      "time_seconds": 5.12,
+      "beat_position": 10.24,
+      "bar_position": 2.56,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 129,
+      "time_seconds": 5.16,
+      "beat_position": 10.32,
+      "bar_position": 2.58,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 130,
+      "time_seconds": 5.2,
+      "beat_position": 10.4,
+      "bar_position": 2.6,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 131,
+      "time_seconds": 5.24,
+      "beat_position": 10.48,
+      "bar_position": 2.62,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 132,
+      "time_seconds": 5.28,
+      "beat_position": 10.56,
+      "bar_position": 2.64,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 133,
+      "time_seconds": 5.32,
+      "beat_position": 10.64,
+      "bar_position": 2.66,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 134,
+      "time_seconds": 5.36,
+      "beat_position": 10.72,
+      "bar_position": 2.68,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 135,
+      "time_seconds": 5.4,
+      "beat_position": 10.8,
+      "bar_position": 2.7,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 136,
+      "time_seconds": 5.44,
+      "beat_position": 10.88,
+      "bar_position": 2.72,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 137,
+      "time_seconds": 5.48,
+      "beat_position": 10.96,
+      "bar_position": 2.74,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 138,
+      "time_seconds": 5.52,
+      "beat_position": 11.04,
+      "bar_position": 2.76,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 139,
+      "time_seconds": 5.56,
+      "beat_position": 11.12,
+      "bar_position": 2.78,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 140,
+      "time_seconds": 5.6,
+      "beat_position": 11.2,
+      "bar_position": 2.8,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 141,
+      "time_seconds": 5.64,
+      "beat_position": 11.28,
+      "bar_position": 2.82,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 142,
+      "time_seconds": 5.68,
+      "beat_position": 11.36,
+      "bar_position": 2.84,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 143,
+      "time_seconds": 5.72,
+      "beat_position": 11.44,
+      "bar_position": 2.86,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 144,
+      "time_seconds": 5.76,
+      "beat_position": 11.52,
+      "bar_position": 2.88,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 145,
+      "time_seconds": 5.8,
+      "beat_position": 11.6,
+      "bar_position": 2.9,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 1.0,
+        "choir_string_drone": 0.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 146,
+      "time_seconds": 5.84,
+      "beat_position": 11.68,
+      "bar_position": 2.92,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.8,
+        "choir_string_drone": 0.2
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.8,
+        0.2
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 147,
+      "time_seconds": 5.88,
+      "beat_position": 11.76,
+      "bar_position": 2.94,
+      "chord_label": "Em11",
+      "dominant_slot": "distorted_808_drums",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.6,
+        "choir_string_drone": 0.4
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.6,
+        0.4
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 148,
+      "time_seconds": 5.92,
+      "beat_position": 11.84,
+      "bar_position": 2.96,
+      "chord_label": "Em11",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.4,
+        "choir_string_drone": 0.6
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.4,
+        0.6
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 149,
+      "time_seconds": 5.96,
+      "beat_position": 11.92,
+      "bar_position": 2.98,
+      "chord_label": "Em11",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.2,
+        "choir_string_drone": 0.8
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.2,
+        0.8
+      ],
+      "active_midi_notes": [
+        40,
+        55,
+        57,
+        59,
+        62
+      ],
+      "active_note_names": [
+        "E2",
+        "G3",
+        "A3",
+        "B3",
+        "D4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 150,
+      "time_seconds": 6.0,
+      "beat_position": 12.0,
+      "bar_position": 3.0,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "onset_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ]
+    },
+    {
+      "frame": 151,
+      "time_seconds": 6.04,
+      "beat_position": 12.08,
+      "bar_position": 3.02,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 152,
+      "time_seconds": 6.08,
+      "beat_position": 12.16,
+      "bar_position": 3.04,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 153,
+      "time_seconds": 6.12,
+      "beat_position": 12.24,
+      "bar_position": 3.06,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 154,
+      "time_seconds": 6.16,
+      "beat_position": 12.32,
+      "bar_position": 3.08,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 155,
+      "time_seconds": 6.2,
+      "beat_position": 12.4,
+      "bar_position": 3.1,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 156,
+      "time_seconds": 6.24,
+      "beat_position": 12.48,
+      "bar_position": 3.12,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 157,
+      "time_seconds": 6.28,
+      "beat_position": 12.56,
+      "bar_position": 3.14,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 158,
+      "time_seconds": 6.32,
+      "beat_position": 12.64,
+      "bar_position": 3.16,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 159,
+      "time_seconds": 6.36,
+      "beat_position": 12.72,
+      "bar_position": 3.18,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 160,
+      "time_seconds": 6.4,
+      "beat_position": 12.8,
+      "bar_position": 3.2,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 161,
+      "time_seconds": 6.44,
+      "beat_position": 12.88,
+      "bar_position": 3.22,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 162,
+      "time_seconds": 6.48,
+      "beat_position": 12.96,
+      "bar_position": 3.24,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 163,
+      "time_seconds": 6.52,
+      "beat_position": 13.04,
+      "bar_position": 3.26,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 164,
+      "time_seconds": 6.56,
+      "beat_position": 13.12,
+      "bar_position": 3.28,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 165,
+      "time_seconds": 6.6,
+      "beat_position": 13.2,
+      "bar_position": 3.3,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 166,
+      "time_seconds": 6.64,
+      "beat_position": 13.28,
+      "bar_position": 3.32,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 167,
+      "time_seconds": 6.68,
+      "beat_position": 13.36,
+      "bar_position": 3.34,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 168,
+      "time_seconds": 6.72,
+      "beat_position": 13.44,
+      "bar_position": 3.36,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 169,
+      "time_seconds": 6.76,
+      "beat_position": 13.52,
+      "bar_position": 3.38,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 170,
+      "time_seconds": 6.8,
+      "beat_position": 13.6,
+      "bar_position": 3.4,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 171,
+      "time_seconds": 6.84,
+      "beat_position": 13.68,
+      "bar_position": 3.42,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 172,
+      "time_seconds": 6.88,
+      "beat_position": 13.76,
+      "bar_position": 3.44,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 173,
+      "time_seconds": 6.92,
+      "beat_position": 13.84,
+      "bar_position": 3.46,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 174,
+      "time_seconds": 6.96,
+      "beat_position": 13.92,
+      "bar_position": 3.48,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 175,
+      "time_seconds": 7.0,
+      "beat_position": 14.0,
+      "bar_position": 3.5,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 176,
+      "time_seconds": 7.04,
+      "beat_position": 14.08,
+      "bar_position": 3.52,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 177,
+      "time_seconds": 7.08,
+      "beat_position": 14.16,
+      "bar_position": 3.54,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 178,
+      "time_seconds": 7.12,
+      "beat_position": 14.24,
+      "bar_position": 3.56,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 179,
+      "time_seconds": 7.16,
+      "beat_position": 14.32,
+      "bar_position": 3.58,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 180,
+      "time_seconds": 7.2,
+      "beat_position": 14.4,
+      "bar_position": 3.6,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 181,
+      "time_seconds": 7.24,
+      "beat_position": 14.48,
+      "bar_position": 3.62,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 182,
+      "time_seconds": 7.28,
+      "beat_position": 14.56,
+      "bar_position": 3.64,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 183,
+      "time_seconds": 7.32,
+      "beat_position": 14.64,
+      "bar_position": 3.66,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 184,
+      "time_seconds": 7.36,
+      "beat_position": 14.72,
+      "bar_position": 3.68,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 185,
+      "time_seconds": 7.4,
+      "beat_position": 14.8,
+      "bar_position": 3.7,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 186,
+      "time_seconds": 7.44,
+      "beat_position": 14.88,
+      "bar_position": 3.72,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 187,
+      "time_seconds": 7.48,
+      "beat_position": 14.96,
+      "bar_position": 3.74,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 188,
+      "time_seconds": 7.52,
+      "beat_position": 15.04,
+      "bar_position": 3.76,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 189,
+      "time_seconds": 7.56,
+      "beat_position": 15.12,
+      "bar_position": 3.78,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 190,
+      "time_seconds": 7.6,
+      "beat_position": 15.2,
+      "bar_position": 3.8,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 191,
+      "time_seconds": 7.64,
+      "beat_position": 15.28,
+      "bar_position": 3.82,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 192,
+      "time_seconds": 7.68,
+      "beat_position": 15.36,
+      "bar_position": 3.84,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 193,
+      "time_seconds": 7.72,
+      "beat_position": 15.44,
+      "bar_position": 3.86,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 194,
+      "time_seconds": 7.76,
+      "beat_position": 15.52,
+      "bar_position": 3.88,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 195,
+      "time_seconds": 7.8,
+      "beat_position": 15.6,
+      "bar_position": 3.9,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.0,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 1.0
+      },
+      "weights_array": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 196,
+      "time_seconds": 7.84,
+      "beat_position": 15.68,
+      "bar_position": 3.92,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.2,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.8
+      },
+      "weights_array": [
+        0.2,
+        0.0,
+        0.0,
+        0.8
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 197,
+      "time_seconds": 7.88,
+      "beat_position": 15.76,
+      "bar_position": 3.94,
+      "chord_label": "Dm9",
+      "dominant_slot": "choir_string_drone",
+      "weights": {
+        "solo_piano_chords": 0.4,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.6
+      },
+      "weights_array": [
+        0.4,
+        0.0,
+        0.0,
+        0.6
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 198,
+      "time_seconds": 7.92,
+      "beat_position": 15.84,
+      "bar_position": 3.96,
+      "chord_label": "Dm9",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 0.6,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.4
+      },
+      "weights_array": [
+        0.6,
+        0.0,
+        0.0,
+        0.4
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    },
+    {
+      "frame": 199,
+      "time_seconds": 7.96,
+      "beat_position": 15.92,
+      "bar_position": 3.98,
+      "chord_label": "Dm9",
+      "dominant_slot": "solo_piano_chords",
+      "weights": {
+        "solo_piano_chords": 0.8,
+        "chiptune_square_arps": 0.0,
+        "distorted_808_drums": 0.0,
+        "choir_string_drone": 0.2
+      },
+      "weights_array": [
+        0.8,
+        0.0,
+        0.0,
+        0.2
+      ],
+      "active_midi_notes": [
+        38,
+        53,
+        57,
+        60,
+        64
+      ],
+      "active_note_names": [
+        "D2",
+        "F3",
+        "A3",
+        "C4",
+        "E4"
+      ],
+      "onset_midi_notes": [],
+      "onset_note_names": []
+    }
+  ]
+}

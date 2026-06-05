@@ -200,6 +200,23 @@ for real-time performance, parameter modulation, and offline loop export.
 - [x] Verify solo regions by comparing composite frames against the expected
   source Aleph style video.
 
+### 14. Clear Prompt MIDI Audio Test
+
+- [x] Parse the provided `Am-Minor Prog 01 (i-VI-v-iv).mid` progression.
+- [x] Generate an 8 second prompt-weight test aligned to the four MIDI chord
+  regions.
+- [x] Replace subtle jazz/texture prompts with four exaggerated diagnostic
+  prompts: solo piano, chiptune square arps, distorted 808 drums, and choir
+  string drone.
+- [x] Render `mrt2_small` audio with frame-level prompt blending and 128-note
+  MIDI conditioning.
+- [x] Add an audition render option that loudness-matches 2 second sections so
+  prompt changes are easier to hear.
+- [x] Verify duration, sample rate, channels, non-silence, and per-section
+  spectral metrics.
+- [x] Mux the clearer MIDI-conditioned audition audio into the diagnostic
+  prompt-weight video.
+
 ## First Target User Flow
 
 1. Launch the sequencer app.
