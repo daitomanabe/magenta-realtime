@@ -161,9 +161,20 @@ for real-time performance, parameter modulation, and offline loop export.
 - [x] Build `deploy_mrt2_sequencer` after app changes.
 - [x] Run relevant React build/type checks.
 - [ ] Run focused Python tests when Python export/generation code changes.
-- [ ] Generate at least one short WAV after render changes.
-- [ ] Verify rendered audio with metadata and non-silence checks.
+- [x] Generate at least one short WAV after render changes.
+- [x] Verify rendered audio with metadata and non-silence checks.
 - [ ] Push after each completed milestone or coherent feature slice.
+
+### 11. Polyrhythm Prompt/Video Test
+
+- [x] Generate four prompt weight lanes with 3:5:7:11 polyrhythm frequencies
+  and independent phase offsets.
+- [x] Save prompt modulation values as JSON and CSV.
+- [x] Render a 10 second `mrt2_small` WAV using frame-level prompt blending.
+- [x] Generate one dynamic Runway landscape base video.
+- [x] Generate four Aleph video variants related to the four Magenta prompts.
+- [x] Composite the four Aleph videos with the saved modulation data.
+- [x] Attach the 10 second Magenta WAV to the video composite.
 
 ## First Target User Flow
 

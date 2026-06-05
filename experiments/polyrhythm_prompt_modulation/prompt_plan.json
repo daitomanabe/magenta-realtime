@@ -1,0 +1,44 @@
+{
+  "bpm": 104,
+  "duration_seconds": 10.0,
+  "fps": 25,
+  "base_runway_prompt": "A 10 second cinematic landscape video with a dynamic camera move: a drone dives through low cloud into a vast mountain valley, sweeping past cliffs, water, mist, and distant sunlight. Photoreal, high detail, natural atmosphere, no people, no text, no logos.",
+  "slots": [
+    {
+      "id": "tension_chords",
+      "label": "Tension chords",
+      "magenta_prompt": "complex jazzy tension chords, warm electric piano, altered dominants, rich ninths and thirteenths",
+      "video_prompt": "Transform the landscape into a warm harmonic architecture: amber and copper light planes rise from the valley like stacked jazz chord voicings, slow elegant camera orbit, soft electric-piano glow, sophisticated nocturnal atmosphere, no people, no text.",
+      "cycles_per_two_bars": 3,
+      "phase_degrees": 0,
+      "gamma": 1.35
+    },
+    {
+      "id": "glassy_arps",
+      "label": "Glassy arpeggios",
+      "magenta_prompt": "fast glassy arpeggio figures, crystalline mallets, bright syncopated harmonic motion",
+      "video_prompt": "Transform the same camera move into crystalline arpeggio energy: prismatic ice rivers, glassy light threads tracing fast ascending patterns through the air, sharp reflections, kinetic drone movement, elegant and clean, no people, no text.",
+      "cycles_per_two_bars": 5,
+      "phase_degrees": 76,
+      "gamma": 1.8
+    },
+    {
+      "id": "broken_beat",
+      "label": "Broken beat drums",
+      "magenta_prompt": "dry broken beat drums, tight room, crisp rim clicks, syncopated jazz break",
+      "video_prompt": "Transform the landscape into a rhythmic broken-beat terrain: cliffs, waves, and shadows cut in syncopated blocks, punchy camera accelerations and micro-whip movements, dry contrast, tight kinetic timing, no people, no text.",
+      "cycles_per_two_bars": 7,
+      "phase_degrees": 151,
+      "gamma": 2.1
+    },
+    {
+      "id": "granular_texture",
+      "label": "Granular texture",
+      "magenta_prompt": "granular tape texture and vinyl air, misty noise, soft degraded ambience around jazz harmony",
+      "video_prompt": "Transform the landscape into granular tape atmosphere: fog layers, film grain, drifting dust, soft analog color bleeding around trees and mountains, floating particles in the camera path, subtle warped parallax, no people, no text.",
+      "cycles_per_two_bars": 11,
+      "phase_degrees": 223,
+      "gamma": 1.55
+    }
+  ]
+}
