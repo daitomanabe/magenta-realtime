@@ -275,6 +275,10 @@ for real-time performance, parameter modulation, and offline loop export.
   seamless 8-bar sine cycle with four 90-degree phase-shifted prompt weights.
 - [x] Render and verify the 16 second `loop_sine` modulation WAV and frame-level
   weight JSON.
+- [x] Increase `loop_sine` contrast so prompt weights visibly move between
+  approximately 0.01 and 0.77.
+- [x] Render a 16 second graph MP4 from the prompt-weight JSON for modulation
+  QA.
 
 ## First Target User Flow
 

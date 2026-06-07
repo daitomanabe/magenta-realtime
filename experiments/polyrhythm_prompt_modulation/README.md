@@ -164,14 +164,20 @@ python3 experiments/polyrhythm_prompt_modulation/run_sustained_synth_sources.py 
 The `loop_sine` weight mode uses one full sine cycle over 16 seconds, with the
 four prompt slots phase-shifted by 90 degrees. At 120 BPM this is an exact
 8-bar modulation cycle, and the prompt-weight endpoint returns to the starting
-weights for seamless looping.
+weights for seamless looping. The sine values are curved to make the modulation
+visibly and audibly obvious: each prompt can dominate at roughly 0.77 while the
+quietest prompts fall to roughly 0.01.
+
+For non-solo runs, the runner also renders a silent graph MP4 from the
+frame-level weight JSON. The graph shows the complete prompt-weight curves, a
+moving playhead, and current weight bars for visual QA.
 
 This runner uses text prompt embeddings by default so prompt wording changes
 are audible in the generated material. Use `--audio-prompts` to switch the same
 profile to MIDI-derived synthetic audio prompt embeddings.
 
-Generated WAVs, reports, frame-level prompt weight JSON files, and the manifest
-are written to:
+Generated WAVs, reports, frame-level prompt weight JSON files, graph videos,
+and the manifest are written to:
 
 ```text
 outputs/polyrhythm_prompt_modulation/sustained_synth_prompt_sources/

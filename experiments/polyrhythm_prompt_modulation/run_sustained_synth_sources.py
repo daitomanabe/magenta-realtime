@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_BINARY = ROOT / "build/examples/midi_prompt_diagnostic/mrt2_midi_prompt_diagnostic"
 DEFAULT_MIDI = ROOT / "assets/Am-Minor Prog 01 (i-VI-v-iv).mid"
 DEFAULT_OUTPUT_DIR = ROOT / "outputs/polyrhythm_prompt_modulation/sustained_synth_prompt_sources"
+GRAPH_VIDEO_SCRIPT = ROOT / "experiments/polyrhythm_prompt_modulation/render_prompt_weight_graph_video.py"
 
 
 EXPERIMENTS = [
@@ -76,7 +77,7 @@ def ffprobe(path: Path) -> dict:
             "-v",
             "error",
             "-show_entries",
-            "stream=codec_name,sample_rate,channels,duration",
+            "stream=codec_name,sample_rate,channels,width,height,duration",
             "-show_entries",
             "format=duration,size",
             "-of",
@@ -169,6 +170,20 @@ def main() -> int:
         if len(weights_data.get("frames", [])) != expected_frames:
             raise RuntimeError(f"{item['name']} weight frame count mismatch")
 
+        graph_video = None
+        graph_probe = None
+        if item["weight_mode"] != "solo":
+            graph_video = args.output_dir / f"{item['name']}.graph.mp4"
+            run([
+                "python3",
+                str(GRAPH_VIDEO_SCRIPT),
+                "--weights",
+                str(weights),
+                "--output",
+                str(graph_video),
+            ])
+            graph_probe = ffprobe(graph_video)
+
         slot_index = max(0, min(3, item["solo_slot"] - 1))
         if item["weight_mode"] == "solo":
             slot_id = report_data["segments"][slot_index]["slot_id"]
@@ -191,10 +206,12 @@ def main() -> int:
             "wav": str(wav.relative_to(ROOT)),
             "report": str(report.relative_to(ROOT)),
             "weights": str(weights.relative_to(ROOT)),
+            "graph_video": str(graph_video.relative_to(ROOT)) if graph_video else None,
             "peak": report_data["peak"],
             "rms": report_data["rms"],
             "non_silent": report_data["non_silent"],
             "ffprobe": probe,
+            "graph_ffprobe": graph_probe,
         }
 
     manifest["experiments"] = [

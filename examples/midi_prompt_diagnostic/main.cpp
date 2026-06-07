@@ -747,9 +747,10 @@ std::array<float, 4> prompt_weights(double time_seconds, const RenderConfig& con
         std::array<float, 4> weights = {0.0f, 0.0f, 0.0f, 0.0f};
         for (size_t i = 0; i < weights.size(); ++i) {
             double phase = 2.0 * kPi * (normalized_time + phases[i]);
-            // One full sine cycle over the render duration. The DC offset keeps
-            // every prompt present while the quadrature phases keep the sum stable.
-            weights[i] = static_cast<float>(0.20 + 0.80 * (0.5 + 0.5 * std::sin(phase)));
+            // One full sine cycle over the render duration. The cubic curve
+            // makes dominance obvious while a small floor keeps blends smooth.
+            double lfo = 0.5 + 0.5 * std::sin(phase);
+            weights[i] = static_cast<float>(0.015 + std::pow(lfo, 3.0));
         }
         return normalize_prompt_weights(weights);
     }
