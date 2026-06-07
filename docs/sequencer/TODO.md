@@ -271,6 +271,10 @@ for real-time performance, parameter modulation, and offline loop export.
   synth prompts.
 - [x] Verify duration, non-silence, and normalized prompt weights for all five
   renders.
+- [x] Add a 16 second BPM 120 `loop_sine` prompt-weight mode that completes one
+  seamless 8-bar sine cycle with four 90-degree phase-shifted prompt weights.
+- [x] Render and verify the 16 second `loop_sine` modulation WAV and frame-level
+  weight JSON.
 
 ## First Target User Flow
 

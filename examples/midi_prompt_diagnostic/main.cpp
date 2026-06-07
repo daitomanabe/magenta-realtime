@@ -738,6 +738,22 @@ std::array<float, 4> prompt_weights(double time_seconds, const RenderConfig& con
         return normalize_prompt_weights(weights);
     }
 
+    if (config.weight_mode == "loop_sine") {
+        double duration = config.duration_seconds > 0.0
+            ? config.duration_seconds
+            : std::max(0.001, config.segment_seconds * 4.0);
+        double normalized_time = time_seconds / duration;
+        constexpr std::array<double, 4> phases = {0.00, 0.25, 0.50, 0.75};
+        std::array<float, 4> weights = {0.0f, 0.0f, 0.0f, 0.0f};
+        for (size_t i = 0; i < weights.size(); ++i) {
+            double phase = 2.0 * kPi * (normalized_time + phases[i]);
+            // One full sine cycle over the render duration. The DC offset keeps
+            // every prompt present while the quadrature phases keep the sum stable.
+            weights[i] = static_cast<float>(0.20 + 0.80 * (0.5 + 0.5 * std::sin(phase)));
+        }
+        return normalize_prompt_weights(weights);
+    }
+
     int segment = segment_for_time(time_seconds, config.segment_seconds);
     double local = time_seconds - segment * config.segment_seconds;
     double transition_seconds = std::max(0.0, config.transition_seconds);
@@ -1479,7 +1495,7 @@ void print_usage(const char* argv0) {
         "  --profile NAME           clear_extreme, microcinematic_footwork, negative_space_club,\n"
         "                           glass_trap_pressure, metallic_ambient_bounce,\n"
         "                           or sustained_synth_textures\n"
-        "  --weight-mode NAME       sequential, solo, modulated, or polyrhythm\n"
+        "  --weight-mode NAME       sequential, solo, modulated, polyrhythm, or loop_sine\n"
         "  --solo-slot INDEX        1-4 prompt slot used when --weight-mode solo\n"
         "  --weights-output PATH    Output frame-level prompt weight JSON\n"
         "  --duration SECONDS       Repeat/clip the MIDI progression to this duration\n"
@@ -1554,7 +1570,8 @@ int main(int argc, char** argv) {
     if (config.weight_mode != "sequential" &&
         config.weight_mode != "solo" &&
         config.weight_mode != "modulated" &&
-        config.weight_mode != "polyrhythm") {
+        config.weight_mode != "polyrhythm" &&
+        config.weight_mode != "loop_sine") {
         std::fprintf(stderr, "Unknown weight mode: %s\n", config.weight_mode.c_str());
         return 1;
     }

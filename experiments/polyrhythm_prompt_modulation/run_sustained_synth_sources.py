@@ -50,6 +50,15 @@ EXPERIMENTS = [
         "duration": 30.0,
         "weight_mode": "modulated",
         "solo_slot": 1,
+        "bpm": 120,
+    },
+    {
+        "stage": "loop_16s",
+        "name": "06_sustained_synth_loop_sine_weight_modulation_16s",
+        "duration": 16.0,
+        "weight_mode": "loop_sine",
+        "solo_slot": 1,
+        "bpm": 120,
     },
 ]
 
@@ -87,7 +96,7 @@ def main() -> int:
     parser.add_argument("--binary", type=Path, default=DEFAULT_BINARY)
     parser.add_argument("--midi", type=Path, default=DEFAULT_MIDI)
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
-    parser.add_argument("--stage", choices=["all", "sources", "modulated"], default="all")
+    parser.add_argument("--stage", choices=["all", "sources", "modulated", "loop_16s"], default="all")
     parser.add_argument("--audio-prompts", action="store_true")
     args = parser.parse_args()
 
@@ -111,6 +120,7 @@ def main() -> int:
         "schema": "mrt-sustained-synth-prompt-sources-v1",
         "profile": "sustained_synth_textures",
         "midi": str(args.midi.relative_to(ROOT)),
+        "bpm": 120,
         "embedding_source": "audio" if args.audio_prompts else "text",
         "experiments": [],
     }
@@ -171,6 +181,7 @@ def main() -> int:
         existing_by_name[item["name"]] = {
             "stage": item["stage"],
             "name": item["name"],
+            "bpm": item.get("bpm", 120),
             "weight_mode": item["weight_mode"],
             "solo_slot": item["solo_slot"],
             "slot_id": slot_id,

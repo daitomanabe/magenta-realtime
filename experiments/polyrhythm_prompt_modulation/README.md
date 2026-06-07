@@ -154,6 +154,18 @@ modulation:
 python3 experiments/polyrhythm_prompt_modulation/run_sustained_synth_sources.py
 ```
 
+Run only the 16 second BPM 120 loop-sine prompt-weight modulation:
+
+```bash
+python3 experiments/polyrhythm_prompt_modulation/run_sustained_synth_sources.py \
+  --stage loop_16s
+```
+
+The `loop_sine` weight mode uses one full sine cycle over 16 seconds, with the
+four prompt slots phase-shifted by 90 degrees. At 120 BPM this is an exact
+8-bar modulation cycle, and the prompt-weight endpoint returns to the starting
+weights for seamless looping.
+
 This runner uses text prompt embeddings by default so prompt wording changes
 are audible in the generated material. Use `--audio-prompts` to switch the same
 profile to MIDI-derived synthetic audio prompt embeddings.
