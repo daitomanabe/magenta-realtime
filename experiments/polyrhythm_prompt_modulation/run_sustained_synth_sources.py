@@ -14,6 +14,9 @@ DEFAULT_BINARY = ROOT / "build/examples/midi_prompt_diagnostic/mrt2_midi_prompt_
 DEFAULT_MIDI = ROOT / "assets/Am-Minor Prog 01 (i-VI-v-iv).mid"
 DEFAULT_OUTPUT_DIR = ROOT / "outputs/polyrhythm_prompt_modulation/sustained_synth_prompt_sources"
 GRAPH_VIDEO_SCRIPT = ROOT / "experiments/polyrhythm_prompt_modulation/render_prompt_weight_graph_video.py"
+CM9_32_BARS_BPM = 130
+CM9_32_BARS = 32
+CM9_32_DURATION = CM9_32_BARS * 4 * 60 / CM9_32_BARS_BPM
 
 
 EXPERIMENTS = [
@@ -61,6 +64,16 @@ EXPERIMENTS = [
         "solo_slot": 1,
         "bpm": 120,
     },
+    {
+        "stage": "cm9_32bars_130",
+        "name": "07_cm9_32bars_bpm130_meter_sine_prompt_weight_modulation",
+        "duration": CM9_32_DURATION,
+        "weight_mode": "meter_sine",
+        "solo_slot": 1,
+        "bpm": CM9_32_BARS_BPM,
+        "bars": CM9_32_BARS,
+        "generated_midi": "cm9_32bars_bpm130",
+    },
 ]
 
 
@@ -92,12 +105,66 @@ def ffprobe(path: Path) -> dict:
     return json.loads(result.stdout)
 
 
+def vlq(value: int) -> bytes:
+    buffer = value & 0x7F
+    value >>= 7
+    while value:
+        buffer <<= 8
+        buffer |= ((value & 0x7F) | 0x80)
+        value >>= 7
+    out = bytearray()
+    while True:
+        out.append(buffer & 0xFF)
+        if buffer & 0x80:
+            buffer >>= 8
+        else:
+            break
+    return bytes(out)
+
+
+def write_cm9_32bar_midi(path: Path) -> None:
+    ppq = 480
+    end_ticks = CM9_32_BARS * 4 * ppq
+    tempo_us = round(60_000_000 / CM9_32_BARS_BPM)
+    chord = [36, 43, 48, 51, 55, 58, 62, 67]  # C2, G2, C3, Eb3, G3, Bb3, D4, G4
+    track = bytearray()
+
+    def add(delta: int, event: bytes) -> None:
+        track.extend(vlq(delta))
+        track.extend(event)
+
+    name = b"Cm9 32 bars BPM130"
+    add(0, b"\xff\x03" + vlq(len(name)) + name)
+    add(0, b"\xff\x51\x03" + tempo_us.to_bytes(3, "big"))
+    add(0, b"\xff\x58\x04" + bytes([4, 2, 24, 8]))
+    for note in chord:
+        add(0, bytes([0x90, note, 88]))
+    for index, note in enumerate(chord):
+        add(end_ticks if index == 0 else 0, bytes([0x80, note, 0]))
+    add(0, b"\xff\x2f\x00")
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("wb") as f:
+        f.write(b"MThd")
+        f.write((6).to_bytes(4, "big"))
+        f.write((0).to_bytes(2, "big"))
+        f.write((1).to_bytes(2, "big"))
+        f.write(ppq.to_bytes(2, "big"))
+        f.write(b"MTrk")
+        f.write(len(track).to_bytes(4, "big"))
+        f.write(track)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--binary", type=Path, default=DEFAULT_BINARY)
     parser.add_argument("--midi", type=Path, default=DEFAULT_MIDI)
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
-    parser.add_argument("--stage", choices=["all", "sources", "modulated", "loop_16s"], default="all")
+    parser.add_argument(
+        "--stage",
+        choices=["all", "sources", "modulated", "loop_16s", "cm9_32bars_130"],
+        default="all",
+    )
     parser.add_argument("--audio-prompts", action="store_true")
     args = parser.parse_args()
 
@@ -127,6 +194,11 @@ def main() -> int:
     }
 
     for item in selected:
+        midi_path = args.midi
+        if item.get("generated_midi") == "cm9_32bars_bpm130":
+            midi_path = args.output_dir / "cm9_32bars_bpm130.mid"
+            write_cm9_32bar_midi(midi_path)
+
         wav = args.output_dir / f"{item['name']}.wav"
         report = args.output_dir / f"{item['name']}.report.json"
         weights = args.output_dir / f"{item['name']}.weights.json"
@@ -134,7 +206,7 @@ def main() -> int:
         cmd = [
             str(args.binary),
             "--midi",
-            str(args.midi),
+            str(midi_path),
             "--profile",
             "sustained_synth_textures",
             "--duration",
@@ -197,12 +269,14 @@ def main() -> int:
             "stage": item["stage"],
             "name": item["name"],
             "bpm": item.get("bpm", 120),
+            "bars": item.get("bars"),
             "weight_mode": item["weight_mode"],
             "solo_slot": item["solo_slot"],
             "slot_id": slot_id,
             "slot_label": slot_label,
             "prompt": prompt,
             "duration_seconds": duration,
+            "midi": str(midi_path.relative_to(ROOT)),
             "wav": str(wav.relative_to(ROOT)),
             "report": str(report.relative_to(ROOT)),
             "weights": str(weights.relative_to(ROOT)),

@@ -161,12 +161,25 @@ python3 experiments/polyrhythm_prompt_modulation/run_sustained_synth_sources.py 
   --stage loop_16s
 ```
 
+Run only the 32-bar BPM 130 Cm9 sustained-chord modulation:
+
+```bash
+python3 experiments/polyrhythm_prompt_modulation/run_sustained_synth_sources.py \
+  --stage cm9_32bars_130
+```
+
 The `loop_sine` weight mode uses one full sine cycle over 16 seconds, with the
 four prompt slots phase-shifted by 90 degrees. At 120 BPM this is an exact
 8-bar modulation cycle, and the prompt-weight endpoint returns to the starting
 weights for seamless looping. The sine values are curved to make the modulation
 visibly and audibly obvious: each prompt can dominate at roughly 0.77 while the
 quietest prompts fall to roughly 0.01.
+
+The `meter_sine` weight mode is designed for longer MIDI-conditioned exports.
+For the Cm9 test, the runner writes a 32-bar BPM 130 MIDI file and drives four
+phase-shifted sine modulators at 4/4, 3/4, 8/6, and 4/4 periods. The rendered
+WAV, frame-level weight JSON, report, graph MP4, and generated MIDI are written
+to the sustained-synth output folder.
 
 For non-solo runs, the runner also renders a silent graph MP4 from the
 frame-level weight JSON. The graph shows the complete prompt-weight curves, a

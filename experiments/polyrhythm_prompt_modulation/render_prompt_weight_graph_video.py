@@ -35,6 +35,8 @@ def draw_frame(data: dict, frame_index: int, width: int, height: int) -> Image.I
     frames = data["frames"]
     slots = data["slots"]
     duration = float(data["duration_seconds"])
+    bpm = float(data.get("bpm", 120))
+    weight_mode = data.get("weight_mode", "weights")
     current = frames[frame_index]
     weights = current["weights"]
 
@@ -55,7 +57,8 @@ def draw_frame(data: dict, frame_index: int, width: int, height: int) -> Image.I
     bar_left = graph_right + 54
     bar_right = width - 70
 
-    draw.text((margin, 28), "Prompt Weight Modulation: loop_sine / 16s / 120 BPM",
+    draw.text((margin, 28),
+              f"Prompt Weight Modulation: {weight_mode} / {duration:.2f}s / {bpm:g} BPM",
               fill=(235, 238, 242), font=title_font)
     draw.text((margin, 62), data.get("profile", "sustained_synth_textures"),
               fill=(150, 156, 168), font=small_font)

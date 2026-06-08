@@ -171,6 +171,7 @@ struct RenderConfig {
     std::string profile = "clear_extreme";
     std::string weight_mode = "sequential";
     int solo_slot = 0;
+    double bpm = kDefaultBpm;
     double duration_seconds = 0.0;
     double segment_seconds = 2.0;
     double transition_seconds = 0.20;
@@ -226,11 +227,13 @@ double tick_to_seconds(int tick, const std::vector<std::pair<int, int>>& tempo_e
     for (size_t i = 1; i < tempos.size(); ++i) {
         int tempo_tick = tempos[i].first;
         if (tick <= tempo_tick) break;
-        seconds += (tempo_tick - previous_tick) * current_tempo_us / 1000000.0 / ppq;
+        seconds += static_cast<double>(tempo_tick - previous_tick) *
+                   static_cast<double>(current_tempo_us) / 1000000.0 / ppq;
         previous_tick = tempo_tick;
         current_tempo_us = tempos[i].second;
     }
-    seconds += (tick - previous_tick) * current_tempo_us / 1000000.0 / ppq;
+    seconds += static_cast<double>(tick - previous_tick) *
+               static_cast<double>(current_tempo_us) / 1000000.0 / ppq;
     return seconds;
 }
 
@@ -749,6 +752,24 @@ std::array<float, 4> prompt_weights(double time_seconds, const RenderConfig& con
             double phase = 2.0 * kPi * (normalized_time + phases[i]);
             // One full sine cycle over the render duration. The cubic curve
             // makes dominance obvious while a small floor keeps blends smooth.
+            double lfo = 0.5 + 0.5 * std::sin(phase);
+            weights[i] = static_cast<float>(0.015 + std::pow(lfo, 3.0));
+        }
+        return normalize_prompt_weights(weights);
+    }
+
+    if (config.weight_mode == "meter_sine") {
+        double beat_position = time_seconds * config.bpm / 60.0;
+        constexpr std::array<double, 4> quarter_note_periods = {
+            4.0,        // 4/4
+            3.0,        // 3/4
+            8.0 * 4.0 / 6.0,  // 8/6 as written, interpreted as a ratio
+            4.0,        // 4/4, phase-shifted
+        };
+        constexpr std::array<double, 4> phases = {0.00, 0.25, 0.50, 0.125};
+        std::array<float, 4> weights = {0.0f, 0.0f, 0.0f, 0.0f};
+        for (size_t i = 0; i < weights.size(); ++i) {
+            double phase = 2.0 * kPi * (beat_position / quarter_note_periods[i] + phases[i]);
             double lfo = 0.5 + 0.5 * std::sin(phase);
             weights[i] = static_cast<float>(0.015 + std::pow(lfo, 3.0));
         }
@@ -1362,6 +1383,7 @@ bool write_report(const std::filesystem::path& path,
     out << "  \"weight_mode\": \"" << json_escape(config.weight_mode) << "\",\n";
     out << "  \"solo_slot\": " << config.solo_slot << ",\n";
     out << "  \"weights_output\": \"" << json_escape(config.weights_path.string()) << "\",\n";
+    out << "  \"bpm\": " << config.bpm << ",\n";
     out << "  \"model\": \"" << json_escape(config.model_name) << "\",\n";
     out << "  \"model_path\": \"" << json_escape(model_path) << "\",\n";
     out << "  \"embedding_source\": \"" << (config.use_audio_prompts ? "audio" : "text") << "\",\n";
@@ -1444,6 +1466,7 @@ bool write_weight_frames(const std::filesystem::path& path,
     out << "  \"profile\": \"" << json_escape(config.profile) << "\",\n";
     out << "  \"weight_mode\": \"" << json_escape(config.weight_mode) << "\",\n";
     out << "  \"solo_slot\": " << config.solo_slot << ",\n";
+    out << "  \"bpm\": " << config.bpm << ",\n";
     out << "  \"duration_seconds\": " << config.duration_seconds << ",\n";
     out << "  \"frame_rate\": " << kFps << ",\n";
     out << "  \"slots\": [\n";
@@ -1473,6 +1496,18 @@ bool write_weight_frames(const std::filesystem::path& path,
     return out.good();
 }
 
+bool reblend_prompt_weights(MLXEngine& engine,
+                            const std::array<float, 4>& weights,
+                            bool use_audio_prompts) {
+    if (use_audio_prompts) {
+        std::array<float, 6> audio_weights = {
+            weights[0], weights[1], weights[2], weights[3], 0.0f, 0.0f};
+        return engine.reblend_musiccoca_tokens(audio_weights.data(),
+                                               static_cast<int>(audio_weights.size()));
+    }
+    return engine.reblend_musiccoca_tokens(weights.data(), static_cast<int>(weights.size()));
+}
+
 void wait_for_prompts(MLXEngine& engine, int slot_count) {
     while (engine.get_text_encoder_status() == 1 ||
            engine.get_quantizer_status() == 1) {
@@ -1496,7 +1531,8 @@ void print_usage(const char* argv0) {
         "  --profile NAME           clear_extreme, microcinematic_footwork, negative_space_club,\n"
         "                           glass_trap_pressure, metallic_ambient_bounce,\n"
         "                           or sustained_synth_textures\n"
-        "  --weight-mode NAME       sequential, solo, modulated, polyrhythm, or loop_sine\n"
+        "  --weight-mode NAME       sequential, solo, modulated, polyrhythm, loop_sine,\n"
+        "                           or meter_sine\n"
         "  --solo-slot INDEX        1-4 prompt slot used when --weight-mode solo\n"
         "  --weights-output PATH    Output frame-level prompt weight JSON\n"
         "  --duration SECONDS       Repeat/clip the MIDI progression to this duration\n"
@@ -1572,7 +1608,8 @@ int main(int argc, char** argv) {
         config.weight_mode != "solo" &&
         config.weight_mode != "modulated" &&
         config.weight_mode != "polyrhythm" &&
-        config.weight_mode != "loop_sine") {
+        config.weight_mode != "loop_sine" &&
+        config.weight_mode != "meter_sine") {
         std::fprintf(stderr, "Unknown weight mode: %s\n", config.weight_mode.c_str());
         return 1;
     }
@@ -1580,6 +1617,7 @@ int main(int argc, char** argv) {
 
     try {
         MidiData midi = parse_midi(config.midi_path);
+        config.bpm = midi.bpm;
         double render_duration = config.duration_seconds > 0.0
             ? config.duration_seconds
             : midi.duration_seconds;
@@ -1615,8 +1653,8 @@ int main(int argc, char** argv) {
                                                 prompt_audio[i].data(), prompt_audio[i].size());
             }
             wait_for_prompts(engine, static_cast<int>(config.slots.size()));
-            std::array<float, 6> initial_weights = {1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-            if (!engine.reblend_musiccoca_tokens(initial_weights.data(), static_cast<int>(initial_weights.size()))) {
+            std::array<float, 4> initial_weights = {1.0f, 0.0f, 0.0f, 0.0f};
+            if (!reblend_prompt_weights(engine, initial_weights, config.use_audio_prompts)) {
                 std::fprintf(stderr, "Initial audio prompt reblend failed\n");
                 return 1;
             }
@@ -1638,7 +1676,8 @@ int main(int argc, char** argv) {
 
         // Match the official live-MIDI path during preroll too, so the model
         // is already conditioned by the first held chord before audible output.
-        for (int pitch : active_notes_at(midi, 0.0)) {
+        auto initial_notes = active_notes_at(midi, 0.0);
+        for (int pitch : initial_notes) {
             engine.set_note_on(pitch);
         }
 
@@ -1667,9 +1706,10 @@ int main(int argc, char** argv) {
             }
 
             auto weights4 = prompt_weights(time_seconds, config);
-            std::array<float, 6> weights = {
-                weights4[0], weights4[1], weights4[2], weights4[3], 0.0f, 0.0f};
-            engine.reblend_musiccoca_tokens(weights.data(), static_cast<int>(weights.size()));
+            if (!reblend_prompt_weights(engine, weights4, config.use_audio_prompts)) {
+                std::fprintf(stderr, "prompt reblend failed at frame %d\n", frame);
+                return 1;
+            }
             engine.set_cfg_musiccoca(blend_float(weights4, config.slots, &Slot::cfg_musiccoca));
             engine.set_cfg_notes(blend_float(weights4, config.slots, &Slot::cfg_notes));
             engine.set_cfg_drums(blend_float(weights4, config.slots, &Slot::cfg_drums));

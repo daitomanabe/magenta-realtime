@@ -279,6 +279,14 @@ for real-time performance, parameter modulation, and offline loop export.
   approximately 0.01 and 0.77.
 - [x] Render a 16 second graph MP4 from the prompt-weight JSON for modulation
   QA.
+- [x] Add a 32-bar BPM 130 Cm9 generator stage for long sustained-chord MIDI
+  conditioning.
+- [x] Add `meter_sine` prompt-weight mode using 4/4, 3/4, 8/6, and 4/4
+  phase-shifted sine periods.
+- [x] Fix long-MIDI tick-to-seconds conversion so BPM tempo math does not
+  overflow on 32-bar exports.
+- [x] Render and verify the 32-bar Cm9 `meter_sine` WAV, frame-level weight
+  JSON, report, generated MIDI, and graph MP4.
 
 ## First Target User Flow
 
