@@ -54,7 +54,9 @@ namespace {
 
 constexpr int kSampleRate = 48000;
 constexpr int kFps = 25;
+constexpr int kWeightFrameRate = 60;
 constexpr double kFrameSeconds = 1.0 / kFps;
+constexpr double kWeightFrameSeconds = 1.0 / kWeightFrameRate;
 constexpr double kDefaultBpm = 120.0;
 constexpr double kPi = 3.141592653589793238462643383279502884;
 
@@ -763,10 +765,10 @@ std::array<float, 4> prompt_weights(double time_seconds, const RenderConfig& con
         constexpr std::array<double, 4> quarter_note_periods = {
             4.0,        // 4/4
             3.0,        // 3/4
-            8.0 * 4.0 / 6.0,  // 8/6 as written, interpreted as a ratio
-            4.0,        // 4/4, phase-shifted
+            3.0,        // 6/8 as six eighth notes
+            4.0,        // 4/4
         };
-        constexpr std::array<double, 4> phases = {0.00, 0.25, 0.50, 0.125};
+        constexpr std::array<double, 4> phases = {0.00, 0.00, 0.00, 0.25};
         std::array<float, 4> weights = {0.0f, 0.0f, 0.0f, 0.0f};
         for (size_t i = 0; i < weights.size(); ++i) {
             double phase = 2.0 * kPi * (beat_position / quarter_note_periods[i] + phases[i]);
@@ -1468,7 +1470,15 @@ bool write_weight_frames(const std::filesystem::path& path,
     out << "  \"solo_slot\": " << config.solo_slot << ",\n";
     out << "  \"bpm\": " << config.bpm << ",\n";
     out << "  \"duration_seconds\": " << config.duration_seconds << ",\n";
-    out << "  \"frame_rate\": " << kFps << ",\n";
+    out << "  \"frame_rate\": " << kWeightFrameRate << ",\n";
+    if (config.weight_mode == "meter_sine") {
+        out << "  \"meter_sine\": [\n";
+        out << "    {\"meter\": \"4/4\", \"quarter_note_period\": 4.000000, \"phase_offset\": 0.000000},\n";
+        out << "    {\"meter\": \"3/4\", \"quarter_note_period\": 3.000000, \"phase_offset\": 0.000000},\n";
+        out << "    {\"meter\": \"6/8\", \"quarter_note_period\": 3.000000, \"phase_offset\": 0.000000},\n";
+        out << "    {\"meter\": \"4/4\", \"quarter_note_period\": 4.000000, \"phase_offset\": 0.250000}\n";
+        out << "  ],\n";
+    }
     out << "  \"slots\": [\n";
     for (int i = 0; i < 4; ++i) {
         out << "    {\"index\": " << i << ", \"id\": \"" << json_escape(config.slots[i].id)
@@ -1478,7 +1488,7 @@ bool write_weight_frames(const std::filesystem::path& path,
     out << "  ],\n";
     out << "  \"frames\": [\n";
     for (int frame = 0; frame < frame_count; ++frame) {
-        double time_seconds = frame * kFrameSeconds;
+        double time_seconds = frame * kWeightFrameSeconds;
         auto weights = prompt_weights(time_seconds, config);
         out << "    {\"frame\": " << frame
             << ", \"time_seconds\": " << time_seconds
@@ -1625,6 +1635,8 @@ int main(int argc, char** argv) {
         config.duration_seconds = midi.duration_seconds;
         config.segment_seconds = midi.duration_seconds / 4.0;
         int frame_count = static_cast<int>(std::lround(midi.duration_seconds * kFps));
+        int weight_frame_count =
+            static_cast<int>(std::lround(midi.duration_seconds * kWeightFrameRate));
         std::string model_dir = magentart::paths::get_models_dir() + "/" + config.model_name;
         std::string mlxfn_path = magentart::paths::find_mlxfn_in_dir(model_dir);
         if (mlxfn_path.empty()) {
@@ -1751,7 +1763,7 @@ int main(int argc, char** argv) {
             std::fprintf(stderr, "Failed to write %s\n", config.report_path.string().c_str());
             return 1;
         }
-        if (!write_weight_frames(config.weights_path, config, frame_count)) {
+        if (!write_weight_frames(config.weights_path, config, weight_frame_count)) {
             std::fprintf(stderr, "Failed to write %s\n", config.weights_path.string().c_str());
             return 1;
         }

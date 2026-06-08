@@ -177,9 +177,11 @@ quietest prompts fall to roughly 0.01.
 
 The `meter_sine` weight mode is designed for longer MIDI-conditioned exports.
 For the Cm9 test, the runner writes a 32-bar BPM 130 MIDI file and drives four
-phase-shifted sine modulators at 4/4, 3/4, 8/6, and 4/4 periods. The rendered
-WAV, frame-level weight JSON, report, graph MP4, and generated MIDI are written
-to the sustained-synth output folder.
+phase-shifted sine modulators at 4/4 phase 0.0, 3/4 phase 0.0, 6/8 phase 0.0,
+and 4/4 phase 0.25. The frame-level weight JSON is written at 60 fps for video
+modulation. The runner retriggers the Cm9 chord once per bar so the generated
+audio stays active across the full 32-bar export, then writes a per-second WAV
+activity check JSON to catch accidental dropouts after generation.
 
 For non-solo runs, the runner also renders a silent graph MP4 from the
 frame-level weight JSON. The graph shows the complete prompt-weight curves, a

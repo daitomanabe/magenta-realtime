@@ -5,6 +5,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
+import struct
 import subprocess
 from pathlib import Path
 
@@ -73,6 +75,7 @@ EXPERIMENTS = [
         "bpm": CM9_32_BARS_BPM,
         "bars": CM9_32_BARS,
         "generated_midi": "cm9_32bars_bpm130",
+        "require_continuous_audio": True,
     },
 ]
 
@@ -105,6 +108,88 @@ def ffprobe(path: Path) -> dict:
     return json.loads(result.stdout)
 
 
+def analyze_float_wav(path: Path, window_seconds: float = 1.0) -> dict:
+    data = path.read_bytes()
+    if data[:4] != b"RIFF" or data[8:12] != b"WAVE":
+        raise RuntimeError(f"{path} is not a RIFF/WAVE file")
+
+    offset = 12
+    fmt: dict[str, int] | None = None
+    audio_data: bytes | None = None
+    while offset + 8 <= len(data):
+        chunk_id = data[offset:offset + 4]
+        chunk_size = int.from_bytes(data[offset + 4:offset + 8], "little")
+        offset += 8
+        chunk = data[offset:offset + chunk_size]
+        if chunk_id == b"fmt ":
+            audio_format, channels, sample_rate, _, block_align, bits = struct.unpack_from(
+                "<HHIIHH", chunk, 0
+            )
+            fmt = {
+                "audio_format": audio_format,
+                "channels": channels,
+                "sample_rate": sample_rate,
+                "block_align": block_align,
+                "bits": bits,
+            }
+        elif chunk_id == b"data":
+            audio_data = chunk
+        offset += chunk_size + (chunk_size & 1)
+
+    if fmt is None or audio_data is None:
+        raise RuntimeError(f"{path} is missing fmt or data chunk")
+    if fmt["audio_format"] != 3 or fmt["bits"] != 32:
+        raise RuntimeError(f"{path} must be 32-bit float WAV, got {fmt}")
+
+    channels = fmt["channels"]
+    sample_rate = fmt["sample_rate"]
+    total_frames = len(audio_data) // (4 * channels)
+    values = struct.unpack("<" + "f" * (len(audio_data) // 4), audio_data)
+    window_frames = max(1, int(round(sample_rate * window_seconds)))
+    windows = []
+    for start in range(0, total_frames, window_frames):
+        end = min(total_frames, start + window_frames)
+        sum_sq = 0.0
+        peak = 0.0
+        count = 0
+        for frame in range(start, end):
+            base = frame * channels
+            mono = sum(values[base + channel] for channel in range(channels)) / channels
+            sum_sq += mono * mono
+            peak = max(peak, abs(mono))
+            count += 1
+        rms = math.sqrt(sum_sq / count) if count else 0.0
+        windows.append({
+            "start_seconds": start / sample_rate,
+            "end_seconds": end / sample_rate,
+            "rms": rms,
+            "peak": peak,
+        })
+
+    post_start_windows = [window for window in windows if window["start_seconds"] >= 3.0]
+    min_post_start_rms = min((window["rms"] for window in post_start_windows), default=0.0)
+    quiet_windows = [
+        window for window in post_start_windows
+        if window["rms"] < 0.0001 or window["peak"] < 0.001
+    ]
+    return {
+        "schema": "mrt-audio-activity-check-v1",
+        "path": str(path.relative_to(ROOT)),
+        "sample_rate": sample_rate,
+        "channels": channels,
+        "duration_seconds": total_frames / sample_rate,
+        "window_seconds": window_seconds,
+        "post_start_seconds": 3.0,
+        "rms_threshold": 0.0001,
+        "peak_threshold": 0.001,
+        "min_post_start_rms": min_post_start_rms,
+        "quiet_window_count": len(quiet_windows),
+        "quiet_windows": quiet_windows[:20],
+        "windows": windows,
+        "continuous_after_post_start": len(quiet_windows) == 0,
+    }
+
+
 def vlq(value: int) -> bytes:
     buffer = value & 0x7F
     value >>= 7
@@ -124,7 +209,8 @@ def vlq(value: int) -> bytes:
 
 def write_cm9_32bar_midi(path: Path) -> None:
     ppq = 480
-    end_ticks = CM9_32_BARS * 4 * ppq
+    bar_ticks = 4 * ppq
+    note_ticks = bar_ticks - 1
     tempo_us = round(60_000_000 / CM9_32_BARS_BPM)
     chord = [36, 43, 48, 51, 55, 58, 62, 67]  # C2, G2, C3, Eb3, G3, Bb3, D4, G4
     track = bytearray()
@@ -137,11 +223,16 @@ def write_cm9_32bar_midi(path: Path) -> None:
     add(0, b"\xff\x03" + vlq(len(name)) + name)
     add(0, b"\xff\x51\x03" + tempo_us.to_bytes(3, "big"))
     add(0, b"\xff\x58\x04" + bytes([4, 2, 24, 8]))
-    for note in chord:
-        add(0, bytes([0x90, note, 88]))
-    for index, note in enumerate(chord):
-        add(end_ticks if index == 0 else 0, bytes([0x80, note, 0]))
-    add(0, b"\xff\x2f\x00")
+
+    pending_delta = 0
+    for _bar in range(CM9_32_BARS):
+        for index, note in enumerate(chord):
+            add(pending_delta if index == 0 else 0, bytes([0x90, note, 88]))
+            pending_delta = 0
+        for index, note in enumerate(chord):
+            add(note_ticks if index == 0 else 0, bytes([0x80, note, 0]))
+        pending_delta = 1
+    add(pending_delta, b"\xff\x2f\x00")
 
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("wb") as f:
@@ -202,6 +293,7 @@ def main() -> int:
         wav = args.output_dir / f"{item['name']}.wav"
         report = args.output_dir / f"{item['name']}.report.json"
         weights = args.output_dir / f"{item['name']}.weights.json"
+        audio_check_path = args.output_dir / f"{item['name']}.audio_check.json"
         audio_prompt_dir = args.output_dir / f"{item['name']}_audio_prompts"
         cmd = [
             str(args.binary),
@@ -233,12 +325,20 @@ def main() -> int:
         report_data = json.loads(report.read_text())
         weights_data = json.loads(weights.read_text())
         probe = ffprobe(wav)
+        audio_check = analyze_float_wav(wav)
+        audio_check_path.write_text(json.dumps(audio_check, indent=2) + "\n")
         duration = float(probe["format"]["duration"])
-        expected_frames = int(round(item["duration"] * 25))
+        weight_frame_rate = float(weights_data.get("frame_rate", 25))
+        expected_frames = int(round(item["duration"] * weight_frame_rate))
         if abs(duration - item["duration"]) > 0.05:
             raise RuntimeError(f"{item['name']} duration mismatch: {duration}")
         if not report_data.get("non_silent", False):
             raise RuntimeError(f"{item['name']} is silent")
+        if item.get("require_continuous_audio") and not audio_check["continuous_after_post_start"]:
+            raise RuntimeError(
+                f"{item['name']} has quiet audio windows after 3s: "
+                f"{audio_check['quiet_windows'][:5]}"
+            )
         if len(weights_data.get("frames", [])) != expected_frames:
             raise RuntimeError(f"{item['name']} weight frame count mismatch")
 
@@ -280,11 +380,15 @@ def main() -> int:
             "wav": str(wav.relative_to(ROOT)),
             "report": str(report.relative_to(ROOT)),
             "weights": str(weights.relative_to(ROOT)),
+            "audio_check": str(audio_check_path.relative_to(ROOT)),
             "graph_video": str(graph_video.relative_to(ROOT)) if graph_video else None,
             "peak": report_data["peak"],
             "rms": report_data["rms"],
             "non_silent": report_data["non_silent"],
+            "continuous_after_3s": audio_check["continuous_after_post_start"],
+            "min_post_3s_rms": audio_check["min_post_start_rms"],
             "ffprobe": probe,
+            "audio_activity": audio_check,
             "graph_ffprobe": graph_probe,
         }
 

@@ -281,12 +281,16 @@ for real-time performance, parameter modulation, and offline loop export.
   QA.
 - [x] Add a 32-bar BPM 130 Cm9 generator stage for long sustained-chord MIDI
   conditioning.
-- [x] Add `meter_sine` prompt-weight mode using 4/4, 3/4, 8/6, and 4/4
-  phase-shifted sine periods.
+- [x] Add `meter_sine` prompt-weight mode using 4/4 phase 0.0, 3/4 phase 0.0,
+  6/8 phase 0.0, and 4/4 phase 0.25.
 - [x] Fix long-MIDI tick-to-seconds conversion so BPM tempo math does not
   overflow on 32-bar exports.
 - [x] Render and verify the 32-bar Cm9 `meter_sine` WAV, frame-level weight
   JSON, report, generated MIDI, and graph MP4.
+- [x] Change `meter_sine` weight JSON output to 60 fps for video modulation
+  data.
+- [x] Add generated-WAV activity verification so long exports fail if audio
+  drops out after the opening seconds.
 
 ## First Target User Flow
 
