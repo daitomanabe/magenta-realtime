@@ -172,6 +172,7 @@ struct RenderConfig {
     std::array<Slot, 4> slots = kSlots;
     std::string profile = "clear_extreme";
     std::string weight_mode = "sequential";
+    std::string control_mode = "slot_blend";
     int solo_slot = 0;
     double bpm = kDefaultBpm;
     double duration_seconds = 0.0;
@@ -697,6 +698,59 @@ bool apply_profile(RenderConfig& config) {
         }};
         return true;
     }
+    if (config.profile == "dirty_cinematic_ambient_cm9") {
+        config.slots = {{
+            {
+                "dirty_voltage_haze",
+                "Dirty Voltage Haze",
+                "Create an original sustained synthesizer texture called Dirty Voltage Haze. A continuous Cm9 low-register modular VCO drone held for 64 bars at 120 BPM, dirty and cinematic, with slow non-rhythmic phase drift, dark ladder low-pass movement, and saturated analog noise in the background. Add tape compression, soft overdrive, filtered reverb, and a wide stable tail. Keep the harmony present and sustained from start to finish. Avoid drums, percussion, kick, snare, hats, clicks, arpeggios, sequencer patterns, rhythmic pulses, tremolo, delay taps, vocals, lead melody, drops, fade-outs, and silence.",
+                "dirty Cm9 modular VCO drone with tape saturation and slow filter drift",
+                "analog_drone",
+                0.56f,
+                42,
+                5.8f,
+                5.7f,
+                0.0f,
+            },
+            {
+                "carbon_cinema_floor",
+                "Carbon Cinema Floor",
+                "Create an original sustained synthesizer texture called Carbon Cinema Floor. A continuous Cm9 cinematic noise bed with filtered broadband noise, low sub pressure, smoky texture, and slow band-pass color changes without impacts or rhythm. Add convolution space, dark saturation, soft spectral blur, and a huge distant-room tail. The sound should be dirty, ambient, heavy, and evolving as one long held environment. Avoid drums, percussion, impacts, risers, hits, arpeggios, sequencer patterns, rhythmic pulses, delay taps, vocals, lead melody, drops, fade-outs, and silence.",
+                "dirty cinematic Cm9 noise floor with sub pressure and convolution space",
+                "cinema_noise",
+                0.64f,
+                58,
+                6.1f,
+                5.8f,
+                0.0f,
+            },
+            {
+                "frozen_glitch_sheet",
+                "Frozen Glitch Sheet",
+                "Create an original sustained synthesizer texture called Frozen Glitch Sheet. A continuous Cm9 frozen-buffer synth sheet with glitch texture, bit-depth erosion, spectral smear, and tiny non-rhythmic digital dust suspended inside the tone. Add resonant notch movement, diffuse reverb, soft broken resampling color, and a wide unstable stereo field. It must stay sustained and ambient, not percussive or stuttering. Avoid drums, percussion, glitch beats, rhythmic stutters, clicks as rhythm, arpeggios, sequencer patterns, tremolo, delay taps, vocals, lead melody, drops, fade-outs, and silence.",
+                "frozen Cm9 glitch sustain with bit-depth erosion and spectral smear",
+                "granular_glitch",
+                0.72f,
+                76,
+                6.4f,
+                5.9f,
+                0.0f,
+            },
+            {
+                "ash_glass_texture",
+                "Ash Glass Texture",
+                "Create an original sustained synthesizer texture called Ash Glass Texture. A continuous Cm9 spectral wavetable pad and dirty glass harmonic cloud held for 64 bars, with slow phase smear, non-rhythmic wavetable drift, and dark high-frequency air. Add muted shimmer reverb, tape haze, gentle chorus, and a large cinematic stereo field. Keep it textural, ambient, and sustained without becoming a melody. Avoid drums, percussion, mallet patterns, arpeggios, sequencer patterns, rhythmic pulses, tremolo, delay taps, vocals, lead melody, drops, fade-outs, and silence.",
+                "dirty Cm9 spectral glass pad with phase smear and tape haze",
+                "spectral_pad",
+                0.60f,
+                52,
+                5.9f,
+                5.8f,
+                0.0f,
+            },
+        }};
+        return true;
+    }
     if (config.profile == "sustained_no_decay_trials") {
         config.slots = {{
             {
@@ -949,6 +1003,81 @@ int blend_top_k(const std::array<float, 4>& weights, const std::array<Slot, 4>& 
     float value = 0.0f;
     for (size_t i = 0; i < weights.size(); ++i) value += weights[i] * slots[i].top_k;
     return static_cast<int>(std::lround(value));
+}
+
+double clamp01(double value) {
+    return std::clamp(value, 0.0, 1.0);
+}
+
+double smoothstep(double value) {
+    double x = clamp01(value);
+    return x * x * (3.0 - 2.0 * x);
+}
+
+double render_progress(double time_seconds, const RenderConfig& config) {
+    double duration = config.duration_seconds > 0.0
+        ? config.duration_seconds
+        : std::max(0.001, config.segment_seconds * 4.0);
+    return clamp01(time_seconds / duration);
+}
+
+float control_cfg_musiccoca(const std::array<float, 4>& weights,
+                            const std::array<Slot, 4>& slots,
+                            double time_seconds,
+                            const RenderConfig& config) {
+    if (config.control_mode == "ambient_crescendo") {
+        double rise = smoothstep(render_progress(time_seconds, config));
+        return static_cast<float>(5.8 + 2.0 * rise);
+    }
+    return blend_float(weights, slots, &Slot::cfg_musiccoca);
+}
+
+float control_cfg_notes(const std::array<float, 4>& weights,
+                        const std::array<Slot, 4>& slots,
+                        double time_seconds,
+                        const RenderConfig& config) {
+    if (config.control_mode == "ambient_crescendo") {
+        double rise = smoothstep(render_progress(time_seconds, config));
+        return static_cast<float>(5.6 + 0.8 * rise);
+    }
+    return blend_float(weights, slots, &Slot::cfg_notes);
+}
+
+float control_cfg_drums(const std::array<float, 4>& weights,
+                        const std::array<Slot, 4>& slots,
+                        double time_seconds,
+                        const RenderConfig& config) {
+    (void)time_seconds;
+    if (config.control_mode == "ambient_crescendo") {
+        return 0.0f;
+    }
+    return blend_float(weights, slots, &Slot::cfg_drums);
+}
+
+float control_temperature(const std::array<float, 4>& weights,
+                          const std::array<Slot, 4>& slots,
+                          double time_seconds,
+                          const RenderConfig& config) {
+    if (config.control_mode == "ambient_crescendo") {
+        double x = render_progress(time_seconds, config);
+        double slow_motion = 0.5 + 0.5 * std::sin(2.0 * kPi * (0.65 * x + 0.13));
+        double value = 0.56 + 0.16 * smoothstep(x) + 0.055 * slow_motion;
+        return static_cast<float>(std::clamp(value, 0.56, 0.80));
+    }
+    return blend_float(weights, slots, &Slot::temperature);
+}
+
+int control_top_k(const std::array<float, 4>& weights,
+                  const std::array<Slot, 4>& slots,
+                  double time_seconds,
+                  const RenderConfig& config) {
+    if (config.control_mode == "ambient_crescendo") {
+        double x = render_progress(time_seconds, config);
+        double slow_motion = 0.5 + 0.5 * std::sin(2.0 * kPi * (0.85 * x + 0.31));
+        double value = 40.0 + 52.0 * smoothstep(x) + 12.0 * slow_motion;
+        return static_cast<int>(std::lround(std::clamp(value, 40.0, 104.0)));
+    }
+    return blend_top_k(weights, slots);
 }
 
 std::vector<int> active_notes_at(const MidiData& midi, double time_seconds) {
@@ -1526,6 +1655,7 @@ bool write_report(const std::filesystem::path& path,
     out << "  \"midi_path\": \"" << json_escape(config.midi_path.string()) << "\",\n";
     out << "  \"profile\": \"" << json_escape(config.profile) << "\",\n";
     out << "  \"weight_mode\": \"" << json_escape(config.weight_mode) << "\",\n";
+    out << "  \"control_mode\": \"" << json_escape(config.control_mode) << "\",\n";
     out << "  \"solo_slot\": " << config.solo_slot << ",\n";
     out << "  \"weights_output\": \"" << json_escape(config.weights_path.string()) << "\",\n";
     out << "  \"prompt_library\": \"" << json_escape(config.prompt_library_path.string()) << "\",\n";
@@ -1557,9 +1687,9 @@ bool write_report(const std::filesystem::path& path,
     out << "  },\n";
     out << "  \"control_roles\": {\n";
     out << "    \"primary\": \"prompt embedding mix via reblend_musiccoca_tokens\",\n";
-    out << "    \"secondary\": \"cfg_musiccoca / cfg_notes / cfg_drums\",\n";
-    out << "    \"expression\": \"temperature\",\n";
-    out << "    \"exploration\": \"top_k\",\n";
+    out << "    \"secondary\": \"cfg_musiccoca / cfg_notes / cfg_drums, optionally shaped by control_mode\",\n";
+    out << "    \"expression\": \"temperature, optionally shaped by control_mode\",\n";
+    out << "    \"exploration\": \"top_k, optionally shaped by control_mode\",\n";
     out << "    \"stability\": \"fixed 25 Hz frames / 1920 sample chunks\",\n";
     out << "    \"midi\": \"MLXEngine::set_note_on/off -> MidiNoteTracker -> generate_frame\"\n";
     out << "  },\n";
@@ -1569,7 +1699,8 @@ bool write_report(const std::filesystem::path& path,
         int end = std::min(total_frames, static_cast<int>(std::lround((segment + 1) * config.segment_seconds * kSampleRate)));
         SegmentMetrics metrics = metrics_segment(interleaved, start, end);
         auto notes = active_notes_at(midi, segment * config.segment_seconds);
-        auto weights = prompt_weights(segment * config.segment_seconds, config);
+        double segment_time = segment * config.segment_seconds;
+        auto weights = prompt_weights(segment_time, config);
         out << "    {\n";
         out << "      \"segment\": " << (segment + 1) << ",\n";
         out << "      \"slot_id\": \"" << config.slots[segment].id << "\",\n";
@@ -1577,11 +1708,11 @@ bool write_report(const std::filesystem::path& path,
         out << "      \"prompt\": \"" << json_escape(config.slots[segment].prompt) << "\",\n";
         out << "      \"guide_kind\": \"" << json_escape(config.slots[segment].guide_kind) << "\",\n";
         out << "      \"weight\": " << weights[segment] << ",\n";
-        out << "      \"cfg_musiccoca\": " << config.slots[segment].cfg_musiccoca << ",\n";
-        out << "      \"cfg_notes\": " << config.slots[segment].cfg_notes << ",\n";
-        out << "      \"cfg_drums\": " << config.slots[segment].cfg_drums << ",\n";
-        out << "      \"temperature\": " << config.slots[segment].temperature << ",\n";
-        out << "      \"top_k\": " << config.slots[segment].top_k << ",\n";
+        out << "      \"cfg_musiccoca\": " << control_cfg_musiccoca(weights, config.slots, segment_time, config) << ",\n";
+        out << "      \"cfg_notes\": " << control_cfg_notes(weights, config.slots, segment_time, config) << ",\n";
+        out << "      \"cfg_drums\": " << control_cfg_drums(weights, config.slots, segment_time, config) << ",\n";
+        out << "      \"temperature\": " << control_temperature(weights, config.slots, segment_time, config) << ",\n";
+        out << "      \"top_k\": " << control_top_k(weights, config.slots, segment_time, config) << ",\n";
         out << "      \"rms\": " << metrics.rms << ",\n";
         out << "      \"peak\": " << metrics.peak << ",\n";
         out << "      \"active_note_names\": [";
@@ -1613,6 +1744,7 @@ bool write_weight_frames(const std::filesystem::path& path,
     out << "  \"schema\": \"mrt-cpp-prompt-weight-frames-v1\",\n";
     out << "  \"profile\": \"" << json_escape(config.profile) << "\",\n";
     out << "  \"weight_mode\": \"" << json_escape(config.weight_mode) << "\",\n";
+    out << "  \"control_mode\": \"" << json_escape(config.control_mode) << "\",\n";
     out << "  \"solo_slot\": " << config.solo_slot << ",\n";
     out << "  \"bpm\": " << config.bpm << ",\n";
     out << "  \"duration_seconds\": " << config.duration_seconds << ",\n";
@@ -1677,11 +1809,11 @@ bool write_weight_frames(const std::filesystem::path& path,
             << "\", \"" << json_escape(active_slots[3].label) << "\"]"
             << ", \"weights\": [" << weights[0] << ", " << weights[1] << ", "
             << weights[2] << ", " << weights[3] << "]"
-            << ", \"cfg_musiccoca\": " << blend_float(weights, active_slots, &Slot::cfg_musiccoca)
-            << ", \"cfg_notes\": " << blend_float(weights, active_slots, &Slot::cfg_notes)
-            << ", \"cfg_drums\": " << blend_float(weights, active_slots, &Slot::cfg_drums)
-            << ", \"temperature\": " << blend_float(weights, active_slots, &Slot::temperature)
-            << ", \"top_k\": " << blend_top_k(weights, active_slots)
+            << ", \"cfg_musiccoca\": " << control_cfg_musiccoca(weights, active_slots, time_seconds, config)
+            << ", \"cfg_notes\": " << control_cfg_notes(weights, active_slots, time_seconds, config)
+            << ", \"cfg_drums\": " << control_cfg_drums(weights, active_slots, time_seconds, config)
+            << ", \"temperature\": " << control_temperature(weights, active_slots, time_seconds, config)
+            << ", \"top_k\": " << control_top_k(weights, active_slots, time_seconds, config)
             << "}" << (frame + 1 == frame_count ? "\n" : ",\n");
     }
     out << "  ]\n";
@@ -1736,9 +1868,11 @@ void print_usage(const char* argv0) {
         "  --resources PATH         Resource dir containing musiccoca/\n"
         "  --profile NAME           clear_extreme, microcinematic_footwork, negative_space_club,\n"
         "                           glass_trap_pressure, metallic_ambient_bounce,\n"
-        "                           sustained_synth_textures, or sustained_no_decay_trials\n"
+        "                           sustained_synth_textures, sustained_no_decay_trials,\n"
+        "                           or dirty_cinematic_ambient_cm9\n"
         "  --weight-mode NAME       sequential, solo, modulated, polyrhythm, loop_sine,\n"
         "                           meter_sine, or page_sine\n"
+        "  --control-mode NAME      slot_blend or ambient_crescendo\n"
         "  --solo-slot INDEX        1-4 prompt slot used when --weight-mode solo\n"
         "  --weights-output PATH    Output frame-level prompt weight JSON\n"
         "  --prompt-library PATH    TSV library of prompts to page through four at a time\n"
@@ -1777,6 +1911,8 @@ bool parse_args(int argc, char** argv, RenderConfig& config) {
             config.profile = need_value("--profile");
         } else if (arg == "--weight-mode") {
             config.weight_mode = need_value("--weight-mode");
+        } else if (arg == "--control-mode") {
+            config.control_mode = need_value("--control-mode");
         } else if (arg == "--solo-slot") {
             config.solo_slot = std::stoi(need_value("--solo-slot")) - 1;
         } else if (arg == "--weights-output") {
@@ -1824,6 +1960,11 @@ int main(int argc, char** argv) {
         config.weight_mode != "meter_sine" &&
         config.weight_mode != "page_sine") {
         std::fprintf(stderr, "Unknown weight mode: %s\n", config.weight_mode.c_str());
+        return 1;
+    }
+    if (config.control_mode != "slot_blend" &&
+        config.control_mode != "ambient_crescendo") {
+        std::fprintf(stderr, "Unknown control mode: %s\n", config.control_mode.c_str());
         return 1;
     }
     config.solo_slot = std::clamp(config.solo_slot, 0, 3);
@@ -1938,11 +2079,11 @@ int main(int argc, char** argv) {
                 std::fprintf(stderr, "prompt reblend failed at frame %d\n", frame);
                 return 1;
             }
-            engine.set_cfg_musiccoca(blend_float(weights4, current_slots, &Slot::cfg_musiccoca));
-            engine.set_cfg_notes(blend_float(weights4, current_slots, &Slot::cfg_notes));
-            engine.set_cfg_drums(blend_float(weights4, current_slots, &Slot::cfg_drums));
-            engine.set_temperature(blend_float(weights4, current_slots, &Slot::temperature));
-            engine.set_top_k(blend_top_k(weights4, current_slots));
+            engine.set_cfg_musiccoca(control_cfg_musiccoca(weights4, current_slots, time_seconds, config));
+            engine.set_cfg_notes(control_cfg_notes(weights4, current_slots, time_seconds, config));
+            engine.set_cfg_drums(control_cfg_drums(weights4, current_slots, time_seconds, config));
+            engine.set_temperature(control_temperature(weights4, current_slots, time_seconds, config));
+            engine.set_top_k(control_top_k(weights4, current_slots, time_seconds, config));
 
             if (!engine.generate_frame(L.data(), R.data())) {
                 std::fprintf(stderr, "generate_frame failed at frame %d\n", frame);

@@ -263,3 +263,36 @@ ffmpeg -y \
 The expected verification is: 100.0 second WAV, `non_silent=true`, no quiet
 windows after 3 seconds, 6000 weight frames at 60 fps, 25 prompt pages, and
 100 unique prompt IDs used by active frames.
+
+### Dirty Cinematic Cm9 64-Bar Test
+
+This test renders one 64-bar, 120 BPM Cm9 held-chord pass with four prompts in
+one set: dirty analog drone, cinematic noise floor, frozen glitch texture, and
+dirty spectral glass pad. The prompts explicitly avoid drums, percussion,
+arpeggios, sequencer patterns, rhythmic pulses, tremolo, delay taps, vocals,
+drops, fade-outs, and silence.
+
+The control matrix is:
+
+- Primary control: prompt embedding mix through `modulated` prompt weights.
+- Secondary control: `ambient_crescendo` CFG curve, rising toward the second
+  half (`cfg_musiccoca` 5.8 to 7.8, `cfg_notes` 5.6 to 6.4).
+- Expression control: temperature moves slowly in a restrained ambient range.
+- Exploration control: top-k moves slowly in a restrained ambient range.
+- Stability control: fixed 25 Hz frames / 1920 sample chunks.
+
+```bash
+TOOLCHAINS=com.apple.dt.toolchain.Metal.32023.883 \
+  DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
+  cmake --build build --target mrt2_midi_prompt_diagnostic -j 8
+DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
+  TOOLCHAINS=com.apple.dt.toolchain.Metal.32023.883 \
+  python3 experiments/polyrhythm_prompt_modulation/run_dirty_cinematic_cm9_64bar_test.py
+```
+
+Generated WAV, 60 fps weight JSON, audio activity check, and graph/audio
+preview MP4 are written to:
+
+```text
+outputs/polyrhythm_prompt_modulation/dirty_cinematic_cm9_64bar/
+```
