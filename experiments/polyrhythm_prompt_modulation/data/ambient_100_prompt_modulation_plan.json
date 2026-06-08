@@ -1,0 +1,614 @@
+{
+  "schema": "mrt-ambient-100-prompt-modulation-plan-v1",
+  "prompt_library": "experiments/polyrhythm_prompt_modulation/data/ambient_100_prompt_library.json",
+  "prompt_library_tsv": "experiments/polyrhythm_prompt_modulation/data/ambient_100_prompt_library.tsv",
+  "midi": "outputs/polyrhythm_prompt_modulation/ambient_100_prompt_modulation/ambient_100_cm9_hold_100s.mid",
+  "bpm": 120,
+  "duration_seconds": 100.0,
+  "prompt_page_size": 4,
+  "prompt_page_seconds": 4.0,
+  "weight_mode": "page_sine",
+  "frame_rate": 60,
+  "pages": [
+    {
+      "page": 0,
+      "start_seconds": 0.0,
+      "end_seconds": 4.0,
+      "prompt_ids": [
+        "001_low_voltage_fog",
+        "002_spectral_ice_halo",
+        "003_carbon_room_tone",
+        "004_buffer_dust_field"
+      ],
+      "prompt_names": [
+        "Low Voltage Fog",
+        "Spectral Ice Halo",
+        "Carbon Room Tone",
+        "Buffer Dust Field"
+      ],
+      "weight_mode": "page_sine",
+      "lane_phases": [
+        0.0,
+        0.25,
+        0.5,
+        0.75
+      ]
+    },
+    {
+      "page": 1,
+      "start_seconds": 4.0,
+      "end_seconds": 8.0,
+      "prompt_ids": [
+        "005_bronze_harmonic_mist",
+        "006_feedback_corridor",
+        "007_tape_memory_drift",
+        "008_silver_air_veil"
+      ],
+      "prompt_names": [
+        "Bronze Harmonic Mist",
+        "Feedback Corridor",
+        "Tape Memory Drift",
+        "Silver Air Veil"
+      ],
+      "weight_mode": "page_sine",
+      "lane_phases": [
+        0.0,
+        0.25,
+        0.5,
+        0.75
+      ]
+    },
+    {
+      "page": 2,
+      "start_seconds": 8.0,
+      "end_seconds": 12.0,
+      "prompt_ids": [
+        "009_sine_cathedral_hold",
+        "010_resonant_concrete_bloom",
+        "011_obsidian_filter_lake",
+        "012_glass_phase_weather"
+      ],
+      "prompt_names": [
+        "Sine Cathedral Hold",
+        "Resonant Concrete Bloom",
+        "Obsidian Filter Lake",
+        "Glass Phase Weather"
+      ],
+      "weight_mode": "page_sine",
+      "lane_phases": [
+        0.0,
+        0.25,
+        0.5,
+        0.75
+      ]
+    },
+    {
+      "page": 3,
+      "start_seconds": 12.0,
+      "end_seconds": 16.0,
+      "prompt_ids": [
+        "013_charcoal_sub_horizon",
+        "014_frozen_circuit_rain",
+        "015_chrome_bell_cloud",
+        "016_random_voltage_garden"
+      ],
+      "prompt_names": [
+        "Charcoal Sub Horizon",
+        "Frozen Circuit Rain",
+        "Chrome Bell Cloud",
+        "Random Voltage Garden"
+      ],
+      "weight_mode": "page_sine",
+      "lane_phases": [
+        0.0,
+        0.25,
+        0.5,
+        0.75
+      ]
+    },
+    {
+      "page": 4,
+      "start_seconds": 16.0,
+      "end_seconds": 20.0,
+      "prompt_ids": [
+        "017_cassette_organ_glow",
+        "018_dust_aurora",
+        "019_drawbar_night_sheet",
+        "020_bowed_metal_atmosphere"
+      ],
+      "prompt_names": [
+        "Cassette Organ Glow",
+        "Dust Aurora",
+        "Drawbar Night Sheet",
+        "Bowed Metal Atmosphere"
+      ],
+      "weight_mode": "page_sine",
+      "lane_phases": [
+        0.0,
+        0.25,
+        0.5,
+        0.75
+      ]
+    },
+    {
+      "page": 5,
+      "start_seconds": 20.0,
+      "end_seconds": 24.0,
+      "prompt_ids": [
+        "021_violet_oscillator_tide",
+        "022_prism_wavetable_snow",
+        "023_asphalt_noise_tide",
+        "024_granular_static_bloom"
+      ],
+      "prompt_names": [
+        "Violet Oscillator Tide",
+        "Prism Wavetable Snow",
+        "Asphalt Noise Tide",
+        "Granular Static Bloom"
+      ],
+      "weight_mode": "page_sine",
+      "lane_phases": [
+        0.0,
+        0.25,
+        0.5,
+        0.75
+      ]
+    },
+    {
+      "page": 6,
+      "start_seconds": 24.0,
+      "end_seconds": 28.0,
+      "prompt_ids": [
+        "025_nickel_resonator_sky",
+        "026_folded_feedback_fog",
+        "027_oxide_tape_horizon",
+        "028_hiss_halo"
+      ],
+      "prompt_names": [
+        "Nickel Resonator Sky",
+        "Folded Feedback Fog",
+        "Oxide Tape Horizon",
+        "Hiss Halo"
+      ],
+      "weight_mode": "page_sine",
+      "lane_phases": [
+        0.0,
+        0.25,
+        0.5,
+        0.75
+      ]
+    },
+    {
+      "page": 7,
+      "start_seconds": 28.0,
+      "end_seconds": 32.0,
+      "prompt_ids": [
+        "029_soft_sine_monolith",
+        "030_contact_mic_nebula",
+        "031_dusk_vco_plain",
+        "032_white_spectral_meadow"
+      ],
+      "prompt_names": [
+        "Soft Sine Monolith",
+        "Contact Mic Nebula",
+        "Dusk VCO Plain",
+        "White Spectral Meadow"
+      ],
+      "weight_mode": "page_sine",
+      "lane_phases": [
+        0.0,
+        0.25,
+        0.5,
+        0.75
+      ]
+    },
+    {
+      "page": 8,
+      "start_seconds": 32.0,
+      "end_seconds": 36.0,
+      "prompt_ids": [
+        "033_black_convolution_sea",
+        "034_cracked_freeze_tail",
+        "035_iron_partial_drift",
+        "036_self_oscillation_room"
+      ],
+      "prompt_names": [
+        "Black Convolution Sea",
+        "Cracked Freeze Tail",
+        "Iron Partial Drift",
+        "Self Oscillation Room"
+      ],
+      "weight_mode": "page_sine",
+      "lane_phases": [
+        0.0,
+        0.25,
+        0.5,
+        0.75
+      ]
+    },
+    {
+      "page": 9,
+      "start_seconds": 36.0,
+      "end_seconds": 40.0,
+      "prompt_ids": [
+        "037_magnetic_chorus_field",
+        "038_bowed_airline",
+        "039_pure_organ_fog",
+        "040_tuned_stone_resonance"
+      ],
+      "prompt_names": [
+        "Magnetic Chorus Field",
+        "Bowed Airline",
+        "Pure Organ Fog",
+        "Tuned Stone Resonance"
+      ],
+      "weight_mode": "page_sine",
+      "lane_phases": [
+        0.0,
+        0.25,
+        0.5,
+        0.75
+      ]
+    },
+    {
+      "page": 10,
+      "start_seconds": 40.0,
+      "end_seconds": 44.0,
+      "prompt_ids": [
+        "041_midnight_ladder_drift",
+        "042_halo_formant_cloud",
+        "043_smoke_bandpass_floor",
+        "044_broken_sampler_sheet"
+      ],
+      "prompt_names": [
+        "Midnight Ladder Drift",
+        "Halo Formant Cloud",
+        "Smoke Bandpass Floor",
+        "Broken Sampler Sheet"
+      ],
+      "weight_mode": "page_sine",
+      "lane_phases": [
+        0.0,
+        0.25,
+        0.5,
+        0.75
+      ]
+    },
+    {
+      "page": 11,
+      "start_seconds": 44.0,
+      "end_seconds": 48.0,
+      "prompt_ids": [
+        "045_copper_ring_mist",
+        "046_cv_weather_shelf",
+        "047_worn_loop_chapel",
+        "048_highpass_dust_garden"
+      ],
+      "prompt_names": [
+        "Copper Ring Mist",
+        "CV Weather Shelf",
+        "Worn Loop Chapel",
+        "Highpass Dust Garden"
+      ],
+      "weight_mode": "page_sine",
+      "lane_phases": [
+        0.0,
+        0.25,
+        0.5,
+        0.75
+      ]
+    },
+    {
+      "page": 12,
+      "start_seconds": 48.0,
+      "end_seconds": 52.0,
+      "prompt_ids": [
+        "049_stacked_sine_chapel",
+        "050_concrete_string_hum",
+        "051_basalt_phase_engine",
+        "052_additive_glass_plain"
+      ],
+      "prompt_names": [
+        "Stacked Sine Chapel",
+        "Concrete String Hum",
+        "Basalt Phase Engine",
+        "Additive Glass Plain"
+      ],
+      "weight_mode": "page_sine",
+      "lane_phases": [
+        0.0,
+        0.25,
+        0.5,
+        0.75
+      ]
+    },
+    {
+      "page": 13,
+      "start_seconds": 52.0,
+      "end_seconds": 56.0,
+      "prompt_ids": [
+        "053_sub_pressure_weather",
+        "054_freeze_index_field",
+        "055_platinum_fm_halo",
+        "056_spring_feedback_bloom"
+      ],
+      "prompt_names": [
+        "Sub Pressure Weather",
+        "Freeze Index Field",
+        "Platinum FM Halo",
+        "Spring Feedback Bloom"
+      ],
+      "weight_mode": "page_sine",
+      "lane_phases": [
+        0.0,
+        0.25,
+        0.5,
+        0.75
+      ]
+    },
+    {
+      "page": 14,
+      "start_seconds": 56.0,
+      "end_seconds": 60.0,
+      "prompt_ids": [
+        "057_velvet_tape_organ",
+        "058_wind_hiss_sheet",
+        "059_static_drawbar_sea",
+        "060_resonator_bank_fog"
+      ],
+      "prompt_names": [
+        "Velvet Tape Organ",
+        "Wind Hiss Sheet",
+        "Static Drawbar Sea",
+        "Resonator Bank Fog"
+      ],
+      "weight_mode": "page_sine",
+      "lane_phases": [
+        0.0,
+        0.25,
+        0.5,
+        0.75
+      ]
+    },
+    {
+      "page": 15,
+      "start_seconds": 60.0,
+      "end_seconds": 64.0,
+      "prompt_ids": [
+        "061_moss_voltage_cathedral",
+        "062_blue_spectral_lens",
+        "063_cavern_noise_bloom",
+        "064_broken_bit_halo"
+      ],
+      "prompt_names": [
+        "Moss Voltage Cathedral",
+        "Blue Spectral Lens",
+        "Cavern Noise Bloom",
+        "Broken Bit Halo"
+      ],
+      "weight_mode": "page_sine",
+      "lane_phases": [
+        0.0,
+        0.25,
+        0.5,
+        0.75
+      ]
+    },
+    {
+      "page": 16,
+      "start_seconds": 64.0,
+      "end_seconds": 68.0,
+      "prompt_ids": [
+        "065_tungsten_overtone_garden",
+        "066_foldback_resonance_room",
+        "067_flutter_memory_bed",
+        "068_needle_air_fog"
+      ],
+      "prompt_names": [
+        "Tungsten Overtone Garden",
+        "Foldback Resonance Room",
+        "Flutter Memory Bed",
+        "Needle Air Fog"
+      ],
+      "weight_mode": "page_sine",
+      "lane_phases": [
+        0.0,
+        0.25,
+        0.5,
+        0.75
+      ]
+    },
+    {
+      "page": 17,
+      "start_seconds": 68.0,
+      "end_seconds": 72.0,
+      "prompt_ids": [
+        "069_soft_partial_organ",
+        "070_bowed_concrete_tail",
+        "071_slate_oscillator_lake",
+        "072_crystal_freeze_bloom"
+      ],
+      "prompt_names": [
+        "Soft Partial Organ",
+        "Bowed Concrete Tail",
+        "Slate Oscillator Lake",
+        "Crystal Freeze Bloom"
+      ],
+      "weight_mode": "page_sine",
+      "lane_phases": [
+        0.0,
+        0.25,
+        0.5,
+        0.75
+      ]
+    },
+    {
+      "page": 18,
+      "start_seconds": 72.0,
+      "end_seconds": 76.0,
+      "prompt_ids": [
+        "073_distant_smoke_floor",
+        "074_pixel_buffer_chapel",
+        "075_mercury_comb_cloud",
+        "076_patch_cable_weather"
+      ],
+      "prompt_names": [
+        "Distant Smoke Floor",
+        "Pixel Buffer Chapel",
+        "Mercury Comb Cloud",
+        "Patch Cable Weather"
+      ],
+      "weight_mode": "page_sine",
+      "lane_phases": [
+        0.0,
+        0.25,
+        0.5,
+        0.75
+      ]
+    },
+    {
+      "page": 19,
+      "start_seconds": 76.0,
+      "end_seconds": 80.0,
+      "prompt_ids": [
+        "077_old_preamp_horizon",
+        "078_pale_noise_veil",
+        "079_sustained_sine_weather",
+        "080_metal_contact_fog"
+      ],
+      "prompt_names": [
+        "Old Preamp Horizon",
+        "Pale Noise Veil",
+        "Sustained Sine Weather",
+        "Metal Contact Fog"
+      ],
+      "weight_mode": "page_sine",
+      "lane_phases": [
+        0.0,
+        0.25,
+        0.5,
+        0.75
+      ]
+    },
+    {
+      "page": 20,
+      "start_seconds": 80.0,
+      "end_seconds": 84.0,
+      "prompt_ids": [
+        "081_ash_vco_monolith",
+        "082_polar_wavetable_halo",
+        "083_lowpass_carbon_sea",
+        "084_glitch_dust_monolith"
+      ],
+      "prompt_names": [
+        "Ash VCO Monolith",
+        "Polar Wavetable Halo",
+        "Lowpass Carbon Sea",
+        "Glitch Dust Monolith"
+      ],
+      "weight_mode": "page_sine",
+      "lane_phases": [
+        0.0,
+        0.25,
+        0.5,
+        0.75
+      ]
+    },
+    {
+      "page": 21,
+      "start_seconds": 84.0,
+      "end_seconds": 88.0,
+      "prompt_ids": [
+        "085_quiet_ring_cathedral",
+        "086_fold_voltage_undertow",
+        "087_tape_oxide_sheet",
+        "088_high_air_cathedral"
+      ],
+      "prompt_names": [
+        "Quiet Ring Cathedral",
+        "Fold Voltage Undertow",
+        "Tape Oxide Sheet",
+        "High Air Cathedral"
+      ],
+      "weight_mode": "page_sine",
+      "lane_phases": [
+        0.0,
+        0.25,
+        0.5,
+        0.75
+      ]
+    },
+    {
+      "page": 22,
+      "start_seconds": 88.0,
+      "end_seconds": 92.0,
+      "prompt_ids": [
+        "089_still_organ_plain",
+        "090_resonant_wire_bloom",
+        "091_shadow_oscillator_fog",
+        "092_frost_glass_undertow"
+      ],
+      "prompt_names": [
+        "Still Organ Plain",
+        "Resonant Wire Bloom",
+        "Shadow Oscillator Fog",
+        "Frost Glass Undertow"
+      ],
+      "weight_mode": "page_sine",
+      "lane_phases": [
+        0.0,
+        0.25,
+        0.5,
+        0.75
+      ]
+    },
+    {
+      "page": 23,
+      "start_seconds": 92.0,
+      "end_seconds": 96.0,
+      "prompt_ids": [
+        "093_cinema_noise_chapel",
+        "094_frozen_grain_lake",
+        "095_alloy_fm_weather",
+        "096_feedback_spring_field"
+      ],
+      "prompt_names": [
+        "Cinema Noise Chapel",
+        "Frozen Grain Lake",
+        "Alloy FM Weather",
+        "Feedback Spring Field"
+      ],
+      "weight_mode": "page_sine",
+      "lane_phases": [
+        0.0,
+        0.25,
+        0.5,
+        0.75
+      ]
+    },
+    {
+      "page": 24,
+      "start_seconds": 96.0,
+      "end_seconds": 100.0,
+      "prompt_ids": [
+        "097_loop_velvet_hall",
+        "098_dust_phase_halo",
+        "099_pure_sine_horizon",
+        "100_bowed_resonator_night"
+      ],
+      "prompt_names": [
+        "Loop Velvet Hall",
+        "Dust Phase Halo",
+        "Pure Sine Horizon",
+        "Bowed Resonator Night"
+      ],
+      "weight_mode": "page_sine",
+      "lane_phases": [
+        0.0,
+        0.25,
+        0.5,
+        0.75
+      ]
+    }
+  ]
+}

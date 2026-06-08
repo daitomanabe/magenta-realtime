@@ -31,6 +31,13 @@ def load_font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
     return ImageFont.load_default()
 
 
+def compact_label(text: str, limit: int = 34) -> str:
+    text = " ".join(text.split())
+    if len(text) <= limit:
+        return text
+    return text[: max(0, limit - 3)] + "..."
+
+
 def draw_frame(data: dict, frame_index: int, width: int, height: int) -> Image.Image:
     frames = data["frames"]
     slots = data["slots"]
@@ -39,6 +46,9 @@ def draw_frame(data: dict, frame_index: int, width: int, height: int) -> Image.I
     weight_mode = data.get("weight_mode", "weights")
     current = frames[frame_index]
     weights = current["weights"]
+    active_labels = current.get("active_slot_labels")
+    active_ids = current.get("active_slot_ids")
+    prompt_page = current.get("prompt_page")
 
     image = Image.new("RGB", (width, height), (12, 14, 18))
     draw = ImageDraw.Draw(image)
@@ -62,6 +72,9 @@ def draw_frame(data: dict, frame_index: int, width: int, height: int) -> Image.I
               fill=(235, 238, 242), font=title_font)
     draw.text((margin, 62), data.get("profile", "sustained_synth_textures"),
               fill=(150, 156, 168), font=small_font)
+    if prompt_page is not None:
+        draw.text((bar_left, 62), f"prompt page {prompt_page + 1}",
+                  fill=(190, 198, 212), font=small_font)
 
     draw.rectangle((graph_left, graph_top, graph_right, graph_bottom),
                    outline=(76, 82, 94), width=2)
@@ -84,8 +97,12 @@ def draw_frame(data: dict, frame_index: int, width: int, height: int) -> Image.I
         y = graph_bottom - int(graph_height * w)
         return x, y
 
+    curve_stride = max(1, len(frames) // 1400)
+    curve_indices = list(range(0, len(frames), curve_stride))
+    if curve_indices[-1] != len(frames) - 1:
+        curve_indices.append(len(frames) - 1)
     for slot_index, color in enumerate(COLORS):
-        points = [point(i, slot_index) for i in range(len(frames))]
+        points = [point(i, slot_index) for i in curve_indices]
         if len(points) > 1:
             draw.line(points, fill=color, width=4)
 
@@ -101,7 +118,13 @@ def draw_frame(data: dict, frame_index: int, width: int, height: int) -> Image.I
     for slot_index, slot in enumerate(slots):
         y = bar_top + slot_index * row_h
         color = COLORS[slot_index]
-        label = slot.get("label") or slot.get("id") or f"Slot {slot_index + 1}"
+        if active_labels and slot_index < len(active_labels):
+            label = active_labels[slot_index]
+        else:
+            label = slot.get("label") or slot.get("id") or f"Slot {slot_index + 1}"
+        if active_ids and slot_index < len(active_ids):
+            label = f"{active_ids[slot_index]} / {label}"
+        label = compact_label(label)
         draw.text((bar_left, y), f"{slot_index + 1}. {label}",
                   fill=(225, 228, 235), font=small_font)
         draw.rectangle((bar_left, y + 30, bar_right, y + 58),
@@ -119,6 +142,8 @@ def draw_frame(data: dict, frame_index: int, width: int, height: int) -> Image.I
 
 
 def render_video(weights_path: Path, output_path: Path, width: int, height: int) -> None:
+    weights_path = weights_path.resolve()
+    output_path = output_path.resolve()
     data = json.loads(weights_path.read_text())
     fps = int(round(float(data.get("frame_rate", 25))))
     frames = data["frames"]

@@ -213,3 +213,53 @@ and the manifest are written to:
 ```text
 outputs/polyrhythm_prompt_modulation/sustained_synth_prompt_sources/
 ```
+
+### Ambient 100 Prompt Paging
+
+This workflow creates 100 beatless ambient synth prompts, stores them as JSON,
+Markdown, and TSV, then renders a 100 second Cm9 ambient pass that pages through
+all prompts four at a time. Each four-prompt page lasts 4 seconds, and the
+`page_sine` weight mode applies four phase-shifted sine modulators inside the
+page while CFG, temperature, and top-k follow the active weighted prompts.
+
+```bash
+python3 experiments/polyrhythm_prompt_modulation/generate_ambient_100_prompt_library.py
+TOOLCHAINS=com.apple.dt.toolchain.Metal.32023.883 \
+  DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
+  cmake --build build --target mrt2_midi_prompt_diagnostic -j 8
+DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
+  TOOLCHAINS=com.apple.dt.toolchain.Metal.32023.883 \
+  build/examples/midi_prompt_diagnostic/mrt2_midi_prompt_diagnostic \
+    --midi outputs/polyrhythm_prompt_modulation/ambient_100_prompt_modulation/ambient_100_cm9_hold_100s.mid \
+    --profile sustained_synth_textures \
+    --duration 100 \
+    --weight-mode page_sine \
+    --prompt-page-seconds 4 \
+    --prompt-library experiments/polyrhythm_prompt_modulation/data/ambient_100_prompt_library.tsv \
+    --output outputs/polyrhythm_prompt_modulation/ambient_100_prompt_modulation/ambient_100_prompt_page_sine_modulation_100s.wav \
+    --report outputs/polyrhythm_prompt_modulation/ambient_100_prompt_modulation/ambient_100_prompt_page_sine_modulation_100s.report.json \
+    --weights-output outputs/polyrhythm_prompt_modulation/ambient_100_prompt_modulation/ambient_100_prompt_page_sine_modulation_100s.weights.json \
+    --text-prompts
+```
+
+The full 60 fps modulation data remains in `.weights.json`. For preview video,
+downsample the weights to 10 fps and render the graph, then mux the WAV:
+
+```bash
+python3 experiments/polyrhythm_prompt_modulation/downsample_prompt_weight_frames.py \
+  --input outputs/polyrhythm_prompt_modulation/ambient_100_prompt_modulation/ambient_100_prompt_page_sine_modulation_100s.weights.json \
+  --output outputs/polyrhythm_prompt_modulation/ambient_100_prompt_modulation/ambient_100_prompt_page_sine_modulation_100s.weights.preview_10fps.json \
+  --fps 10
+python3 experiments/polyrhythm_prompt_modulation/render_prompt_weight_graph_video.py \
+  --weights outputs/polyrhythm_prompt_modulation/ambient_100_prompt_modulation/ambient_100_prompt_page_sine_modulation_100s.weights.preview_10fps.json \
+  --output outputs/polyrhythm_prompt_modulation/ambient_100_prompt_modulation/ambient_100_prompt_page_sine_modulation_100s.graph_10fps.mp4
+ffmpeg -y \
+  -i outputs/polyrhythm_prompt_modulation/ambient_100_prompt_modulation/ambient_100_prompt_page_sine_modulation_100s.graph_10fps.mp4 \
+  -i outputs/polyrhythm_prompt_modulation/ambient_100_prompt_modulation/ambient_100_prompt_page_sine_modulation_100s.wav \
+  -map 0:v:0 -map 1:a:0 -c:v copy -c:a aac -b:a 192k -shortest -movflags +faststart \
+  outputs/polyrhythm_prompt_modulation/ambient_100_prompt_modulation/ambient_100_prompt_page_sine_modulation_100s.graph_audio_10fps.mp4
+```
+
+The expected verification is: 100.0 second WAV, `non_silent=true`, no quiet
+windows after 3 seconds, 6000 weight frames at 60 fps, 25 prompt pages, and
+100 unique prompt IDs used by active frames.

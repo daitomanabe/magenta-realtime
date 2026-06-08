@@ -182,6 +182,9 @@ struct RenderConfig {
     float target_rms = 0.045f;
     double preroll_seconds = 2.0;
     std::filesystem::path weights_path;
+    std::filesystem::path prompt_library_path;
+    double prompt_page_seconds = 4.0;
+    std::vector<Slot> prompt_library;
 };
 
 uint16_t read_u16(const std::vector<uint8_t>& data, size_t& offset) {
@@ -773,6 +776,79 @@ std::array<float, 4> normalize_prompt_weights(std::array<float, 4> weights) {
     return weights;
 }
 
+std::vector<std::string> split_tab_line(const std::string& line) {
+    std::vector<std::string> fields;
+    std::string field;
+    std::istringstream stream(line);
+    while (std::getline(stream, field, '\t')) {
+        fields.push_back(field);
+    }
+    return fields;
+}
+
+std::vector<Slot> load_prompt_library(const std::filesystem::path& path) {
+    std::ifstream file(path);
+    if (!file) throw std::runtime_error("Could not open prompt library: " + path.string());
+
+    std::vector<Slot> slots;
+    std::string line;
+    bool first = true;
+    while (std::getline(file, line)) {
+        if (line.empty()) continue;
+        if (first) {
+            first = false;
+            if (line.rfind("id\t", 0) == 0) continue;
+        }
+        auto fields = split_tab_line(line);
+        if (fields.size() < 10) {
+            throw std::runtime_error("Prompt library row has fewer than 10 fields: " + line);
+        }
+        Slot slot;
+        slot.id = fields[0];
+        slot.label = fields[1];
+        slot.prompt = fields[3];
+        slot.audio_recipe = fields[1] + " text prompt";
+        slot.guide_kind = fields[4];
+        slot.temperature = std::stof(fields[5]);
+        slot.top_k = std::stoi(fields[6]);
+        slot.cfg_musiccoca = std::stof(fields[7]);
+        slot.cfg_notes = std::stof(fields[8]);
+        slot.cfg_drums = std::stof(fields[9]);
+        slots.push_back(std::move(slot));
+    }
+    if (slots.size() < 4) {
+        throw std::runtime_error("Prompt library must contain at least 4 prompts: " + path.string());
+    }
+    return slots;
+}
+
+bool using_prompt_library(const RenderConfig& config) {
+    return !config.prompt_library.empty();
+}
+
+int prompt_page_count(const RenderConfig& config) {
+    if (!using_prompt_library(config)) return 1;
+    return static_cast<int>((config.prompt_library.size() + 3) / 4);
+}
+
+int prompt_page_for_time(double time_seconds, const RenderConfig& config) {
+    if (!using_prompt_library(config)) return 0;
+    double page_seconds = std::max(0.001, config.prompt_page_seconds);
+    int page = static_cast<int>(time_seconds / page_seconds);
+    return std::clamp(page, 0, prompt_page_count(config) - 1);
+}
+
+std::array<Slot, 4> prompt_slots_for_page(const RenderConfig& config, int page) {
+    if (!using_prompt_library(config)) return config.slots;
+    std::array<Slot, 4> slots = config.slots;
+    int base = std::max(0, page) * 4;
+    for (int lane = 0; lane < 4; ++lane) {
+        int index = (base + lane) % static_cast<int>(config.prompt_library.size());
+        slots[lane] = config.prompt_library[index];
+    }
+    return slots;
+}
+
 std::array<float, 4> prompt_weights(double time_seconds, const RenderConfig& config) {
     if (config.weight_mode == "solo") {
         std::array<float, 4> weights = {0.0f, 0.0f, 0.0f, 0.0f};
@@ -792,6 +868,20 @@ std::array<float, 4> prompt_weights(double time_seconds, const RenderConfig& con
             double phase = 2.0 * kPi * (normalized_time * cycles[i] + phases[i]);
             double lfo = 0.5 + 0.5 * std::sin(phase);
             weights[i] = static_cast<float>(0.04 + std::pow(lfo, 1.8));
+        }
+        return normalize_prompt_weights(weights);
+    }
+
+    if (config.weight_mode == "page_sine") {
+        double page_seconds = std::max(0.001, config.prompt_page_seconds);
+        double local_time = std::fmod(std::max(0.0, time_seconds), page_seconds);
+        double normalized_time = local_time / page_seconds;
+        constexpr std::array<double, 4> phases = {0.00, 0.25, 0.50, 0.75};
+        std::array<float, 4> weights = {0.0f, 0.0f, 0.0f, 0.0f};
+        for (size_t i = 0; i < weights.size(); ++i) {
+            double phase = 2.0 * kPi * (normalized_time + phases[i]);
+            double lfo = 0.5 + 0.5 * std::sin(phase);
+            weights[i] = static_cast<float>(0.018 + std::pow(lfo, 2.4));
         }
         return normalize_prompt_weights(weights);
     }
@@ -1438,6 +1528,9 @@ bool write_report(const std::filesystem::path& path,
     out << "  \"weight_mode\": \"" << json_escape(config.weight_mode) << "\",\n";
     out << "  \"solo_slot\": " << config.solo_slot << ",\n";
     out << "  \"weights_output\": \"" << json_escape(config.weights_path.string()) << "\",\n";
+    out << "  \"prompt_library\": \"" << json_escape(config.prompt_library_path.string()) << "\",\n";
+    out << "  \"prompt_library_size\": " << config.prompt_library.size() << ",\n";
+    out << "  \"prompt_page_seconds\": " << config.prompt_page_seconds << ",\n";
     out << "  \"bpm\": " << config.bpm << ",\n";
     out << "  \"model\": \"" << json_escape(config.model_name) << "\",\n";
     out << "  \"model_path\": \"" << json_escape(model_path) << "\",\n";
@@ -1524,6 +1617,9 @@ bool write_weight_frames(const std::filesystem::path& path,
     out << "  \"bpm\": " << config.bpm << ",\n";
     out << "  \"duration_seconds\": " << config.duration_seconds << ",\n";
     out << "  \"frame_rate\": " << kWeightFrameRate << ",\n";
+    out << "  \"prompt_library\": \"" << json_escape(config.prompt_library_path.string()) << "\",\n";
+    out << "  \"prompt_library_size\": " << config.prompt_library.size() << ",\n";
+    out << "  \"prompt_page_seconds\": " << config.prompt_page_seconds << ",\n";
     if (config.weight_mode == "meter_sine") {
         out << "  \"meter_sine\": [\n";
         out << "    {\"meter\": \"4/4\", \"quarter_note_period\": 4.000000, \"phase_offset\": 0.000000},\n";
@@ -1539,19 +1635,53 @@ bool write_weight_frames(const std::filesystem::path& path,
             << (i == 3 ? "\n" : ",\n");
     }
     out << "  ],\n";
+    out << "  \"prompt_pages\": [\n";
+    int pages = prompt_page_count(config);
+    for (int page = 0; page < pages; ++page) {
+        auto page_slots = prompt_slots_for_page(config, page);
+        out << "    {\"page\": " << page
+            << ", \"start_seconds\": " << (page * config.prompt_page_seconds)
+            << ", \"end_seconds\": " << ((page + 1) * config.prompt_page_seconds)
+            << ", \"prompt_indices\": [";
+        for (int lane = 0; lane < 4; ++lane) {
+            if (lane) out << ", ";
+            out << ((page * 4 + lane) % std::max(1, static_cast<int>(config.prompt_library.size())));
+        }
+        out << "], \"ids\": [";
+        for (int lane = 0; lane < 4; ++lane) {
+            if (lane) out << ", ";
+            out << "\"" << json_escape(page_slots[lane].id) << "\"";
+        }
+        out << "], \"labels\": [";
+        for (int lane = 0; lane < 4; ++lane) {
+            if (lane) out << ", ";
+            out << "\"" << json_escape(page_slots[lane].label) << "\"";
+        }
+        out << "]}" << (page + 1 == pages ? "\n" : ",\n");
+    }
+    out << "  ],\n";
     out << "  \"frames\": [\n";
     for (int frame = 0; frame < frame_count; ++frame) {
         double time_seconds = frame * kWeightFrameSeconds;
+        int page = prompt_page_for_time(time_seconds, config);
+        auto active_slots = prompt_slots_for_page(config, page);
         auto weights = prompt_weights(time_seconds, config);
         out << "    {\"frame\": " << frame
             << ", \"time_seconds\": " << time_seconds
+            << ", \"prompt_page\": " << page
+            << ", \"active_slot_ids\": [\"" << json_escape(active_slots[0].id) << "\", \""
+            << json_escape(active_slots[1].id) << "\", \"" << json_escape(active_slots[2].id)
+            << "\", \"" << json_escape(active_slots[3].id) << "\"]"
+            << ", \"active_slot_labels\": [\"" << json_escape(active_slots[0].label) << "\", \""
+            << json_escape(active_slots[1].label) << "\", \"" << json_escape(active_slots[2].label)
+            << "\", \"" << json_escape(active_slots[3].label) << "\"]"
             << ", \"weights\": [" << weights[0] << ", " << weights[1] << ", "
             << weights[2] << ", " << weights[3] << "]"
-            << ", \"cfg_musiccoca\": " << blend_float(weights, config.slots, &Slot::cfg_musiccoca)
-            << ", \"cfg_notes\": " << blend_float(weights, config.slots, &Slot::cfg_notes)
-            << ", \"cfg_drums\": " << blend_float(weights, config.slots, &Slot::cfg_drums)
-            << ", \"temperature\": " << blend_float(weights, config.slots, &Slot::temperature)
-            << ", \"top_k\": " << blend_top_k(weights, config.slots)
+            << ", \"cfg_musiccoca\": " << blend_float(weights, active_slots, &Slot::cfg_musiccoca)
+            << ", \"cfg_notes\": " << blend_float(weights, active_slots, &Slot::cfg_notes)
+            << ", \"cfg_drums\": " << blend_float(weights, active_slots, &Slot::cfg_drums)
+            << ", \"temperature\": " << blend_float(weights, active_slots, &Slot::temperature)
+            << ", \"top_k\": " << blend_top_k(weights, active_slots)
             << "}" << (frame + 1 == frame_count ? "\n" : ",\n");
     }
     out << "  ]\n";
@@ -1583,6 +1713,19 @@ void wait_for_prompts(MLXEngine& engine, int slot_count) {
     }
 }
 
+void set_text_prompt_slots(MLXEngine& engine, const std::array<Slot, 4>& slots) {
+    std::vector<std::string> prompts;
+    std::vector<float> initial_weights;
+    prompts.reserve(slots.size());
+    initial_weights.reserve(slots.size());
+    for (int i = 0; i < 4; ++i) {
+        prompts.push_back(slots[i].prompt);
+        initial_weights.push_back(i == 0 ? 1.0f : 0.0f);
+    }
+    engine.set_text_prompts(prompts, initial_weights);
+    wait_for_prompts(engine, static_cast<int>(slots.size()));
+}
+
 void print_usage(const char* argv0) {
     std::fprintf(stderr,
         "Usage: %s [options]\n"
@@ -1595,9 +1738,11 @@ void print_usage(const char* argv0) {
         "                           glass_trap_pressure, metallic_ambient_bounce,\n"
         "                           sustained_synth_textures, or sustained_no_decay_trials\n"
         "  --weight-mode NAME       sequential, solo, modulated, polyrhythm, loop_sine,\n"
-        "                           or meter_sine\n"
+        "                           meter_sine, or page_sine\n"
         "  --solo-slot INDEX        1-4 prompt slot used when --weight-mode solo\n"
         "  --weights-output PATH    Output frame-level prompt weight JSON\n"
+        "  --prompt-library PATH    TSV library of prompts to page through four at a time\n"
+        "  --prompt-page-seconds N  Seconds per four-prompt library page (default: 4.0)\n"
         "  --duration SECONDS       Repeat/clip the MIDI progression to this duration\n"
         "  --transition SECONDS     Prompt crossfade duration at segment boundaries\n"
         "  --text-prompts           Use text prompts instead of MIDI-derived audio prompt embeddings\n"
@@ -1636,6 +1781,10 @@ bool parse_args(int argc, char** argv, RenderConfig& config) {
             config.solo_slot = std::stoi(need_value("--solo-slot")) - 1;
         } else if (arg == "--weights-output") {
             config.weights_path = need_value("--weights-output");
+        } else if (arg == "--prompt-library") {
+            config.prompt_library_path = need_value("--prompt-library");
+        } else if (arg == "--prompt-page-seconds") {
+            config.prompt_page_seconds = std::stod(need_value("--prompt-page-seconds"));
         } else if (arg == "--duration") {
             config.duration_seconds = std::stod(need_value("--duration"));
         } else if (arg == "--transition") {
@@ -1672,11 +1821,21 @@ int main(int argc, char** argv) {
         config.weight_mode != "modulated" &&
         config.weight_mode != "polyrhythm" &&
         config.weight_mode != "loop_sine" &&
-        config.weight_mode != "meter_sine") {
+        config.weight_mode != "meter_sine" &&
+        config.weight_mode != "page_sine") {
         std::fprintf(stderr, "Unknown weight mode: %s\n", config.weight_mode.c_str());
         return 1;
     }
     config.solo_slot = std::clamp(config.solo_slot, 0, 3);
+    if (!config.prompt_library_path.empty()) {
+        config.prompt_library = load_prompt_library(config.prompt_library_path);
+        config.slots = prompt_slots_for_page(config, 0);
+        config.use_audio_prompts = false;
+        if (config.prompt_page_seconds <= 0.0) {
+            std::fprintf(stderr, "--prompt-page-seconds must be positive\n");
+            return 1;
+        }
+    }
 
     try {
         MidiData midi = parse_midi(config.midi_path);
@@ -1724,14 +1883,7 @@ int main(int argc, char** argv) {
                 return 1;
             }
         } else {
-            std::vector<std::string> prompts;
-            std::vector<float> initial_weights;
-            for (int i = 0; i < 4; ++i) {
-                prompts.push_back(config.slots[i].prompt);
-                initial_weights.push_back(i == 0 ? 1.0f : 0.0f);
-            }
-            engine.set_text_prompts(prompts, initial_weights);
-            wait_for_prompts(engine, static_cast<int>(config.slots.size()));
+            set_text_prompt_slots(engine, config.slots);
         }
 
         engine.set_onset_mode(1);
@@ -1758,6 +1910,8 @@ int main(int argc, char** argv) {
         std::vector<float> interleaved;
         interleaved.reserve(static_cast<size_t>(frame_count) * kFrameSamples * 2);
         size_t next_event = 0;
+        int current_prompt_page = 0;
+        std::array<Slot, 4> current_slots = config.slots;
         for (int frame = 0; frame < frame_count; ++frame) {
             double time_seconds = frame * kFrameSeconds;
             while (next_event < midi.events.size() &&
@@ -1770,16 +1924,25 @@ int main(int argc, char** argv) {
                 ++next_event;
             }
 
+            if (using_prompt_library(config)) {
+                int next_prompt_page = prompt_page_for_time(time_seconds, config);
+                if (next_prompt_page != current_prompt_page) {
+                    current_prompt_page = next_prompt_page;
+                    current_slots = prompt_slots_for_page(config, current_prompt_page);
+                    set_text_prompt_slots(engine, current_slots);
+                }
+            }
+
             auto weights4 = prompt_weights(time_seconds, config);
             if (!reblend_prompt_weights(engine, weights4, config.use_audio_prompts)) {
                 std::fprintf(stderr, "prompt reblend failed at frame %d\n", frame);
                 return 1;
             }
-            engine.set_cfg_musiccoca(blend_float(weights4, config.slots, &Slot::cfg_musiccoca));
-            engine.set_cfg_notes(blend_float(weights4, config.slots, &Slot::cfg_notes));
-            engine.set_cfg_drums(blend_float(weights4, config.slots, &Slot::cfg_drums));
-            engine.set_temperature(blend_float(weights4, config.slots, &Slot::temperature));
-            engine.set_top_k(blend_top_k(weights4, config.slots));
+            engine.set_cfg_musiccoca(blend_float(weights4, current_slots, &Slot::cfg_musiccoca));
+            engine.set_cfg_notes(blend_float(weights4, current_slots, &Slot::cfg_notes));
+            engine.set_cfg_drums(blend_float(weights4, current_slots, &Slot::cfg_drums));
+            engine.set_temperature(blend_float(weights4, current_slots, &Slot::temperature));
+            engine.set_top_k(blend_top_k(weights4, current_slots));
 
             if (!engine.generate_frame(L.data(), R.data())) {
                 std::fprintf(stderr, "generate_frame failed at frame %d\n", frame);
