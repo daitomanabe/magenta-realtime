@@ -79,7 +79,7 @@ EXPERIMENTS = [
     },
     {
         "stage": "no_decay_trials",
-        "name": "08_no_decay_constant_vco_hold_32bars",
+        "name": "08_no_decay_unbroken_synth_pad_32bars",
         "profile": "sustained_no_decay_trials",
         "duration": CM9_32_DURATION,
         "weight_mode": "solo",
@@ -90,7 +90,7 @@ EXPERIMENTS = [
     },
     {
         "stage": "no_decay_trials",
-        "name": "09_no_decay_infinite_freeze_pad_32bars",
+        "name": "09_no_decay_frozen_synth_sheet_32bars",
         "profile": "sustained_no_decay_trials",
         "duration": CM9_32_DURATION,
         "weight_mode": "solo",
@@ -101,7 +101,7 @@ EXPERIMENTS = [
     },
     {
         "stage": "no_decay_trials",
-        "name": "10_no_decay_unbroken_noise_floor_32bars",
+        "name": "10_no_decay_string_machine_hold_32bars",
         "profile": "sustained_no_decay_trials",
         "duration": CM9_32_DURATION,
         "weight_mode": "solo",
@@ -112,7 +112,7 @@ EXPERIMENTS = [
     },
     {
         "stage": "no_decay_trials",
-        "name": "11_no_decay_self_sustaining_feedback_32bars",
+        "name": "11_no_decay_sine_stack_sustain_32bars",
         "profile": "sustained_no_decay_trials",
         "duration": CM9_32_DURATION,
         "weight_mode": "solo",

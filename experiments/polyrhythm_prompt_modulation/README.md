@@ -194,8 +194,10 @@ activity check JSON to catch accidental dropouts after generation.
 The `no_decay_trials` stage uses a separate `sustained_no_decay_trials` profile
 to test whether prompt wording alone can keep the sound active for the full
 32 bars. It records `first_3s_rms`, `last_8s_median_rms`, and their ratio in
-each `.audio_check.json`; feedback-freeze, spectral-freeze, and noise-floor
-phrasing are more reliable than simply asking for a constant oscillator hold.
+each `.audio_check.json`. The revised beatless synth-pad prompts avoid granular
+texture, BBD delay, delay taps, feedback rhythm, tremolo, pulses, and sequenced
+motion; the stacked-sine / organ-pad phrasing has been the most reliable
+non-decaying sustained synth result.
 
 For non-solo runs, the runner also renders a silent graph MP4 from the
 frame-level weight JSON. The graph shows the complete prompt-weight curves, a

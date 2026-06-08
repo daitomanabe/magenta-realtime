@@ -293,8 +293,12 @@ for real-time performance, parameter modulation, and offline loop export.
   drops out after the opening seconds.
 - [x] Run four 32-bar no-decay prompt trials with a single long-held Cm9 MIDI
   chord and compare first/last RMS activity.
-- [x] Identify freeze/feedback/noise-floor prompt wording as more reliable for
-  non-decaying 32-bar sustained output than plain constant-oscillator wording.
+- [x] In the first no-decay pass, identify freeze/feedback/noise-floor wording
+  as better for RMS continuity than plain constant-oscillator wording.
+- [x] Revise no-decay trials away from granular, BBD delay, feedback rhythm,
+  tremolo, and pulse wording after faint rhythmic artifacts were heard.
+- [x] Verify stacked-sine / organ-pad wording as the strongest beatless
+  sustained synth no-decay prompt among the revised trials.
 
 ## First Target User Flow
 
