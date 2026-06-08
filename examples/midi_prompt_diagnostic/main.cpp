@@ -694,6 +694,59 @@ bool apply_profile(RenderConfig& config) {
         }};
         return true;
     }
+    if (config.profile == "sustained_no_decay_trials") {
+        config.slots = {{
+            {
+                "constant_vco_hold",
+                "Constant VCO Hold",
+                "Create an original 32-bar sustained synthesizer texture called Constant VCO Hold. A continuous Cm9 modular VCO chord drone at constant amplitude from the first beat to the final beat, no decay envelope, no fade-out, no release tail, no rests, and no drop in RMS. Keep the oscillator sustain locked open for the whole render while only the filter cutoff and stereo phase drift move slowly. Avoid drums, vocals, arpeggios, lead melody, percussive attacks, endings, pauses, and silence.",
+                "constant-amplitude modular VCO Cm9 drone with slow filter and phase drift",
+                "analog_drone",
+                0.58f,
+                40,
+                7.4f,
+                6.2f,
+                0.0f,
+            },
+            {
+                "infinite_freeze_pad",
+                "Infinite Freeze Pad",
+                "Create an original 32-bar sustained synthesizer texture called Infinite Freeze Pad. A frozen spectral pad holding one Cm9 harmony continuously with a flat sustain level, infinite freeze behavior, no natural note decay, no fade-out, and no quiet gaps. Let shimmer, chorus, and phase smear evolve around a steady center tone so the energy remains present for the entire 32 bars. Avoid drums, vocals, melody lead, plucked envelopes, arpeggios, transitions, pauses, and silence.",
+                "non-decaying frozen spectral Cm9 pad with shimmer and phase smear",
+                "spectral_pad",
+                0.62f,
+                56,
+                7.3f,
+                6.4f,
+                0.0f,
+            },
+            {
+                "unbroken_noise_floor",
+                "Unbroken Noise Floor",
+                "Create an original 32-bar sustained synthesizer texture called Unbroken Noise Floor. A dark filtered noise bed and sub pressure layer that remains continuously audible at a stable level from start to finish, with no volume decay, no fade-out, no dropouts, and no silence after the opening. Use slow band-pass movement, convolution space, and a steady low drone under the Cm9 harmony. Avoid drums, vocals, melody lead, risers, endings, sparse gaps, and abrupt dynamics.",
+                "steady filtered noise and sub pressure layer with slow band-pass motion",
+                "cinema_noise",
+                0.76f,
+                84,
+                7.2f,
+                4.0f,
+                0.0f,
+            },
+            {
+                "self_sustaining_feedback",
+                "Self Sustaining Feedback",
+                "Create an original 32-bar sustained synthesizer texture called Self Sustaining Feedback. A self-sustaining feedback freeze and resonator bank holding Cm9 with a constant drone floor, no amplitude decay, no release, no fade-out, and no silent windows. Keep granular texture, BBD delay feedback, and resonant notch motion active without turning into rhythm or lead melody. Avoid drums, vocals, arpeggios, pop chords, percussive cuts, endings, pauses, and silence.",
+                "self-sustaining feedback freeze with resonators, BBD delay, and notch motion",
+                "granular_glitch",
+                0.84f,
+                96,
+                7.1f,
+                4.8f,
+                0.0f,
+            },
+        }};
+        return true;
+    }
     return false;
 }
 
@@ -1540,7 +1593,7 @@ void print_usage(const char* argv0) {
         "  --resources PATH         Resource dir containing musiccoca/\n"
         "  --profile NAME           clear_extreme, microcinematic_footwork, negative_space_club,\n"
         "                           glass_trap_pressure, metallic_ambient_bounce,\n"
-        "                           or sustained_synth_textures\n"
+        "                           sustained_synth_textures, or sustained_no_decay_trials\n"
         "  --weight-mode NAME       sequential, solo, modulated, polyrhythm, loop_sine,\n"
         "                           or meter_sine\n"
         "  --solo-slot INDEX        1-4 prompt slot used when --weight-mode solo\n"

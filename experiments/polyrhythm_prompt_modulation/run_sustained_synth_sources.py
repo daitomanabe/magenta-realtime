@@ -77,6 +77,50 @@ EXPERIMENTS = [
         "generated_midi": "cm9_32bars_bpm130",
         "require_continuous_audio": True,
     },
+    {
+        "stage": "no_decay_trials",
+        "name": "08_no_decay_constant_vco_hold_32bars",
+        "profile": "sustained_no_decay_trials",
+        "duration": CM9_32_DURATION,
+        "weight_mode": "solo",
+        "solo_slot": 1,
+        "bpm": CM9_32_BARS_BPM,
+        "bars": CM9_32_BARS,
+        "generated_midi": "cm9_32bars_bpm130_hold",
+    },
+    {
+        "stage": "no_decay_trials",
+        "name": "09_no_decay_infinite_freeze_pad_32bars",
+        "profile": "sustained_no_decay_trials",
+        "duration": CM9_32_DURATION,
+        "weight_mode": "solo",
+        "solo_slot": 2,
+        "bpm": CM9_32_BARS_BPM,
+        "bars": CM9_32_BARS,
+        "generated_midi": "cm9_32bars_bpm130_hold",
+    },
+    {
+        "stage": "no_decay_trials",
+        "name": "10_no_decay_unbroken_noise_floor_32bars",
+        "profile": "sustained_no_decay_trials",
+        "duration": CM9_32_DURATION,
+        "weight_mode": "solo",
+        "solo_slot": 3,
+        "bpm": CM9_32_BARS_BPM,
+        "bars": CM9_32_BARS,
+        "generated_midi": "cm9_32bars_bpm130_hold",
+    },
+    {
+        "stage": "no_decay_trials",
+        "name": "11_no_decay_self_sustaining_feedback_32bars",
+        "profile": "sustained_no_decay_trials",
+        "duration": CM9_32_DURATION,
+        "weight_mode": "solo",
+        "solo_slot": 4,
+        "bpm": CM9_32_BARS_BPM,
+        "bars": CM9_32_BARS,
+        "generated_midi": "cm9_32bars_bpm130_hold",
+    },
 ]
 
 
@@ -168,6 +212,23 @@ def analyze_float_wav(path: Path, window_seconds: float = 1.0) -> dict:
 
     post_start_windows = [window for window in windows if window["start_seconds"] >= 3.0]
     min_post_start_rms = min((window["rms"] for window in post_start_windows), default=0.0)
+    first_3s_windows = [window for window in windows if window["start_seconds"] < 3.0]
+    last_8s_start = max(0.0, (total_frames / sample_rate) - 8.0)
+    last_8s_windows = [window for window in windows if window["start_seconds"] >= last_8s_start]
+    first_3s_rms = (
+        sum(window["rms"] for window in first_3s_windows) / len(first_3s_windows)
+        if first_3s_windows else 0.0
+    )
+    last_8s_median_rms = (
+        sorted(window["rms"] for window in last_8s_windows)[len(last_8s_windows) // 2]
+        if last_8s_windows else 0.0
+    )
+    min_to_first_3s_rms_ratio = (
+        min_post_start_rms / first_3s_rms if first_3s_rms > 0.0 else 0.0
+    )
+    last_8s_to_first_3s_rms_ratio = (
+        last_8s_median_rms / first_3s_rms if first_3s_rms > 0.0 else 0.0
+    )
     quiet_windows = [
         window for window in post_start_windows
         if window["rms"] < 0.0001 or window["peak"] < 0.001
@@ -182,6 +243,10 @@ def analyze_float_wav(path: Path, window_seconds: float = 1.0) -> dict:
         "post_start_seconds": 3.0,
         "rms_threshold": 0.0001,
         "peak_threshold": 0.001,
+        "first_3s_rms": first_3s_rms,
+        "last_8s_median_rms": last_8s_median_rms,
+        "min_to_first_3s_rms_ratio": min_to_first_3s_rms_ratio,
+        "last_8s_to_first_3s_rms_ratio": last_8s_to_first_3s_rms_ratio,
         "min_post_start_rms": min_post_start_rms,
         "quiet_window_count": len(quiet_windows),
         "quiet_windows": quiet_windows[:20],
@@ -246,6 +311,39 @@ def write_cm9_32bar_midi(path: Path) -> None:
         f.write(track)
 
 
+def write_cm9_32bar_hold_midi(path: Path) -> None:
+    ppq = 480
+    end_ticks = CM9_32_BARS * 4 * ppq
+    tempo_us = round(60_000_000 / CM9_32_BARS_BPM)
+    chord = [36, 43, 48, 51, 55, 58, 62, 67]  # C2, G2, C3, Eb3, G3, Bb3, D4, G4
+    track = bytearray()
+
+    def add(delta: int, event: bytes) -> None:
+        track.extend(vlq(delta))
+        track.extend(event)
+
+    name = b"Cm9 32 bars BPM130 hold"
+    add(0, b"\xff\x03" + vlq(len(name)) + name)
+    add(0, b"\xff\x51\x03" + tempo_us.to_bytes(3, "big"))
+    add(0, b"\xff\x58\x04" + bytes([4, 2, 24, 8]))
+    for note in chord:
+        add(0, bytes([0x90, note, 88]))
+    for index, note in enumerate(chord):
+        add(end_ticks if index == 0 else 0, bytes([0x80, note, 0]))
+    add(0, b"\xff\x2f\x00")
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("wb") as f:
+        f.write(b"MThd")
+        f.write((6).to_bytes(4, "big"))
+        f.write((0).to_bytes(2, "big"))
+        f.write((1).to_bytes(2, "big"))
+        f.write(ppq.to_bytes(2, "big"))
+        f.write(b"MTrk")
+        f.write(len(track).to_bytes(4, "big"))
+        f.write(track)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--binary", type=Path, default=DEFAULT_BINARY)
@@ -253,7 +351,14 @@ def main() -> int:
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
     parser.add_argument(
         "--stage",
-        choices=["all", "sources", "modulated", "loop_16s", "cm9_32bars_130"],
+        choices=[
+            "all",
+            "sources",
+            "modulated",
+            "loop_16s",
+            "cm9_32bars_130",
+            "no_decay_trials",
+        ],
         default="all",
     )
     parser.add_argument("--audio-prompts", action="store_true")
@@ -277,7 +382,7 @@ def main() -> int:
 
     manifest = {
         "schema": "mrt-sustained-synth-prompt-sources-v1",
-        "profile": "sustained_synth_textures",
+        "profile": "varies_by_experiment",
         "midi": str(args.midi.relative_to(ROOT)),
         "bpm": 120,
         "embedding_source": "audio" if args.audio_prompts else "text",
@@ -289,6 +394,9 @@ def main() -> int:
         if item.get("generated_midi") == "cm9_32bars_bpm130":
             midi_path = args.output_dir / "cm9_32bars_bpm130.mid"
             write_cm9_32bar_midi(midi_path)
+        elif item.get("generated_midi") == "cm9_32bars_bpm130_hold":
+            midi_path = args.output_dir / "cm9_32bars_bpm130_hold.mid"
+            write_cm9_32bar_hold_midi(midi_path)
 
         wav = args.output_dir / f"{item['name']}.wav"
         report = args.output_dir / f"{item['name']}.report.json"
@@ -300,7 +408,7 @@ def main() -> int:
             "--midi",
             str(midi_path),
             "--profile",
-            "sustained_synth_textures",
+            item.get("profile", "sustained_synth_textures"),
             "--duration",
             f"{item['duration']:.3f}",
             "--transition",
@@ -368,6 +476,7 @@ def main() -> int:
         existing_by_name[item["name"]] = {
             "stage": item["stage"],
             "name": item["name"],
+            "profile": item.get("profile", "sustained_synth_textures"),
             "bpm": item.get("bpm", 120),
             "bars": item.get("bars"),
             "weight_mode": item["weight_mode"],
@@ -387,6 +496,8 @@ def main() -> int:
             "non_silent": report_data["non_silent"],
             "continuous_after_3s": audio_check["continuous_after_post_start"],
             "min_post_3s_rms": audio_check["min_post_start_rms"],
+            "last_8s_to_first_3s_rms_ratio": audio_check["last_8s_to_first_3s_rms_ratio"],
+            "min_to_first_3s_rms_ratio": audio_check["min_to_first_3s_rms_ratio"],
             "ffprobe": probe,
             "audio_activity": audio_check,
             "graph_ffprobe": graph_probe,

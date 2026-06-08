@@ -291,6 +291,10 @@ for real-time performance, parameter modulation, and offline loop export.
   data.
 - [x] Add generated-WAV activity verification so long exports fail if audio
   drops out after the opening seconds.
+- [x] Run four 32-bar no-decay prompt trials with a single long-held Cm9 MIDI
+  chord and compare first/last RMS activity.
+- [x] Identify freeze/feedback/noise-floor prompt wording as more reliable for
+  non-decaying 32-bar sustained output than plain constant-oscillator wording.
 
 ## First Target User Flow
 

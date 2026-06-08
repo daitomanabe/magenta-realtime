@@ -168,6 +168,14 @@ python3 experiments/polyrhythm_prompt_modulation/run_sustained_synth_sources.py 
   --stage cm9_32bars_130
 ```
 
+Run four 32-bar no-decay prompt trials against a single long-held Cm9 MIDI
+chord, without per-bar note retriggers:
+
+```bash
+python3 experiments/polyrhythm_prompt_modulation/run_sustained_synth_sources.py \
+  --stage no_decay_trials
+```
+
 The `loop_sine` weight mode uses one full sine cycle over 16 seconds, with the
 four prompt slots phase-shifted by 90 degrees. At 120 BPM this is an exact
 8-bar modulation cycle, and the prompt-weight endpoint returns to the starting
@@ -182,6 +190,12 @@ and 4/4 phase 0.25. The frame-level weight JSON is written at 60 fps for video
 modulation. The runner retriggers the Cm9 chord once per bar so the generated
 audio stays active across the full 32-bar export, then writes a per-second WAV
 activity check JSON to catch accidental dropouts after generation.
+
+The `no_decay_trials` stage uses a separate `sustained_no_decay_trials` profile
+to test whether prompt wording alone can keep the sound active for the full
+32 bars. It records `first_3s_rms`, `last_8s_median_rms`, and their ratio in
+each `.audio_check.json`; feedback-freeze, spectral-freeze, and noise-floor
+phrasing are more reliable than simply asking for a constant oscillator hold.
 
 For non-solo runs, the runner also renders a silent graph MP4 from the
 frame-level weight JSON. The graph shows the complete prompt-weight curves, a
