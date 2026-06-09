@@ -1629,8 +1629,8 @@ std::vector<float> synth_beatless_drone_variant_prompt(const MidiData& midi,
 
     uint32_t seed = stable_hash_string(guide_kind);
     double base_phase = (seed & 0xffffu) / 65536.0 * 2.0 * kPi;
-    double detune_scale = 0.00055 + 0.00012 * ((seed >> 8) % 7);
-    double tone_blend = 0.08 + 0.02 * ((seed >> 12) % 5);
+    double detune_scale = 0.00012 + 0.00003 * ((seed >> 8) % 7);
+    double tone_blend = 0.035 + 0.006 * ((seed >> 12) % 5);
     int transpose = -12 + static_cast<int>((seed >> 16) % 3) * 12;
 
     for (size_t note_index = 0; note_index < notes.size(); ++note_index) {
@@ -1644,8 +1644,8 @@ std::vector<float> synth_beatless_drone_variant_prompt(const MidiData& midi,
             double attack = std::min(1.0, t / 1.8);
             double release = std::min(1.0, std::max(0.0, (kPromptSeconds - t) / 1.8));
             double env = std::min(attack, release);
-            double slow_a = 0.985 + 0.015 * std::sin(2.0 * kPi * (0.009 + 0.0004 * note_index) * t + phase);
-            double slow_b = 0.990 + 0.010 * std::sin(2.0 * kPi * (0.004 + 0.0003 * ((seed >> 20) % 5)) * t + phase * 0.37);
+            double slow_a = 0.996 + 0.004 * std::sin(2.0 * kPi * (0.006 + 0.0002 * note_index) * t + phase);
+            double slow_b = 0.997 + 0.003 * std::sin(2.0 * kPi * (0.003 + 0.0001 * ((seed >> 20) % 5)) * t + phase * 0.37);
             double f = root * detune;
             double tone =
                 std::sin(2.0 * kPi * f * t + phase) +

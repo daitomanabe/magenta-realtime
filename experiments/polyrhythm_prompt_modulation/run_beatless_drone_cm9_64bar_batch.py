@@ -144,10 +144,10 @@ def prompt_for_take(take_index: int) -> dict[str, str | float | int]:
         "category": "beatless_drone",
         "prompt": prompt,
         "guide_kind": f"beatless_drone_{take_index:03d}",
-        "temperature": 0.30 + 0.006 * (idx % 5),
-        "top_k": 8 + (idx % 4) * 2,
-        "cfg_musiccoca": 7.4 + 0.04 * (idx % 4),
-        "cfg_notes": 6.8 + 0.04 * (idx % 4),
+        "temperature": 0.22 + 0.004 * (idx % 5),
+        "top_k": 4 + (idx % 3),
+        "cfg_musiccoca": 8.0 + 0.04 * (idx % 4),
+        "cfg_notes": 7.0 + 0.04 * (idx % 4),
         "cfg_drums": 0.0,
     }
 
