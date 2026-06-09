@@ -201,6 +201,7 @@ struct RenderConfig {
     int batch_variant = 0;
     double macro_phase_offset = 0.0;
     double macro_reference_seconds = 128.0;
+    double midi_refresh_seconds = 0.0;
 };
 
 uint16_t read_u16(const std::vector<uint8_t>& data, size_t& offset) {
@@ -1730,6 +1731,7 @@ bool write_report(const std::filesystem::path& path,
     out << "  \"batch_variant\": " << config.batch_variant << ",\n";
     out << "  \"macro_phase_offset\": " << config.macro_phase_offset << ",\n";
     out << "  \"macro_reference_seconds\": " << config.macro_reference_seconds << ",\n";
+    out << "  \"midi_refresh_seconds\": " << config.midi_refresh_seconds << ",\n";
     out << "  \"bpm\": " << config.bpm << ",\n";
     out << "  \"model\": \"" << json_escape(config.model_name) << "\",\n";
     out << "  \"model_path\": \"" << json_escape(model_path) << "\",\n";
@@ -1827,6 +1829,7 @@ bool write_weight_frames(const std::filesystem::path& path,
     out << "  \"batch_variant\": " << config.batch_variant << ",\n";
     out << "  \"macro_phase_offset\": " << config.macro_phase_offset << ",\n";
     out << "  \"macro_reference_seconds\": " << config.macro_reference_seconds << ",\n";
+    out << "  \"midi_refresh_seconds\": " << config.midi_refresh_seconds << ",\n";
     if (config.weight_mode == "meter_sine" || config.weight_mode == "meter_macro_sine") {
         out << "  \"meter_sine\": [\n";
         out << "    {\"meter\": \"4/4\", \"quarter_note_period\": " << kMeterQuarterNotePeriods[0]
@@ -1970,6 +1973,7 @@ void print_usage(const char* argv0) {
         "  --macro-reference-seconds N  Reference duration for meter_macro_sine macro LFOs\n"
         "  --macro-phase-offset N   Extra phase offset for meter_macro_sine macro LFOs\n"
         "  --batch-variant INDEX    Variant index folded into meter_macro_sine macro phases\n"
+        "  --midi-refresh-seconds N Re-send active MIDI notes every N seconds during render\n"
         "  --duration SECONDS       Repeat/clip the MIDI progression to this duration\n"
         "  --transition SECONDS     Prompt crossfade duration at segment boundaries\n"
         "  --text-prompts           Use text prompts instead of MIDI-derived audio prompt embeddings\n"
@@ -2023,6 +2027,8 @@ bool parse_args(int argc, char** argv, RenderConfig& config) {
             config.macro_phase_offset = std::stod(need_value("--macro-phase-offset"));
         } else if (arg == "--batch-variant") {
             config.batch_variant = std::stoi(need_value("--batch-variant"));
+        } else if (arg == "--midi-refresh-seconds") {
+            config.midi_refresh_seconds = std::stod(need_value("--midi-refresh-seconds"));
         } else if (arg == "--duration") {
             config.duration_seconds = std::stod(need_value("--duration"));
         } else if (arg == "--transition") {
@@ -2077,6 +2083,10 @@ int main(int argc, char** argv) {
     }
     if (config.min_window_rms <= 0.0f || config.max_window_gain <= 0.0f) {
         std::fprintf(stderr, "--min-window-rms and --max-window-gain must be positive\n");
+        return 1;
+    }
+    if (config.midi_refresh_seconds < 0.0) {
+        std::fprintf(stderr, "--midi-refresh-seconds must be non-negative\n");
         return 1;
     }
     if (config.control_mode != "slot_blend" &&
@@ -2170,6 +2180,9 @@ int main(int argc, char** argv) {
         size_t next_event = 0;
         int current_prompt_page = 0;
         std::array<Slot, 4> current_slots = config.slots;
+        double next_midi_refresh_seconds = config.midi_refresh_seconds > 0.0
+            ? config.midi_refresh_seconds
+            : std::numeric_limits<double>::infinity();
         for (int frame = 0; frame < frame_count; ++frame) {
             double time_seconds = frame * kFrameSeconds;
             while (next_event < midi.events.size() &&
@@ -2188,6 +2201,17 @@ int main(int argc, char** argv) {
                     current_prompt_page = next_prompt_page;
                     current_slots = prompt_slots_for_page(config, current_prompt_page);
                     set_text_prompt_slots(engine, current_slots);
+                }
+            }
+
+            if (config.midi_refresh_seconds > 0.0 &&
+                time_seconds + 0.000001 >= next_midi_refresh_seconds) {
+                auto refreshed_notes = active_notes_at(midi, time_seconds);
+                for (int pitch : refreshed_notes) {
+                    engine.set_note_on(pitch);
+                }
+                while (next_midi_refresh_seconds <= time_seconds + 0.000001) {
+                    next_midi_refresh_seconds += config.midi_refresh_seconds;
                 }
             }
 

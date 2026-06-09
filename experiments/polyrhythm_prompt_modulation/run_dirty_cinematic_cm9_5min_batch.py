@@ -26,6 +26,7 @@ BPM = 120
 BEATS_PER_BAR = 4
 DURATION_SECONDS = 300.0
 MACRO_REFERENCE_SECONDS = 128.0
+MIDI_REFRESH_SECONDS = 2.75
 SAMPLE_RATE = 48000
 CHANNELS = 2
 BYTES_PER_SAMPLE = 4
@@ -561,6 +562,12 @@ def validate_take(paths: dict[str, Path], duration_seconds: float) -> dict:
         raise RuntimeError("Rendered WAV is silent")
     if not audio_check["continuous_after_post_start"]:
         raise RuntimeError(f"Quiet windows found: {audio_check['quiet_windows'][:5]}")
+    low_rms_windows = [
+        window for window in audio_check["windows"]
+        if window["start_seconds"] >= 3.0 and window["rms"] < 0.003
+    ]
+    if low_rms_windows:
+        raise RuntimeError(f"Collapsed low-RMS windows found: {low_rms_windows[:5]}")
 
     controls = control_summary(frames)
     for slot in controls["prompt_weights"]:
@@ -649,11 +656,8 @@ def main() -> int:
             "temperature": [0.6075, 0.7205],
             "top_k": [51, 103],
             "buffer_chunk": "fixed 25 Hz frames / 1920 sample chunks",
-            "window_rms_stabilization": {
-                "enabled": True,
-                "min_window_rms": 0.012,
-                "max_window_gain": 1024,
-            },
+            "midi_refresh_seconds": MIDI_REFRESH_SECONDS,
+            "window_rms_stabilization": {"enabled": False},
         },
         "mix_modulation": {
             "micro": "BPM120 meter_sine for 4/4, 3/4, 6/8, 4/4 phase offset 0.25",
@@ -701,17 +705,14 @@ def main() -> int:
                     f"{phase_offset:.9f}",
                     "--batch-variant",
                     str(take_index),
+                    "--midi-refresh-seconds",
+                    f"{MIDI_REFRESH_SECONDS:.3f}",
                     "--prompt-library",
                     str(paths["prompts"]),
                     "--prompt-page-seconds",
                     f"{args.duration + 1.0:.3f}",
                     "--transition",
                     "0.000",
-                    "--stabilize-window-rms",
-                    "--min-window-rms",
-                    "0.012",
-                    "--max-window-gain",
-                    "1024",
                     "--output",
                     str(paths["wav"]),
                     "--report",

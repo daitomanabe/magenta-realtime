@@ -283,9 +283,9 @@ The control matrix is:
 - Expression control: temperature moves within 0.6075 to 0.7205.
 - Exploration control: top-k moves within 51 to 103.
 - Stability control: fixed 25 Hz frames / 1920 sample chunks.
-- Long-form output guard: explicit 1 second window RMS floor stabilization
-  (`min_window_rms=0.012`, `max_window_gain=1024`) keeps sustained material
-  from dropping into near-silence.
+- Long-form output guard: active MIDI notes are refreshed every 2.75 seconds
+  during render. The batch does not use RMS-floor boosting; collapsed low-RMS
+  windows fail QA instead of being amplified into noise.
 
 ```bash
 TOOLCHAINS=com.apple.dt.toolchain.Metal.32023.883 \
