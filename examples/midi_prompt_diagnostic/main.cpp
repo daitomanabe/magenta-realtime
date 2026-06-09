@@ -202,6 +202,7 @@ struct RenderConfig {
     double macro_phase_offset = 0.0;
     double macro_reference_seconds = 128.0;
     double midi_refresh_seconds = 0.0;
+    std::string midi_mode = "scheduled";
 };
 
 uint16_t read_u16(const std::vector<uint8_t>& data, size_t& offset) {
@@ -1153,6 +1154,26 @@ void fade_edges(std::vector<float>& samples, double seconds = 0.01) {
     }
 }
 
+std::vector<float> prepare_audio_prompt_embedding_samples(const std::vector<float>& samples) {
+    constexpr int kAudioPromptSampleRate = 16000;
+    constexpr int kAudioPromptSeconds = 10;
+    constexpr size_t kAudioPromptFrames = kAudioPromptSampleRate * kAudioPromptSeconds;
+    std::vector<float> prepared(kAudioPromptFrames, 0.0f);
+    if (samples.empty()) return prepared;
+
+    const double source_per_prompt_sample =
+        static_cast<double>(kSampleRate) / static_cast<double>(kAudioPromptSampleRate);
+    for (size_t i = 0; i < prepared.size(); ++i) {
+        size_t source_index = static_cast<size_t>(std::floor(i * source_per_prompt_sample));
+        if (source_index >= samples.size()) {
+            source_index %= samples.size();
+        }
+        prepared[i] = samples[source_index];
+    }
+    fade_edges(prepared, 0.04);
+    return prepared;
+}
+
 void add_to(std::vector<float>& samples, int start, const std::vector<float>& tone) {
     if (start >= static_cast<int>(samples.size())) return;
     int end = std::min(static_cast<int>(samples.size()), start + static_cast<int>(tone.size()));
@@ -1731,6 +1752,7 @@ bool write_report(const std::filesystem::path& path,
     out << "  \"batch_variant\": " << config.batch_variant << ",\n";
     out << "  \"macro_phase_offset\": " << config.macro_phase_offset << ",\n";
     out << "  \"macro_reference_seconds\": " << config.macro_reference_seconds << ",\n";
+    out << "  \"midi_mode\": \"" << json_escape(config.midi_mode) << "\",\n";
     out << "  \"midi_refresh_seconds\": " << config.midi_refresh_seconds << ",\n";
     out << "  \"bpm\": " << config.bpm << ",\n";
     out << "  \"model\": \"" << json_escape(config.model_name) << "\",\n";
@@ -1829,6 +1851,7 @@ bool write_weight_frames(const std::filesystem::path& path,
     out << "  \"batch_variant\": " << config.batch_variant << ",\n";
     out << "  \"macro_phase_offset\": " << config.macro_phase_offset << ",\n";
     out << "  \"macro_reference_seconds\": " << config.macro_reference_seconds << ",\n";
+    out << "  \"midi_mode\": \"" << json_escape(config.midi_mode) << "\",\n";
     out << "  \"midi_refresh_seconds\": " << config.midi_refresh_seconds << ",\n";
     if (config.weight_mode == "meter_sine" || config.weight_mode == "meter_macro_sine") {
         out << "  \"meter_sine\": [\n";
@@ -1927,15 +1950,27 @@ bool reblend_prompt_weights(MLXEngine& engine,
 }
 
 void wait_for_prompts(MLXEngine& engine, int slot_count) {
-    while (engine.get_text_encoder_status() == 1 ||
-           engine.get_quantizer_status() == 1) {
+    constexpr int kMaxWaitIterations = 30000;
+    for (int iteration = 0; iteration < kMaxWaitIterations; ++iteration) {
+        bool busy = engine.get_text_encoder_status() == 1 ||
+                    engine.get_quantizer_status() == 1;
+        bool all_ready = true;
+        for (int i = 0; i < slot_count; ++i) {
+            int status = engine.get_prompt_status(i);
+            if (status == 3) {
+                std::fprintf(stderr, "Prompt slot %d failed to encode\n", i + 1);
+                return;
+            }
+            if (status != 2) {
+                all_ready = false;
+            }
+        }
+        if (!busy && all_ready) {
+            return;
+        }
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
-    for (int i = 0; i < slot_count; ++i) {
-        while (engine.get_prompt_status(i) == 1) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
-        }
-    }
+    std::fprintf(stderr, "Timed out waiting for prompt encoding\n");
 }
 
 void set_text_prompt_slots(MLXEngine& engine, const std::array<Slot, 4>& slots) {
@@ -1973,6 +2008,7 @@ void print_usage(const char* argv0) {
         "  --macro-reference-seconds N  Reference duration for meter_macro_sine macro LFOs\n"
         "  --macro-phase-offset N   Extra phase offset for meter_macro_sine macro LFOs\n"
         "  --batch-variant INDEX    Variant index folded into meter_macro_sine macro phases\n"
+        "  --midi-mode NAME         scheduled or initial_latch (default: scheduled)\n"
         "  --midi-refresh-seconds N Re-send active MIDI notes every N seconds during render\n"
         "  --duration SECONDS       Repeat/clip the MIDI progression to this duration\n"
         "  --transition SECONDS     Prompt crossfade duration at segment boundaries\n"
@@ -2027,6 +2063,8 @@ bool parse_args(int argc, char** argv, RenderConfig& config) {
             config.macro_phase_offset = std::stod(need_value("--macro-phase-offset"));
         } else if (arg == "--batch-variant") {
             config.batch_variant = std::stoi(need_value("--batch-variant"));
+        } else if (arg == "--midi-mode") {
+            config.midi_mode = need_value("--midi-mode");
         } else if (arg == "--midi-refresh-seconds") {
             config.midi_refresh_seconds = std::stod(need_value("--midi-refresh-seconds"));
         } else if (arg == "--duration") {
@@ -2089,6 +2127,11 @@ int main(int argc, char** argv) {
         std::fprintf(stderr, "--midi-refresh-seconds must be non-negative\n");
         return 1;
     }
+    if (config.midi_mode != "scheduled" &&
+        config.midi_mode != "initial_latch") {
+        std::fprintf(stderr, "Unknown MIDI mode: %s\n", config.midi_mode.c_str());
+        return 1;
+    }
     if (config.control_mode != "slot_blend" &&
         config.control_mode != "ambient_crescendo") {
         std::fprintf(stderr, "Unknown control mode: %s\n", config.control_mode.c_str());
@@ -2139,10 +2182,11 @@ int main(int argc, char** argv) {
             std::filesystem::create_directories(config.audio_prompt_dir);
             for (int i = 0; i < 4; ++i) {
                 auto audio_path = config.audio_prompt_dir /
-                                  (std::to_string(i + 1) + "_" + config.slots[i].id + ".wav");
+                    (std::to_string(i + 1) + "_" + config.slots[i].id + ".wav");
                 write_wav(audio_path, to_stereo_interleaved(prompt_audio[i]), kSampleRate, 2);
+                auto embedding_audio = prepare_audio_prompt_embedding_samples(prompt_audio[i]);
                 engine.set_audio_prompt_samples(i, audio_path.filename().string(),
-                                                prompt_audio[i].data(), prompt_audio[i].size());
+                                                embedding_audio.data(), embedding_audio.size());
             }
             wait_for_prompts(engine, static_cast<int>(config.slots.size()));
             std::array<float, 4> initial_weights = {1.0f, 0.0f, 0.0f, 0.0f};
@@ -2185,14 +2229,16 @@ int main(int argc, char** argv) {
             : std::numeric_limits<double>::infinity();
         for (int frame = 0; frame < frame_count; ++frame) {
             double time_seconds = frame * kFrameSeconds;
-            while (next_event < midi.events.size() &&
-                   midi.events[next_event].time_seconds <= time_seconds + 0.000001) {
-                if (midi.events[next_event].on) {
-                    engine.set_note_on(midi.events[next_event].pitch);
-                } else {
-                    engine.set_note_off(midi.events[next_event].pitch);
+            if (config.midi_mode == "scheduled") {
+                while (next_event < midi.events.size() &&
+                       midi.events[next_event].time_seconds <= time_seconds + 0.000001) {
+                    if (midi.events[next_event].on) {
+                        engine.set_note_on(midi.events[next_event].pitch);
+                    } else {
+                        engine.set_note_off(midi.events[next_event].pitch);
+                    }
+                    ++next_event;
                 }
-                ++next_event;
             }
 
             if (using_prompt_library(config)) {
@@ -2204,7 +2250,8 @@ int main(int argc, char** argv) {
                 }
             }
 
-            if (config.midi_refresh_seconds > 0.0 &&
+            if (config.midi_mode == "scheduled" &&
+                config.midi_refresh_seconds > 0.0 &&
                 time_seconds + 0.000001 >= next_midi_refresh_seconds) {
                 auto refreshed_notes = active_notes_at(midi, time_seconds);
                 for (int pitch : refreshed_notes) {
@@ -2238,13 +2285,15 @@ int main(int argc, char** argv) {
                 std::printf("frame %d/%d\n", frame + 1, frame_count);
             }
         }
-        while (next_event < midi.events.size()) {
-            if (midi.events[next_event].on) {
-                engine.set_note_on(midi.events[next_event].pitch);
-            } else {
-                engine.set_note_off(midi.events[next_event].pitch);
+        if (config.midi_mode == "scheduled") {
+            while (next_event < midi.events.size()) {
+                if (midi.events[next_event].on) {
+                    engine.set_note_on(midi.events[next_event].pitch);
+                } else {
+                    engine.set_note_off(midi.events[next_event].pitch);
+                }
+                ++next_event;
             }
-            ++next_event;
         }
 
         if (config.match_segment_rms) {
