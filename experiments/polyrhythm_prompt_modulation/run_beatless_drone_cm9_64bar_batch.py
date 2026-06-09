@@ -166,7 +166,7 @@ def paths_for_take(output_dir: Path, take_index: int) -> dict[str, Path]:
     }
 
 
-def short_spike_count(wav: Path) -> int | None:
+def short_rms_metrics(wav: Path) -> dict[str, float | int] | None:
     if dirty.np is None:
         return None
     fmt, data_offset, data_size = dirty.find_float_wav_data(wav)
@@ -189,15 +189,40 @@ def short_spike_count(wav: Path) -> int | None:
             values.append(float(dirty.np.sqrt(dirty.np.mean(dirty.np.square(chunk)))))
     del samples
     if not values:
-        return 0
+        return {"spike_count": 0, "periodicity": 0.0}
     arr = dirty.np.array(values, dtype=dirty.np.float64)
     median = float(dirty.np.median(arr))
     mad = float(dirty.np.median(dirty.np.abs(arr - median)))
     threshold = median + max(0.006, 6.0 * mad)
-    return int(dirty.np.sum(arr > threshold))
+    spike_count = int(dirty.np.sum(arr > threshold))
+    centered = arr - float(dirty.np.mean(arr))
+    denom = float(dirty.np.dot(centered, centered))
+    periodicity = 0.0
+    if denom > 1e-12 and len(centered) > 16:
+        # 100 ms windows. Lags 2..40 cover 0.2s to 4s, enough to catch
+        # obvious beat-grid envelope motion without rejecting slow drone drift.
+        for lag in range(2, min(40, len(centered) - 1) + 1):
+            a = centered[:-lag]
+            b = centered[lag:]
+            corr = float(dirty.np.dot(a, b))
+            norm = float(dirty.np.sqrt(dirty.np.dot(a, a) * dirty.np.dot(b, b)))
+            if norm > 1e-12:
+                periodicity = max(periodicity, corr / norm)
+    return {
+        "spike_count": spike_count,
+        "periodicity": periodicity,
+        "median": median,
+        "mad": mad,
+        "spike_threshold": threshold,
+    }
 
 
-def validate_take(paths: dict[str, Path], duration_seconds: float, max_spike_count: int) -> dict:
+def validate_take(
+    paths: dict[str, Path],
+    duration_seconds: float,
+    max_spike_count: int,
+    max_rhythm_periodicity: float,
+) -> dict:
     probe = dirty.sustained.ffprobe(paths["wav"])
     report = json.loads(paths["report"].read_text(encoding="utf-8"))
     weights = json.loads(paths["weights"].read_text(encoding="utf-8"))
@@ -208,7 +233,14 @@ def validate_take(paths: dict[str, Path], duration_seconds: float, max_spike_cou
     ]
     audio_check["low_rms_window_count_lt_0_003"] = len(low_rms_windows)
     audio_check["low_rms_windows_lt_0_003"] = low_rms_windows[:20]
-    audio_check["rms_100ms_spike_count"] = short_spike_count(paths["wav"].resolve())
+    short_metrics = short_rms_metrics(paths["wav"].resolve())
+    audio_check["rms_100ms_spike_count"] = (
+        None if short_metrics is None else short_metrics["spike_count"]
+    )
+    audio_check["rms_100ms_periodicity"] = (
+        None if short_metrics is None else short_metrics["periodicity"]
+    )
+    audio_check["rms_100ms_metrics"] = short_metrics
     paths["audio_check"].write_text(json.dumps(audio_check, indent=2) + "\n", encoding="utf-8")
 
     duration = float(probe["format"]["duration"])
@@ -229,8 +261,13 @@ def validate_take(paths: dict[str, Path], duration_seconds: float, max_spike_cou
     if low_rms_windows:
         raise RuntimeError(f"Collapsed low-RMS windows found: {low_rms_windows[:5]}")
     spike_count = audio_check["rms_100ms_spike_count"]
-    if spike_count is not None and spike_count > max_spike_count:
+    if max_spike_count >= 0 and spike_count is not None and spike_count > max_spike_count:
         raise RuntimeError(f"Too many 100ms RMS spikes: {spike_count} > {max_spike_count}")
+    periodicity = audio_check["rms_100ms_periodicity"]
+    if max_rhythm_periodicity >= 0.0 and periodicity is not None and periodicity > max_rhythm_periodicity:
+        raise RuntimeError(
+            f"Too much 100ms RMS periodicity: {periodicity:.3f} > {max_rhythm_periodicity:.3f}"
+        )
 
     return {
         "duration_seconds": duration,
@@ -249,6 +286,7 @@ def validate_take(paths: dict[str, Path], duration_seconds: float, max_spike_cou
             "quiet_window_count": audio_check["quiet_window_count"],
             "low_rms_window_count_lt_0_003": len(low_rms_windows),
             "rms_100ms_spike_count": audio_check["rms_100ms_spike_count"],
+            "rms_100ms_periodicity": audio_check["rms_100ms_periodicity"],
             "min_post_3s_rms": audio_check["min_post_start_rms"],
         },
     }
@@ -265,7 +303,9 @@ def main() -> int:
     parser.add_argument("--count", type=int, default=COUNT)
     parser.add_argument("--start-index", type=int, default=1)
     parser.add_argument("--duration", type=float, default=DURATION_SECONDS)
-    parser.add_argument("--max-spike-count", type=int, default=24)
+    parser.add_argument("--max-spike-count", type=int, default=-1)
+    parser.add_argument("--max-rhythm-periodicity", type=float, default=-1.0)
+    parser.add_argument("--retry-attempts", type=int, default=6)
     parser.add_argument("--force", action="store_true")
     parser.add_argument("--skip-render", action="store_true")
     args = parser.parse_args()
@@ -326,30 +366,63 @@ def main() -> int:
 
         if paths["wav"].exists() and not args.force and not args.skip_render:
             print(f"take {take_index:03d}: exists, validating", flush=True)
+            summary = validate_take(
+                paths,
+                args.duration,
+                args.max_spike_count,
+                args.max_rhythm_periodicity,
+            )
         elif not args.skip_render:
-            cmd = [
-                str(args.binary),
-                "--midi", str(midi),
-                "--profile", "beatless_drone_ambient_cm9",
-                "--prompt-library", str(paths["prompts"]),
-                "--prompt-library-audio-prompts",
-                "--no-write-audio-prompt-guides",
-                "--prompt-page-seconds", f"{args.duration + 1.0:.3f}",
-                "--weight-mode", "solo",
-                "--solo-slot", "1",
-                "--control-mode", "slot_blend",
-                "--duration", f"{args.duration:.3f}",
-                "--midi-mode", "initial_latch",
-                "--midi-refresh-seconds", "0",
-                "--transition", "0.000",
-                "--target-rms", "0.045",
-                "--output", str(paths["wav"]),
-                "--report", str(paths["report"]),
-                "--weights-output", str(paths["weights"]),
-            ]
-            dirty.run_logged(cmd, paths["log"])
-
-        summary = validate_take(paths, args.duration, args.max_spike_count)
+            last_error: Exception | None = None
+            for attempt in range(1, args.retry_attempts + 1):
+                cmd = [
+                    str(args.binary),
+                    "--midi", str(midi),
+                    "--profile", "beatless_drone_ambient_cm9",
+                    "--prompt-library", str(paths["prompts"]),
+                    "--prompt-library-audio-prompts",
+                    "--no-write-audio-prompt-guides",
+                    "--prompt-page-seconds", f"{args.duration + 1.0:.3f}",
+                    "--weight-mode", "solo",
+                    "--solo-slot", "1",
+                    "--control-mode", "slot_blend",
+                    "--duration", f"{args.duration:.3f}",
+                    "--batch-variant", str(take_index * 100 + attempt),
+                    "--midi-mode", "initial_latch",
+                    "--midi-refresh-seconds", "0",
+                    "--transition", "0.000",
+                    "--target-rms", "0.045",
+                    "--output", str(paths["wav"]),
+                    "--report", str(paths["report"]),
+                    "--weights-output", str(paths["weights"]),
+                ]
+                attempt_log = paths["log"] if attempt == 1 else paths["log"].with_suffix(
+                    f".attempt{attempt}.log"
+                )
+                dirty.run_logged(cmd, attempt_log)
+                try:
+                    summary = validate_take(
+                        paths,
+                        args.duration,
+                        args.max_spike_count,
+                        args.max_rhythm_periodicity,
+                    )
+                    summary["attempt"] = attempt
+                    break
+                except RuntimeError as exc:
+                    last_error = exc
+                    print(f"take {take_index:03d}: retry {attempt} failed: {exc}", flush=True)
+                    for stale in [paths["wav"], paths["report"], paths["weights"], paths["audio_check"]]:
+                        stale.unlink(missing_ok=True)
+            else:
+                raise RuntimeError(f"take {take_index:03d} failed after retries: {last_error}")
+        else:
+            summary = validate_take(
+                paths,
+                args.duration,
+                args.max_spike_count,
+                args.max_rhythm_periodicity,
+            )
         summary["take_index"] = take_index
         summary["prompt"] = prompt_summary
         manifest["takes"].append(summary)
@@ -359,6 +432,7 @@ def main() -> int:
             f"take {take_index:03d}: ok "
             f"rms={summary['rms']:.6f} "
             f"min_post_3s={summary['audio_activity']['min_post_3s_rms']:.6f} "
+            f"periodicity={summary['audio_activity']['rms_100ms_periodicity']:.3f} "
             f"spikes={summary['audio_activity']['rms_100ms_spike_count']}",
             flush=True,
         )
