@@ -143,7 +143,7 @@ def prompt_for_take(take_index: int) -> dict[str, str | float | int]:
         "label": name,
         "category": "beatless_drone",
         "prompt": prompt,
-        "guide_kind": "spectral_pad",
+        "guide_kind": f"beatless_drone_{take_index:03d}",
         "temperature": 0.30 + 0.006 * (idx % 5),
         "top_k": 8 + (idx % 4) * 2,
         "cfg_musiccoca": 7.4 + 0.04 * (idx % 4),
@@ -197,7 +197,7 @@ def short_spike_count(wav: Path) -> int | None:
     return int(dirty.np.sum(arr > threshold))
 
 
-def validate_take(paths: dict[str, Path], duration_seconds: float) -> dict:
+def validate_take(paths: dict[str, Path], duration_seconds: float, max_spike_count: int) -> dict:
     probe = dirty.sustained.ffprobe(paths["wav"])
     report = json.loads(paths["report"].read_text(encoding="utf-8"))
     weights = json.loads(paths["weights"].read_text(encoding="utf-8"))
@@ -214,7 +214,7 @@ def validate_take(paths: dict[str, Path], duration_seconds: float) -> dict:
     duration = float(probe["format"]["duration"])
     if abs(duration - duration_seconds) > 0.05:
         raise RuntimeError(f"Duration mismatch: {duration}")
-    if report.get("embedding_source") != "text":
+    if report.get("embedding_source") != "audio":
         raise RuntimeError(f"Unexpected embedding source: {report.get('embedding_source')}")
     if report.get("midi_mode") != "initial_latch":
         raise RuntimeError(f"Unexpected MIDI mode: {report.get('midi_mode')}")
@@ -228,6 +228,9 @@ def validate_take(paths: dict[str, Path], duration_seconds: float) -> dict:
         raise RuntimeError(f"Quiet windows found: {audio_check['quiet_windows'][:5]}")
     if low_rms_windows:
         raise RuntimeError(f"Collapsed low-RMS windows found: {low_rms_windows[:5]}")
+    spike_count = audio_check["rms_100ms_spike_count"]
+    if spike_count is not None and spike_count > max_spike_count:
+        raise RuntimeError(f"Too many 100ms RMS spikes: {spike_count} > {max_spike_count}")
 
     return {
         "duration_seconds": duration,
@@ -262,6 +265,7 @@ def main() -> int:
     parser.add_argument("--count", type=int, default=COUNT)
     parser.add_argument("--start-index", type=int, default=1)
     parser.add_argument("--duration", type=float, default=DURATION_SECONDS)
+    parser.add_argument("--max-spike-count", type=int, default=24)
     parser.add_argument("--force", action="store_true")
     parser.add_argument("--skip-render", action="store_true")
     args = parser.parse_args()
@@ -300,7 +304,7 @@ def main() -> int:
         "midi": str(midi.relative_to(ROOT)),
         "midi_mode": "initial_latch",
         "midi_refresh_seconds": 0.0,
-        "embedding_source": "text",
+        "embedding_source": "audio",
         "weight_mode": "solo",
         "control_mode": "slot_blend",
         "prompt_variant_mode": "one_unique_beatless_prompt_per_take",
@@ -328,6 +332,8 @@ def main() -> int:
                 "--midi", str(midi),
                 "--profile", "beatless_drone_ambient_cm9",
                 "--prompt-library", str(paths["prompts"]),
+                "--prompt-library-audio-prompts",
+                "--no-write-audio-prompt-guides",
                 "--prompt-page-seconds", f"{args.duration + 1.0:.3f}",
                 "--weight-mode", "solo",
                 "--solo-slot", "1",
@@ -343,7 +349,7 @@ def main() -> int:
             ]
             dirty.run_logged(cmd, paths["log"])
 
-        summary = validate_take(paths, args.duration)
+        summary = validate_take(paths, args.duration, args.max_spike_count)
         summary["take_index"] = take_index
         summary["prompt"] = prompt_summary
         manifest["takes"].append(summary)

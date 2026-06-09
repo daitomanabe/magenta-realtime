@@ -188,6 +188,8 @@ struct RenderConfig {
     double segment_seconds = 2.0;
     double transition_seconds = 0.20;
     bool use_audio_prompts = true;
+    bool prompt_library_audio_prompts = false;
+    bool write_audio_prompt_guides = true;
     bool match_segment_rms = true;
     float target_rms = 0.045f;
     bool stabilize_window_rms = false;
@@ -1603,9 +1605,68 @@ std::vector<float> synth_granular_glitch_prompt(const MidiData& midi) {
     return samples;
 }
 
+uint32_t stable_hash_string(const std::string& value) {
+    uint32_t hash = 2166136261u;
+    for (unsigned char c : value) {
+        hash ^= c;
+        hash *= 16777619u;
+    }
+    return hash;
+}
+
+std::vector<float> synth_beatless_drone_variant_prompt(const MidiData& midi,
+                                                       const std::string& guide_kind) {
+    constexpr double kPromptSeconds = 10.0;
+    const int total_samples = static_cast<int>(std::lround(kPromptSeconds * kSampleRate));
+    std::vector<float> samples(static_cast<size_t>(total_samples), 0.0f);
+    auto notes = active_notes_at(midi, 0.0);
+    if (notes.empty()) {
+        for (const auto& note : midi.notes) {
+            if (note.start_seconds <= 0.001) notes.push_back(note.pitch);
+        }
+    }
+    if (notes.empty()) notes = {48, 51, 55, 58, 62};
+
+    uint32_t seed = stable_hash_string(guide_kind);
+    double base_phase = (seed & 0xffffu) / 65536.0 * 2.0 * kPi;
+    double detune_scale = 0.00055 + 0.00012 * ((seed >> 8) % 7);
+    double tone_blend = 0.08 + 0.02 * ((seed >> 12) % 5);
+    int transpose = -12 + static_cast<int>((seed >> 16) % 3) * 12;
+
+    for (size_t note_index = 0; note_index < notes.size(); ++note_index) {
+        int pitch = notes[note_index] + transpose;
+        double root = midi_frequency(pitch);
+        double phase = base_phase + 0.71 * static_cast<double>(note_index);
+        double detune = 1.0 + detune_scale * (static_cast<double>(note_index) - 2.0);
+        double amp = 0.055 / std::sqrt(static_cast<double>(notes.size()));
+        for (int i = 0; i < total_samples; ++i) {
+            double t = i / static_cast<double>(kSampleRate);
+            double attack = std::min(1.0, t / 1.8);
+            double release = std::min(1.0, std::max(0.0, (kPromptSeconds - t) / 1.8));
+            double env = std::min(attack, release);
+            double slow_a = 0.985 + 0.015 * std::sin(2.0 * kPi * (0.009 + 0.0004 * note_index) * t + phase);
+            double slow_b = 0.990 + 0.010 * std::sin(2.0 * kPi * (0.004 + 0.0003 * ((seed >> 20) % 5)) * t + phase * 0.37);
+            double f = root * detune;
+            double tone =
+                std::sin(2.0 * kPi * f * t + phase) +
+                tone_blend * std::sin(2.0 * kPi * f * 1.501 * t + phase * 1.7) +
+                0.10 * std::sin(2.0 * kPi * f * 2.001 * t + phase * 2.3);
+            samples[i] += static_cast<float>(amp * tone * env * slow_a * slow_b);
+        }
+    }
+
+    for (float& sample : samples) sample = std::tanh(sample * 1.08f);
+    fade_edges(samples, 0.16);
+    normalize_audio(samples);
+    return samples;
+}
+
 std::vector<float> synth_for_guide_kind(const MidiData& midi,
                                         const std::string& guide_kind,
                                         double segment_seconds) {
+    if (guide_kind.rfind("beatless_drone_", 0) == 0) {
+        return synth_beatless_drone_variant_prompt(midi, guide_kind);
+    }
     if (guide_kind == "piano") return synth_piano_prompt(midi);
     if (guide_kind == "chiptune") return synth_chiptune_prompt(midi, segment_seconds);
     if (guide_kind == "drums808") return synth_808_prompt(midi, segment_seconds);
@@ -2057,6 +2118,7 @@ void print_usage(const char* argv0) {
         "  --solo-slot INDEX        1-4 prompt slot used when --weight-mode solo\n"
         "  --weights-output PATH    Output frame-level prompt weight JSON\n"
         "  --prompt-library PATH    TSV library of prompts to page through four at a time\n"
+        "  --prompt-library-audio-prompts Use prompt-library guide_kind fields as audio prompts\n"
         "  --prompt-page-seconds N  Seconds per four-prompt library page (default: 4.0)\n"
         "  --macro-reference-seconds N  Reference duration for meter_macro_sine macro LFOs\n"
         "  --macro-phase-offset N   Extra phase offset for meter_macro_sine macro LFOs\n"
@@ -2066,6 +2128,7 @@ void print_usage(const char* argv0) {
         "  --duration SECONDS       Repeat/clip the MIDI progression to this duration\n"
         "  --transition SECONDS     Prompt crossfade duration at segment boundaries\n"
         "  --text-prompts           Use text prompts instead of MIDI-derived audio prompt embeddings\n"
+        "  --no-write-audio-prompt-guides Do not write generated audio prompt guide WAV files\n"
         "  --no-match-rms           Do not RMS-match the four prompt sections\n"
         "  --target-rms VALUE       Target RMS when matching sections (default: 0.045)\n"
         "  --stabilize-window-rms  Raise very quiet 1s windows after segment RMS matching\n"
@@ -2108,6 +2171,8 @@ bool parse_args(int argc, char** argv, RenderConfig& config) {
             config.weights_path = need_value("--weights-output");
         } else if (arg == "--prompt-library") {
             config.prompt_library_path = need_value("--prompt-library");
+        } else if (arg == "--prompt-library-audio-prompts") {
+            config.prompt_library_audio_prompts = true;
         } else if (arg == "--prompt-page-seconds") {
             config.prompt_page_seconds = std::stod(need_value("--prompt-page-seconds"));
         } else if (arg == "--macro-reference-seconds") {
@@ -2126,6 +2191,8 @@ bool parse_args(int argc, char** argv, RenderConfig& config) {
             config.transition_seconds = std::stod(need_value("--transition"));
         } else if (arg == "--text-prompts") {
             config.use_audio_prompts = false;
+        } else if (arg == "--no-write-audio-prompt-guides") {
+            config.write_audio_prompt_guides = false;
         } else if (arg == "--no-match-rms") {
             config.match_segment_rms = false;
         } else if (arg == "--target-rms") {
@@ -2194,7 +2261,7 @@ int main(int argc, char** argv) {
     if (!config.prompt_library_path.empty()) {
         config.prompt_library = load_prompt_library(config.prompt_library_path);
         config.slots = prompt_slots_for_page(config, 0);
-        config.use_audio_prompts = false;
+        config.use_audio_prompts = config.prompt_library_audio_prompts;
         if (config.prompt_page_seconds <= 0.0) {
             std::fprintf(stderr, "--prompt-page-seconds must be positive\n");
             return 1;
@@ -2233,15 +2300,20 @@ int main(int argc, char** argv) {
         if (config.use_audio_prompts) {
             auto prompt_audio = build_audio_prompts(midi, config.slots, config.segment_seconds);
             std::filesystem::create_directories(config.audio_prompt_dir);
-            for (int i = 0; i < 4; ++i) {
+            int prompt_slots_to_prepare = config.weight_mode == "solo"
+                ? std::clamp(config.solo_slot + 1, 1, 4)
+                : 4;
+            for (int i = 0; i < prompt_slots_to_prepare; ++i) {
                 auto audio_path = config.audio_prompt_dir /
                     (std::to_string(i + 1) + "_" + config.slots[i].id + ".wav");
-                write_wav(audio_path, to_stereo_interleaved(prompt_audio[i]), kSampleRate, 2);
+                if (config.write_audio_prompt_guides) {
+                    write_wav(audio_path, to_stereo_interleaved(prompt_audio[i]), kSampleRate, 2);
+                }
                 auto embedding_audio = prepare_audio_prompt_embedding_samples(prompt_audio[i]);
                 engine.set_audio_prompt_samples(i, audio_path.filename().string(),
                                                 embedding_audio.data(), embedding_audio.size());
             }
-            wait_for_prompts(engine, static_cast<int>(config.slots.size()));
+            wait_for_prompts(engine, prompt_slots_to_prepare);
             std::array<float, 4> initial_weights = {1.0f, 0.0f, 0.0f, 0.0f};
             if (!reblend_prompt_weights(engine, initial_weights, config.use_audio_prompts)) {
                 std::fprintf(stderr, "Initial audio prompt reblend failed\n");
