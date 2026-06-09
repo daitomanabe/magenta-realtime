@@ -274,12 +274,18 @@ drops, fade-outs, and silence.
 
 The control matrix is:
 
-- Primary control: prompt embedding mix through `modulated` prompt weights.
+- Primary control: prompt embedding mix through `meter_macro_sine` prompt
+  weights. The micro layer is BPM-synced `meter_sine` for 4/4, 3/4, 6/8,
+  and 4/4 with phase offset 0.25. The macro layer uses different sine cycles
+  over a 128 second reference and is multiplied into the prompt mix.
 - Secondary control: `ambient_crescendo` CFG curve, rising toward the second
   half (`cfg_musiccoca` 5.8 to 7.8, `cfg_notes` 5.6 to 6.4).
-- Expression control: temperature moves slowly in a restrained ambient range.
-- Exploration control: top-k moves slowly in a restrained ambient range.
+- Expression control: temperature moves within 0.6075 to 0.7205.
+- Exploration control: top-k moves within 51 to 103.
 - Stability control: fixed 25 Hz frames / 1920 sample chunks.
+- Long-form output guard: explicit 1 second window RMS floor stabilization
+  (`min_window_rms=0.012`, `max_window_gain=1024`) keeps sustained material
+  from dropping into near-silence.
 
 ```bash
 TOOLCHAINS=com.apple.dt.toolchain.Metal.32023.883 \
@@ -295,4 +301,20 @@ preview MP4 are written to:
 
 ```text
 outputs/polyrhythm_prompt_modulation/dirty_cinematic_cm9_64bar/
+```
+
+For the production batch, render 50 five-minute Cm9 takes with varied macro
+phase offsets:
+
+```bash
+DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
+  TOOLCHAINS=com.apple.dt.toolchain.Metal.32023.883 \
+  python3 experiments/polyrhythm_prompt_modulation/run_dirty_cinematic_cm9_5min_batch.py
+```
+
+Each take writes a WAV, render log, 60 fps prompt-weight/control JSON, report,
+and audio continuity check under:
+
+```text
+outputs/polyrhythm_prompt_modulation/dirty_cinematic_cm9_5min_batch/
 ```

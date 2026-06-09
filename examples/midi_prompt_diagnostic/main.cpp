@@ -59,6 +59,15 @@ constexpr double kFrameSeconds = 1.0 / kFps;
 constexpr double kWeightFrameSeconds = 1.0 / kWeightFrameRate;
 constexpr double kDefaultBpm = 120.0;
 constexpr double kPi = 3.141592653589793238462643383279502884;
+constexpr std::array<double, 4> kMeterQuarterNotePeriods = {
+    4.0,  // 4/4
+    3.0,  // 3/4
+    3.0,  // 6/8 as six eighth notes
+    4.0,  // 4/4
+};
+constexpr std::array<double, 4> kMeterPhaseOffsets = {0.00, 0.00, 0.00, 0.25};
+constexpr std::array<double, 4> kMacroCyclesPerReference = {1.0, 1.5, 2.5, 3.5};
+constexpr std::array<double, 4> kMacroPhaseOffsets = {0.00, 0.23, 0.47, 0.71};
 
 struct MidiNote {
     int start_tick = 0;
@@ -181,11 +190,17 @@ struct RenderConfig {
     bool use_audio_prompts = true;
     bool match_segment_rms = true;
     float target_rms = 0.045f;
+    bool stabilize_window_rms = false;
+    float min_window_rms = 0.002f;
+    float max_window_gain = 256.0f;
     double preroll_seconds = 2.0;
     std::filesystem::path weights_path;
     std::filesystem::path prompt_library_path;
     double prompt_page_seconds = 4.0;
     std::vector<Slot> prompt_library;
+    int batch_variant = 0;
+    double macro_phase_offset = 0.0;
+    double macro_reference_seconds = 128.0;
 };
 
 uint16_t read_u16(const std::vector<uint8_t>& data, size_t& offset) {
@@ -830,6 +845,33 @@ std::array<float, 4> normalize_prompt_weights(std::array<float, 4> weights) {
     return weights;
 }
 
+std::array<float, 4> meter_sine_raw_weights(double time_seconds, const RenderConfig& config) {
+    double beat_position = time_seconds * config.bpm / 60.0;
+    std::array<float, 4> weights = {0.0f, 0.0f, 0.0f, 0.0f};
+    for (size_t i = 0; i < weights.size(); ++i) {
+        double phase =
+            2.0 * kPi * (beat_position / kMeterQuarterNotePeriods[i] + kMeterPhaseOffsets[i]);
+        double lfo = 0.5 + 0.5 * std::sin(phase);
+        weights[i] = static_cast<float>(0.015 + std::pow(lfo, 3.0));
+    }
+    return weights;
+}
+
+std::array<float, 4> macro_sine_raw_weights(double time_seconds, const RenderConfig& config) {
+    double reference_seconds = std::max(0.001, config.macro_reference_seconds);
+    double normalized_time = time_seconds / reference_seconds;
+    double variant_phase = config.macro_phase_offset +
+                           0.017 * static_cast<double>(config.batch_variant);
+    std::array<float, 4> weights = {0.0f, 0.0f, 0.0f, 0.0f};
+    for (size_t i = 0; i < weights.size(); ++i) {
+        double slot_phase = kMacroPhaseOffsets[i] + variant_phase * static_cast<double>(i + 1);
+        double phase = 2.0 * kPi * (normalized_time * kMacroCyclesPerReference[i] + slot_phase);
+        double lfo = 0.5 + 0.5 * std::sin(phase);
+        weights[i] = static_cast<float>(0.04 + std::pow(lfo, 1.8));
+    }
+    return weights;
+}
+
 std::vector<std::string> split_tab_line(const std::string& line) {
     std::vector<std::string> fields;
     std::string field;
@@ -958,19 +1000,18 @@ std::array<float, 4> prompt_weights(double time_seconds, const RenderConfig& con
     }
 
     if (config.weight_mode == "meter_sine") {
-        double beat_position = time_seconds * config.bpm / 60.0;
-        constexpr std::array<double, 4> quarter_note_periods = {
-            4.0,        // 4/4
-            3.0,        // 3/4
-            3.0,        // 6/8 as six eighth notes
-            4.0,        // 4/4
-        };
-        constexpr std::array<double, 4> phases = {0.00, 0.00, 0.00, 0.25};
+        return normalize_prompt_weights(meter_sine_raw_weights(time_seconds, config));
+    }
+
+    if (config.weight_mode == "meter_macro_sine") {
+        auto meter = meter_sine_raw_weights(time_seconds, config);
+        auto macro = macro_sine_raw_weights(time_seconds, config);
         std::array<float, 4> weights = {0.0f, 0.0f, 0.0f, 0.0f};
         for (size_t i = 0; i < weights.size(); ++i) {
-            double phase = 2.0 * kPi * (beat_position / quarter_note_periods[i] + phases[i]);
-            double lfo = 0.5 + 0.5 * std::sin(phase);
-            weights[i] = static_cast<float>(0.015 + std::pow(lfo, 3.0));
+            double micro = std::pow(std::max(0.0001f, meter[i]), 0.72);
+            double slow = std::pow(std::max(0.0001f, macro[i]), 1.05);
+            weights[i] = static_cast<float>(0.020 + 0.82 * micro * slow +
+                                            0.10 * micro + 0.08 * slow);
         }
         return normalize_prompt_weights(weights);
     }
@@ -1060,9 +1101,10 @@ float control_temperature(const std::array<float, 4>& weights,
                           const RenderConfig& config) {
     if (config.control_mode == "ambient_crescendo") {
         double x = render_progress(time_seconds, config);
-        double slow_motion = 0.5 + 0.5 * std::sin(2.0 * kPi * (0.65 * x + 0.13));
-        double value = 0.56 + 0.16 * smoothstep(x) + 0.055 * slow_motion;
-        return static_cast<float>(std::clamp(value, 0.56, 0.80));
+        double wobble = 0.12 * x * (1.0 - x) * std::sin(2.0 * kPi * (1.37 * x + 0.13));
+        double shaped = clamp01(smoothstep(x) + wobble);
+        double value = 0.6075 + (0.7205 - 0.6075) * shaped;
+        return static_cast<float>(value);
     }
     return blend_float(weights, slots, &Slot::temperature);
 }
@@ -1073,9 +1115,10 @@ int control_top_k(const std::array<float, 4>& weights,
                   const RenderConfig& config) {
     if (config.control_mode == "ambient_crescendo") {
         double x = render_progress(time_seconds, config);
-        double slow_motion = 0.5 + 0.5 * std::sin(2.0 * kPi * (0.85 * x + 0.31));
-        double value = 40.0 + 52.0 * smoothstep(x) + 12.0 * slow_motion;
-        return static_cast<int>(std::lround(std::clamp(value, 40.0, 104.0)));
+        double wobble = 0.12 * x * (1.0 - x) * std::sin(2.0 * kPi * (1.11 * x + 0.31));
+        double shaped = clamp01(smoothstep(x) + wobble);
+        double value = 51.0 + (103.0 - 51.0) * shaped;
+        return static_cast<int>(std::lround(value));
     }
     return blend_top_k(weights, slots);
 }
@@ -1588,6 +1631,16 @@ SegmentMetrics metrics_segment(const std::vector<float>& interleaved, int start_
     return metrics;
 }
 
+void limit_peak(std::vector<float>& interleaved) {
+    float peak = 0.0f;
+    for (float v : interleaved) peak = std::max(peak, std::abs(v));
+    float target_peak = std::pow(10.0f, -1.0f / 20.0f);
+    if (peak > target_peak) {
+        float gain = target_peak / peak;
+        for (float& v : interleaved) v *= gain;
+    }
+}
+
 void match_segment_rms(std::vector<float>& interleaved,
                        double duration_seconds,
                        double segment_seconds,
@@ -1604,13 +1657,26 @@ void match_segment_rms(std::vector<float>& interleaved,
             interleaved[frame * 2 + 1] *= gain;
         }
     }
-    float peak = 0.0f;
-    for (float v : interleaved) peak = std::max(peak, std::abs(v));
-    float target_peak = std::pow(10.0f, -1.0f / 20.0f);
-    if (peak > target_peak) {
-        float gain = target_peak / peak;
-        for (float& v : interleaved) v *= gain;
+    limit_peak(interleaved);
+}
+
+void stabilize_window_rms(std::vector<float>& interleaved,
+                          double window_seconds,
+                          float min_window_rms,
+                          float max_window_gain) {
+    int total_frames = static_cast<int>(interleaved.size() / 2);
+    int window_frames = std::max(1, static_cast<int>(std::lround(window_seconds * kSampleRate)));
+    for (int start = 0; start < total_frames; start += window_frames) {
+        int end = std::min(total_frames, start + window_frames);
+        float rms = rms_segment(interleaved, start, end);
+        if (rms <= 0.00000001f || rms >= min_window_rms) continue;
+        float gain = std::min(max_window_gain, min_window_rms / rms);
+        for (int frame = start; frame < end; ++frame) {
+            interleaved[frame * 2] *= gain;
+            interleaved[frame * 2 + 1] *= gain;
+        }
     }
+    limit_peak(interleaved);
 }
 
 std::string json_escape(const std::string& value) {
@@ -1661,6 +1727,9 @@ bool write_report(const std::filesystem::path& path,
     out << "  \"prompt_library\": \"" << json_escape(config.prompt_library_path.string()) << "\",\n";
     out << "  \"prompt_library_size\": " << config.prompt_library.size() << ",\n";
     out << "  \"prompt_page_seconds\": " << config.prompt_page_seconds << ",\n";
+    out << "  \"batch_variant\": " << config.batch_variant << ",\n";
+    out << "  \"macro_phase_offset\": " << config.macro_phase_offset << ",\n";
+    out << "  \"macro_reference_seconds\": " << config.macro_reference_seconds << ",\n";
     out << "  \"bpm\": " << config.bpm << ",\n";
     out << "  \"model\": \"" << json_escape(config.model_name) << "\",\n";
     out << "  \"model_path\": \"" << json_escape(model_path) << "\",\n";
@@ -1673,6 +1742,9 @@ bool write_report(const std::filesystem::path& path,
     out << "  \"chunk_samples\": " << kFrameSamples << ",\n";
     out << "  \"segment_seconds\": " << config.segment_seconds << ",\n";
     out << "  \"transition_seconds\": " << config.transition_seconds << ",\n";
+    out << "  \"stabilize_window_rms\": " << (config.stabilize_window_rms ? "true" : "false") << ",\n";
+    out << "  \"min_window_rms\": " << config.min_window_rms << ",\n";
+    out << "  \"max_window_gain\": " << config.max_window_gain << ",\n";
     out << "  \"peak\": " << peak << ",\n";
     out << "  \"rms\": " << rms << ",\n";
     out << "  \"non_silent\": " << ((peak > 0.0001f && rms > 0.00001) ? "true" : "false") << ",\n";
@@ -1752,12 +1824,30 @@ bool write_weight_frames(const std::filesystem::path& path,
     out << "  \"prompt_library\": \"" << json_escape(config.prompt_library_path.string()) << "\",\n";
     out << "  \"prompt_library_size\": " << config.prompt_library.size() << ",\n";
     out << "  \"prompt_page_seconds\": " << config.prompt_page_seconds << ",\n";
-    if (config.weight_mode == "meter_sine") {
+    out << "  \"batch_variant\": " << config.batch_variant << ",\n";
+    out << "  \"macro_phase_offset\": " << config.macro_phase_offset << ",\n";
+    out << "  \"macro_reference_seconds\": " << config.macro_reference_seconds << ",\n";
+    if (config.weight_mode == "meter_sine" || config.weight_mode == "meter_macro_sine") {
         out << "  \"meter_sine\": [\n";
-        out << "    {\"meter\": \"4/4\", \"quarter_note_period\": 4.000000, \"phase_offset\": 0.000000},\n";
-        out << "    {\"meter\": \"3/4\", \"quarter_note_period\": 3.000000, \"phase_offset\": 0.000000},\n";
-        out << "    {\"meter\": \"6/8\", \"quarter_note_period\": 3.000000, \"phase_offset\": 0.000000},\n";
-        out << "    {\"meter\": \"4/4\", \"quarter_note_period\": 4.000000, \"phase_offset\": 0.250000}\n";
+        out << "    {\"meter\": \"4/4\", \"quarter_note_period\": " << kMeterQuarterNotePeriods[0]
+            << ", \"phase_offset\": " << kMeterPhaseOffsets[0] << "},\n";
+        out << "    {\"meter\": \"3/4\", \"quarter_note_period\": " << kMeterQuarterNotePeriods[1]
+            << ", \"phase_offset\": " << kMeterPhaseOffsets[1] << "},\n";
+        out << "    {\"meter\": \"6/8\", \"quarter_note_period\": " << kMeterQuarterNotePeriods[2]
+            << ", \"phase_offset\": " << kMeterPhaseOffsets[2] << "},\n";
+        out << "    {\"meter\": \"4/4\", \"quarter_note_period\": " << kMeterQuarterNotePeriods[3]
+            << ", \"phase_offset\": " << kMeterPhaseOffsets[3] << "}\n";
+        out << "  ],\n";
+    }
+    if (config.weight_mode == "meter_macro_sine") {
+        out << "  \"macro_sine\": [\n";
+        for (int i = 0; i < 4; ++i) {
+            out << "    {\"slot\": " << i
+                << ", \"cycles_per_reference\": " << kMacroCyclesPerReference[i]
+                << ", \"base_phase_offset\": " << kMacroPhaseOffsets[i]
+                << ", \"reference_seconds\": " << config.macro_reference_seconds
+                << "}" << (i == 3 ? "\n" : ",\n");
+        }
         out << "  ],\n";
     }
     out << "  \"slots\": [\n";
@@ -1871,17 +1961,23 @@ void print_usage(const char* argv0) {
         "                           sustained_synth_textures, sustained_no_decay_trials,\n"
         "                           or dirty_cinematic_ambient_cm9\n"
         "  --weight-mode NAME       sequential, solo, modulated, polyrhythm, loop_sine,\n"
-        "                           meter_sine, or page_sine\n"
+        "                           meter_sine, meter_macro_sine, or page_sine\n"
         "  --control-mode NAME      slot_blend or ambient_crescendo\n"
         "  --solo-slot INDEX        1-4 prompt slot used when --weight-mode solo\n"
         "  --weights-output PATH    Output frame-level prompt weight JSON\n"
         "  --prompt-library PATH    TSV library of prompts to page through four at a time\n"
         "  --prompt-page-seconds N  Seconds per four-prompt library page (default: 4.0)\n"
+        "  --macro-reference-seconds N  Reference duration for meter_macro_sine macro LFOs\n"
+        "  --macro-phase-offset N   Extra phase offset for meter_macro_sine macro LFOs\n"
+        "  --batch-variant INDEX    Variant index folded into meter_macro_sine macro phases\n"
         "  --duration SECONDS       Repeat/clip the MIDI progression to this duration\n"
         "  --transition SECONDS     Prompt crossfade duration at segment boundaries\n"
         "  --text-prompts           Use text prompts instead of MIDI-derived audio prompt embeddings\n"
         "  --no-match-rms           Do not RMS-match the four prompt sections\n"
-        "  --target-rms VALUE       Target RMS when matching sections (default: 0.045)\n",
+        "  --target-rms VALUE       Target RMS when matching sections (default: 0.045)\n"
+        "  --stabilize-window-rms  Raise very quiet 1s windows after segment RMS matching\n"
+        "  --min-window-rms VALUE   Minimum RMS for stabilized windows (default: 0.002)\n"
+        "  --max-window-gain VALUE  Maximum gain for stabilized windows (default: 256)\n",
         argv0);
 }
 
@@ -1921,6 +2017,12 @@ bool parse_args(int argc, char** argv, RenderConfig& config) {
             config.prompt_library_path = need_value("--prompt-library");
         } else if (arg == "--prompt-page-seconds") {
             config.prompt_page_seconds = std::stod(need_value("--prompt-page-seconds"));
+        } else if (arg == "--macro-reference-seconds") {
+            config.macro_reference_seconds = std::stod(need_value("--macro-reference-seconds"));
+        } else if (arg == "--macro-phase-offset") {
+            config.macro_phase_offset = std::stod(need_value("--macro-phase-offset"));
+        } else if (arg == "--batch-variant") {
+            config.batch_variant = std::stoi(need_value("--batch-variant"));
         } else if (arg == "--duration") {
             config.duration_seconds = std::stod(need_value("--duration"));
         } else if (arg == "--transition") {
@@ -1931,6 +2033,12 @@ bool parse_args(int argc, char** argv, RenderConfig& config) {
             config.match_segment_rms = false;
         } else if (arg == "--target-rms") {
             config.target_rms = std::stof(need_value("--target-rms"));
+        } else if (arg == "--stabilize-window-rms") {
+            config.stabilize_window_rms = true;
+        } else if (arg == "--min-window-rms") {
+            config.min_window_rms = std::stof(need_value("--min-window-rms"));
+        } else if (arg == "--max-window-gain") {
+            config.max_window_gain = std::stof(need_value("--max-window-gain"));
         } else if (arg == "--help" || arg == "-h") {
             print_usage(argv[0]);
             return false;
@@ -1958,8 +2066,17 @@ int main(int argc, char** argv) {
         config.weight_mode != "polyrhythm" &&
         config.weight_mode != "loop_sine" &&
         config.weight_mode != "meter_sine" &&
+        config.weight_mode != "meter_macro_sine" &&
         config.weight_mode != "page_sine") {
         std::fprintf(stderr, "Unknown weight mode: %s\n", config.weight_mode.c_str());
+        return 1;
+    }
+    if (config.macro_reference_seconds <= 0.0) {
+        std::fprintf(stderr, "--macro-reference-seconds must be positive\n");
+        return 1;
+    }
+    if (config.min_window_rms <= 0.0f || config.max_window_gain <= 0.0f) {
+        std::fprintf(stderr, "--min-window-rms and --max-window-gain must be positive\n");
         return 1;
     }
     if (config.control_mode != "slot_blend" &&
@@ -2108,6 +2225,9 @@ int main(int argc, char** argv) {
 
         if (config.match_segment_rms) {
             match_segment_rms(interleaved, midi.duration_seconds, config.segment_seconds, config.target_rms);
+        }
+        if (config.stabilize_window_rms) {
+            stabilize_window_rms(interleaved, 1.0, config.min_window_rms, config.max_window_gain);
         }
 
         auto end_time = std::chrono::steady_clock::now();

@@ -90,14 +90,14 @@ def main() -> int:
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
     midi = args.output_dir / "dirty_cinematic_cm9_64bars_bpm120_hold.mid"
-    wav = args.output_dir / "dirty_cinematic_cm9_64bars_bpm120_modulated.wav"
-    report = args.output_dir / "dirty_cinematic_cm9_64bars_bpm120_modulated.report.json"
-    weights = args.output_dir / "dirty_cinematic_cm9_64bars_bpm120_modulated.weights.json"
-    audio_check_path = args.output_dir / "dirty_cinematic_cm9_64bars_bpm120_modulated.audio_check.json"
-    preview_weights = args.output_dir / "dirty_cinematic_cm9_64bars_bpm120_modulated.weights.preview_10fps.json"
-    graph = args.output_dir / "dirty_cinematic_cm9_64bars_bpm120_modulated.graph_10fps.mp4"
-    graph_audio = args.output_dir / "dirty_cinematic_cm9_64bars_bpm120_modulated.graph_audio_10fps.mp4"
-    manifest = args.output_dir / "dirty_cinematic_cm9_64bars_bpm120_modulated.manifest.json"
+    wav = args.output_dir / "dirty_cinematic_cm9_64bars_bpm120_meter_macro_sine.wav"
+    report = args.output_dir / "dirty_cinematic_cm9_64bars_bpm120_meter_macro_sine.report.json"
+    weights = args.output_dir / "dirty_cinematic_cm9_64bars_bpm120_meter_macro_sine.weights.json"
+    audio_check_path = args.output_dir / "dirty_cinematic_cm9_64bars_bpm120_meter_macro_sine.audio_check.json"
+    preview_weights = args.output_dir / "dirty_cinematic_cm9_64bars_bpm120_meter_macro_sine.weights.preview_10fps.json"
+    graph = args.output_dir / "dirty_cinematic_cm9_64bars_bpm120_meter_macro_sine.graph_10fps.mp4"
+    graph_audio = args.output_dir / "dirty_cinematic_cm9_64bars_bpm120_meter_macro_sine.graph_audio_10fps.mp4"
+    manifest = args.output_dir / "dirty_cinematic_cm9_64bars_bpm120_meter_macro_sine.manifest.json"
 
     write_cm9_hold_midi(midi)
 
@@ -111,11 +111,22 @@ def main() -> int:
             "--duration",
             f"{DURATION_SECONDS:.3f}",
             "--weight-mode",
-            "modulated",
+            "meter_macro_sine",
             "--control-mode",
             "ambient_crescendo",
+            "--macro-reference-seconds",
+            "128.000",
+            "--macro-phase-offset",
+            "0.000",
+            "--batch-variant",
+            "0",
             "--transition",
             "0.000",
+            "--stabilize-window-rms",
+            "--min-window-rms",
+            "0.012",
+            "--max-window-gain",
+            "1024",
             "--output",
             str(wav),
             "--report",
@@ -194,10 +205,18 @@ def main() -> int:
                 "bars": BARS,
                 "duration_seconds": DURATION_SECONDS,
                 "profile": "dirty_cinematic_ambient_cm9",
-                "weight_mode": "modulated",
+                "weight_mode": "meter_macro_sine",
                 "control_mode": "ambient_crescendo",
+                "macro_reference_seconds": 128.0,
+                "macro_phase_offset": 0.0,
+                "batch_variant": 0,
+                "window_rms_stabilization": {
+                    "enabled": True,
+                    "min_window_rms": 0.012,
+                    "max_window_gain": 1024,
+                },
                 "control_roles": {
-                    "primary": "prompt embedding mix",
+                    "primary": "prompt embedding mix with BPM-synced meter_sine multiplied by 128-second macro_sine",
                     "secondary": "CFG weight rises toward the second half",
                     "expression": "temperature moves slowly in a restrained ambient range",
                     "exploration": "top_k moves slowly in a restrained ambient range",
