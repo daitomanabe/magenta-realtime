@@ -303,8 +303,9 @@ preview MP4 are written to:
 outputs/polyrhythm_prompt_modulation/dirty_cinematic_cm9_64bar/
 ```
 
-For the production batch, render 50 five-minute Cm9 takes with varied macro
-phase offsets:
+For the prompt-variant validation batch, render 10 five-minute Cm9 takes. Each
+take writes a fresh four-prompt TSV, so both the prompt content and the macro
+phase offsets vary between takes:
 
 ```bash
 DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
@@ -313,8 +314,10 @@ DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
 ```
 
 Each take writes a WAV, render log, 60 fps prompt-weight/control JSON, report,
-and audio continuity check under:
+prompt TSV, and audio continuity check under:
 
 ```text
-outputs/polyrhythm_prompt_modulation/dirty_cinematic_cm9_5min_batch/
+outputs/polyrhythm_prompt_modulation/dirty_cinematic_cm9_5min_prompt_variants_10/
 ```
+
+Use `--count 50` only after the 10-take prompt-variant batch has been checked.

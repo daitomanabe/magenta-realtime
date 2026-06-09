@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render 50 five-minute dirty cinematic Cm9 meter+macro prompt-mix takes."""
+"""Render dirty cinematic Cm9 meter+macro prompt-mix takes with prompt variants."""
 
 from __future__ import annotations
 
@@ -21,7 +21,7 @@ except ImportError:  # pragma: no cover - slow fallback for minimal Python envs.
 
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_BINARY = ROOT / "build/examples/midi_prompt_diagnostic/mrt2_midi_prompt_diagnostic"
-DEFAULT_OUTPUT_DIR = ROOT / "outputs/polyrhythm_prompt_modulation/dirty_cinematic_cm9_5min_batch"
+DEFAULT_OUTPUT_DIR = ROOT / "outputs/polyrhythm_prompt_modulation/dirty_cinematic_cm9_5min_prompt_variants_10"
 BPM = 120
 BEATS_PER_BAR = 4
 DURATION_SECONDS = 300.0
@@ -31,6 +31,131 @@ CHANNELS = 2
 BYTES_PER_SAMPLE = 4
 WEIGHT_FRAME_RATE = 60
 CHORD = [36, 43, 48, 51, 55, 58, 62, 67]
+PROMPT_LIBRARY_HEADER = [
+    "id",
+    "label",
+    "category",
+    "prompt",
+    "guide_kind",
+    "temperature",
+    "top_k",
+    "cfg_musiccoca",
+    "cfg_notes",
+    "cfg_drums",
+]
+
+TAKE_VARIANTS = [
+    {
+        "scene": "Obsidian Fog Vault",
+        "slug": "obsidian_fog",
+        "drone": "low detuned VCO fog with unstable transformer hum",
+        "noise": "black room tone, soot-like broadband noise, and sub pressure",
+        "glitch": "frozen cassette buffer dust with broken resampling edges",
+        "pad": "smoked glass wavetable haze with dim metallic overtones",
+        "filter": "slow ladder low-pass shadowing and shallow notch drift",
+        "space": "long concrete chamber reverb with soft tape compression",
+        "motion": "barely moving non-rhythmic phase drift",
+    },
+    {
+        "scene": "Mercury Ice Corridor",
+        "slug": "mercury_ice",
+        "drone": "cold sine-stack drone with brushed modular detune",
+        "noise": "silver filtered air pressure and distant mechanical room hiss",
+        "glitch": "icy spectral freeze grains suspended without stutters",
+        "pad": "pale wavetable choir pad with frost-like harmonic smear",
+        "filter": "slow high-pass air movement and muted comb-color shifts",
+        "space": "wide frozen hall reverb with restrained shimmer",
+        "motion": "slow non-periodic spectral thawing",
+    },
+    {
+        "scene": "Carbon Cinema Tunnel",
+        "slug": "carbon_tunnel",
+        "drone": "heavy Cm9 oscillator floor with dirty subharmonic bloom",
+        "noise": "charcoal noise bed, low shelf pressure, and smoky midrange",
+        "glitch": "dark buffer-freeze sheet with tiny digital ash",
+        "pad": "cinematic glass pad buried under carbon tape haze",
+        "filter": "broad band-pass sweeps that never form a pulse",
+        "space": "deep tunnel convolution tail and saturated low reflections",
+        "motion": "slow pressure changes across the stereo field",
+    },
+    {
+        "scene": "Rust Neon Observatory",
+        "slug": "rust_neon",
+        "drone": "rusted modular chord drone with dim neon harmonic bleed",
+        "noise": "oxide noise floor, distant transformer buzz, and dark air",
+        "glitch": "corroded granular hold with non-rhythmic bit erosion",
+        "pad": "neon spectral pad softened by magnetic tape wear",
+        "filter": "slow resonant low-pass opening with off-grid drift",
+        "space": "large observatory reverb with blurred reverse reflections",
+        "motion": "uneven analog drift without tremolo",
+    },
+    {
+        "scene": "Granite Storm Interior",
+        "slug": "granite_storm",
+        "drone": "granite-heavy VCO sustain with pressure-wave detune",
+        "noise": "storm-static broadband bed and low cinematic rumble",
+        "glitch": "frozen storm buffer texture with soft cracked edges",
+        "pad": "gray additive pad with mineral shimmer and dust",
+        "filter": "slow low-mid filtering and wide non-rhythmic phasing",
+        "space": "huge stone room tail with compressed dark reflections",
+        "motion": "very slow density drift like suspended weather",
+    },
+    {
+        "scene": "Oil Glass Atrium",
+        "slug": "oil_glass",
+        "drone": "oil-thick analog drone with smeared pitch drift",
+        "noise": "viscous dark noise bed and wet sub pressure",
+        "glitch": "liquid buffer smear with tiny non-metric digital bubbles",
+        "pad": "black glass pad with oily upper-harmonic bands",
+        "filter": "slow formant-like color drift and muted notch movement",
+        "space": "glossy atrium reverb with soft overdrive",
+        "motion": "fluid non-rhythmic stereo bending",
+    },
+    {
+        "scene": "Ashen Data Cathedral",
+        "slug": "ashen_data",
+        "drone": "cathedral-size Cm9 drone with burnt digital undertones",
+        "noise": "ashen data hiss, dark fan noise, and sub resonance",
+        "glitch": "static frozen buffer choir with decomposed sample edges",
+        "pad": "wide spectral organ pad with dusty harmonic bloom",
+        "filter": "slow resonant notch migration and gentle spectral blur",
+        "space": "cathedral tail, tape haze, and distant digital smear",
+        "motion": "long-form non-periodic harmonic breathing",
+    },
+    {
+        "scene": "Chrome Dust Horizon",
+        "slug": "chrome_dust",
+        "drone": "chrome-coated modular drone with unstable sine beating",
+        "noise": "bright dust noise filtered into a dark cinematic bed",
+        "glitch": "metallic freeze dust with tiny broken codec artifacts",
+        "pad": "cold glass pad with chrome shimmer and dirty chorus",
+        "filter": "slow high-mid damping and low-pass shade movement",
+        "space": "wide horizon reverb with blurred metallic reflections",
+        "motion": "slow stereo widening without rhythmic movement",
+    },
+    {
+        "scene": "Basalt Memory Room",
+        "slug": "basalt_memory",
+        "drone": "basalt-dark polysynth drone with worn tape oscillation",
+        "noise": "old memory-room hiss, sub floor, and filtered dust",
+        "glitch": "aged frozen buffer sheet with soft memory corruption",
+        "pad": "dim spectral pad with cracked glass harmonics",
+        "filter": "slow low-pass settling and non-metric phase smear",
+        "space": "small-to-vast room morph with saturated tail",
+        "motion": "gradual texture aging across the full take",
+    },
+    {
+        "scene": "Violet Machine Weather",
+        "slug": "violet_machine",
+        "drone": "violet machine drone with dirty modular chord pressure",
+        "noise": "electrical weather noise and cinematic low cloud",
+        "glitch": "suspended machine-glitch sheet with no rhythmic cuts",
+        "pad": "violet wavetable pad with diffuse glassy overtones",
+        "filter": "slow asymmetric filter color and post-effect diffusion",
+        "space": "dark plate reverb, tape saturation, and soft chorus",
+        "motion": "evolving non-rhythmic modulation from start to finish",
+    },
+]
 
 
 def vlq(value: int) -> bytes:
@@ -97,6 +222,128 @@ def run_logged(cmd: list[str], log_path: Path) -> None:
     if proc.returncode != 0:
         tail = "\n".join(log_path.read_text(encoding="utf-8", errors="replace").splitlines()[-40:])
         raise RuntimeError(f"Render failed with exit code {proc.returncode}: {log_path}\n{tail}")
+
+
+def clean_tsv(value: str) -> str:
+    return " ".join(value.replace("\t", " ").replace("\n", " ").split())
+
+
+def prompt_slots_for_take(take_index: int) -> list[dict[str, str | float | int]]:
+    variant = TAKE_VARIANTS[(take_index - 1) % len(TAKE_VARIANTS)]
+    scene = variant["scene"]
+    slug = variant["slug"]
+    common = (
+        "Keep one continuous Cm9 sustained environment for the full five minutes at 120 BPM. "
+        "The material is dirty, cinematic, ambient, textural, and beatless. "
+        "Let post effects and filters evolve slowly, but do not create a rhythm. "
+        "Avoid drums, percussion, kick, snare, hats, impacts, risers, arpeggios, "
+        "sequencer patterns, rhythmic pulses, tremolo, gated motion, delay taps, "
+        "vocals, lead melody, drops, fade-outs, sudden cuts, and silence."
+    )
+    return [
+        {
+            "id": f"take{take_index:03d}_{slug}_voltage_drone",
+            "label": f"{scene} Voltage Drone",
+            "category": "analog_drone",
+            "prompt": (
+                f"Create an original sustained synthesizer texture called {scene} Voltage Drone. "
+                f"A continuous Cm9 low-register modular synth sustain made from {variant['drone']}. "
+                f"Use {variant['filter']}, {variant['motion']}, and a stable low end. "
+                f"Add {variant['space']}. {common}"
+            ),
+            "guide_kind": "analog_drone",
+            "temperature": 0.58,
+            "top_k": 42,
+            "cfg_musiccoca": 5.8,
+            "cfg_notes": 5.7,
+            "cfg_drums": 0.0,
+        },
+        {
+            "id": f"take{take_index:03d}_{slug}_cinema_floor",
+            "label": f"{scene} Cinema Floor",
+            "category": "cinema_noise",
+            "prompt": (
+                f"Create an original sustained synthesizer texture called {scene} Cinema Floor. "
+                f"A continuous Cm9 cinematic noise bed built from {variant['noise']}. "
+                f"Shape it with {variant['filter']} and {variant['motion']}. "
+                f"Add {variant['space']} while keeping the sound heavy and wide. {common}"
+            ),
+            "guide_kind": "cinema_noise",
+            "temperature": 0.64,
+            "top_k": 58,
+            "cfg_musiccoca": 6.1,
+            "cfg_notes": 5.8,
+            "cfg_drums": 0.0,
+        },
+        {
+            "id": f"take{take_index:03d}_{slug}_glitch_sheet",
+            "label": f"{scene} Glitch Sheet",
+            "category": "granular_glitch",
+            "prompt": (
+                f"Create an original sustained synthesizer texture called {scene} Glitch Sheet. "
+                f"A continuous Cm9 frozen-buffer synth sheet made from {variant['glitch']}. "
+                f"The glitches are texture only: no stutters, no clicks as rhythm, and no beat grid. "
+                f"Use {variant['filter']}, {variant['motion']}, and {variant['space']}. {common}"
+            ),
+            "guide_kind": "granular_glitch",
+            "temperature": 0.72,
+            "top_k": 76,
+            "cfg_musiccoca": 6.4,
+            "cfg_notes": 5.9,
+            "cfg_drums": 0.0,
+        },
+        {
+            "id": f"take{take_index:03d}_{slug}_glass_texture",
+            "label": f"{scene} Glass Texture",
+            "category": "spectral_pad",
+            "prompt": (
+                f"Create an original sustained synthesizer texture called {scene} Glass Texture. "
+                f"A continuous Cm9 spectral pad made from {variant['pad']}. "
+                f"Use {variant['filter']}, {variant['motion']}, gentle chorus, and slow post-effect diffusion. "
+                f"Add {variant['space']} while keeping the tone sustained and non-melodic. {common}"
+            ),
+            "guide_kind": "spectral_pad",
+            "temperature": 0.60,
+            "top_k": 52,
+            "cfg_musiccoca": 5.9,
+            "cfg_notes": 5.8,
+            "cfg_drums": 0.0,
+        },
+    ]
+
+
+def write_prompt_library(path: Path, slots: list[dict[str, str | float | int]]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    lines = ["\t".join(PROMPT_LIBRARY_HEADER)]
+    for slot in slots:
+        lines.append(
+            "\t".join([
+                clean_tsv(str(slot["id"])),
+                clean_tsv(str(slot["label"])),
+                clean_tsv(str(slot["category"])),
+                clean_tsv(str(slot["prompt"])),
+                clean_tsv(str(slot["guide_kind"])),
+                f"{float(slot['temperature']):.3f}",
+                str(int(slot["top_k"])),
+                f"{float(slot['cfg_musiccoca']):.3f}",
+                f"{float(slot['cfg_notes']):.3f}",
+                f"{float(slot['cfg_drums']):.3f}",
+            ])
+        )
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def prompt_manifest(slots: list[dict[str, str | float | int]]) -> list[dict[str, str]]:
+    return [
+        {
+            "id": str(slot["id"]),
+            "label": str(slot["label"]),
+            "category": str(slot["category"]),
+            "guide_kind": str(slot["guide_kind"]),
+            "prompt": str(slot["prompt"]),
+        }
+        for slot in slots
+    ]
 
 
 def find_float_wav_data(path: Path) -> tuple[dict[str, int], int, int]:
@@ -277,6 +524,7 @@ def paths_for_take(output_dir: Path, take_index: int) -> dict[str, Path]:
     stem = f"dirty_cinematic_cm9_take_{take_index:03d}_meter_macro_sine_5min"
     return {
         "dir": take_dir,
+        "prompts": take_dir / f"{stem}.prompts.tsv",
         "wav": take_dir / f"{stem}.wav",
         "report": take_dir / f"{stem}.report.json",
         "weights": take_dir / f"{stem}.weights.json",
@@ -321,6 +569,7 @@ def validate_take(paths: dict[str, Path], duration_seconds: float) -> dict:
 
     return {
         "duration_seconds": duration,
+        "prompt_library": str(paths["prompts"].relative_to(ROOT)),
         "wav": str(wav.relative_to(ROOT)),
         "report": str(report.relative_to(ROOT)),
         "weights": str(weights.relative_to(ROOT)),
@@ -350,7 +599,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--binary", type=Path, default=DEFAULT_BINARY)
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
-    parser.add_argument("--count", type=int, default=50)
+    parser.add_argument("--count", type=int, default=10)
     parser.add_argument("--start-index", type=int, default=1)
     parser.add_argument("--duration", type=float, default=DURATION_SECONDS)
     parser.add_argument("--force", action="store_true")
@@ -381,7 +630,7 @@ def main() -> int:
 
     manifest_path = output_dir / "manifest.json"
     manifest = {
-        "schema": "mrt-dirty-cinematic-cm9-5min-batch-v1",
+        "schema": "mrt-dirty-cinematic-cm9-5min-prompt-variant-batch-v1",
         "profile": "dirty_cinematic_ambient_cm9",
         "weight_mode": "meter_macro_sine",
         "control_mode": "ambient_crescendo",
@@ -392,6 +641,8 @@ def main() -> int:
         "start_index": args.start_index,
         "macro_reference_seconds": MACRO_REFERENCE_SECONDS,
         "midi": str(midi.relative_to(ROOT)),
+        "prompt_variant_mode": "per_take_four_prompt_tsv",
+        "prompt_variant_count": len(TAKE_VARIANTS),
         "control_targets": {
             "cfg_musiccoca": [5.8, 7.8],
             "cfg_notes": [5.6, 6.4],
@@ -415,9 +666,17 @@ def main() -> int:
         paths = paths_for_take(output_dir, take_index)
         paths["dir"].mkdir(parents=True, exist_ok=True)
         phase_offset = macro_phase_offset_for_take(take_index)
+        prompt_slots = prompt_slots_for_take(take_index)
+        write_prompt_library(paths["prompts"], prompt_slots)
         print(f"take {take_index:03d}: macro_phase_offset={phase_offset:.6f}", flush=True)
+        print(
+            "take "
+            f"{take_index:03d}: prompts="
+            + ", ".join(str(slot["label"]) for slot in prompt_slots),
+            flush=True,
+        )
 
-        existing = all(paths[key].exists() for key in ["wav", "report", "weights"])
+        existing = all(paths[key].exists() for key in ["prompts", "wav", "report", "weights"])
         if args.force:
             existing = False
         if not existing:
@@ -442,6 +701,10 @@ def main() -> int:
                     f"{phase_offset:.9f}",
                     "--batch-variant",
                     str(take_index),
+                    "--prompt-library",
+                    str(paths["prompts"]),
+                    "--prompt-page-seconds",
+                    f"{args.duration + 1.0:.3f}",
                     "--transition",
                     "0.000",
                     "--stabilize-window-rms",
@@ -467,6 +730,7 @@ def main() -> int:
             "take_index": take_index,
             "macro_phase_offset": phase_offset,
             "batch_variant": take_index,
+            "prompt_set": prompt_manifest(prompt_slots),
         })
         manifest["takes"].append(summary)
         manifest["completed_count"] = len(manifest["takes"])
