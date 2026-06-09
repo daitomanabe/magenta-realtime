@@ -967,8 +967,8 @@ std::vector<Slot> load_prompt_library(const std::filesystem::path& path) {
         slot.cfg_drums = std::stof(fields[9]);
         slots.push_back(std::move(slot));
     }
-    if (slots.size() < 4) {
-        throw std::runtime_error("Prompt library must contain at least 4 prompts: " + path.string());
+    if (slots.empty()) {
+        throw std::runtime_error("Prompt library must contain at least 1 prompt: " + path.string());
     }
     return slots;
 }
