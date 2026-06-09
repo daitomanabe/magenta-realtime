@@ -768,6 +768,59 @@ bool apply_profile(RenderConfig& config) {
         }};
         return true;
     }
+    if (config.profile == "beatless_drone_ambient_cm9") {
+        config.slots = {{
+            {
+                "submerged_organ_voltage",
+                "Submerged Organ Voltage",
+                "Create an original sustained synthesizer texture called Submerged Organ Voltage. A continuous Cm9 low-register modular oscillator and organ-like drone held as one uninterrupted tone field, with no repeated attacks and no pulse. Use only very slow non-periodic phase drift, a dark low-pass filter that barely moves, soft tape saturation, and a wide stable reverb tail. The sound should feel ambient, heavy, suspended, and continuous. Avoid drums, percussion, kick, snare, hats, clicks, ticks, impacts, stutters, arpeggios, sequencer patterns, rhythmic pulses, tremolo, gated motion, delay taps, vocals, lead melody, drops, fade-outs, and silence.",
+                "uninterrupted low Cm9 modular oscillator and organ drone with slow filter drift",
+                "analog_drone",
+                0.46f,
+                24,
+                7.0f,
+                6.6f,
+                0.0f,
+            },
+            {
+                "static_cloud_continuum",
+                "Static Cloud Continuum",
+                "Create an original sustained synthesizer texture called Static Cloud Continuum. A continuous Cm9 filtered noise bed and sub-harmonic fog with no events, no impacts, and no meter. The tone is a smooth dark air mass with extremely slow band-pass color drift, soft saturation, spectral blur, and a distant convolution-like room tail. It should remain a single ambient environment without becoming a beat or sequence. Avoid drums, percussion, transient hits, risers, clicks, clock noise, arpeggios, rhythmic pulses, tremolo, delay taps, vocals, lead melody, drops, fade-outs, and silence.",
+                "continuous Cm9 filtered noise bed with sub fog and very slow color drift",
+                "cinema_noise",
+                0.50f,
+                28,
+                7.1f,
+                6.5f,
+                0.0f,
+            },
+            {
+                "frozen_glass_horizon",
+                "Frozen Glass Horizon",
+                "Create an original sustained synthesizer texture called Frozen Glass Horizon. A continuous Cm9 spectral wavetable pad held as a smooth harmonic cloud, with slow phase smear, non-periodic detune drift, and muted high-frequency air. Add gentle chorus, soft tape haze, and a large reverb field, but keep the surface legato and unbroken. It should be ambient, drone-like, and textural without melody. Avoid drums, percussion, mallets, plucks, clicks, grains, arpeggios, sequencer patterns, rhythmic LFOs, tremolo, gated motion, delay taps, vocals, lead melody, drops, fade-outs, and silence.",
+                "unbroken Cm9 spectral wavetable pad with phase smear and muted air",
+                "spectral_pad",
+                0.48f,
+                26,
+                7.2f,
+                6.7f,
+                0.0f,
+            },
+            {
+                "feedback_tide_hold",
+                "Feedback Tide Hold",
+                "Create an original sustained synthesizer texture called Feedback Tide Hold. A continuous Cm9 modular feedback drone held below self-oscillation, with slowly breathing resonance and smooth non-periodic voltage drift. Add warm wavefolder color, dark filtering, and a deep reverb tail that stays connected as one long tone. The sound should be cinematic, ambient, and suspended, with no audible beat grid. Avoid drums, percussion, impacts, glitches, crackles, clicks, stutters, arpeggios, sequencer patterns, rhythmic pulses, tremolo, delay taps, vocals, lead melody, drops, fade-outs, and silence.",
+                "continuous Cm9 modular feedback drone with slow resonance breathing",
+                "analog_drone",
+                0.47f,
+                24,
+                7.0f,
+                6.6f,
+                0.0f,
+            },
+        }};
+        return true;
+    }
     if (config.profile == "sustained_no_decay_trials") {
         config.slots = {{
             {
@@ -1997,7 +2050,7 @@ void print_usage(const char* argv0) {
         "  --profile NAME           clear_extreme, microcinematic_footwork, negative_space_club,\n"
         "                           glass_trap_pressure, metallic_ambient_bounce,\n"
         "                           sustained_synth_textures, sustained_no_decay_trials,\n"
-        "                           or dirty_cinematic_ambient_cm9\n"
+        "                           dirty_cinematic_ambient_cm9, or beatless_drone_ambient_cm9\n"
         "  --weight-mode NAME       sequential, solo, modulated, polyrhythm, loop_sine,\n"
         "                           meter_sine, meter_macro_sine, or page_sine\n"
         "  --control-mode NAME      slot_blend or ambient_crescendo\n"
