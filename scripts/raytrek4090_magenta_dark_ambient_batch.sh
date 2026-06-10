@@ -377,7 +377,7 @@ if [[ "$SKIP_INSTALL" != "1" ]]; then
   "$UV" pip install -U "jax[$JAX_CUDA_EXTRA]"
   PYTHON="python"
 else
-  if [[ -x .venv-raytrek/bin/activate ]]; then
+  if [[ -f .venv-raytrek/bin/activate ]]; then
     # shellcheck disable=SC1091
     source .venv-raytrek/bin/activate
     PYTHON="python"
