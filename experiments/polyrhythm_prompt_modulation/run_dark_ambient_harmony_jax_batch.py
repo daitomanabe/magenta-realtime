@@ -208,7 +208,7 @@ def write_weight_json(path: Path, duration: float, modulation: dict, batch_varia
 
 def note_conditioning(pitches: list[int], first_chunk: bool) -> list[int]:
     notes = [-1] * 128
-    value = 2 if first_chunk else 1
+    value = 1 if first_chunk else 2
     for pitch in pitches:
         if 0 <= pitch < 128:
             notes[pitch] = value
