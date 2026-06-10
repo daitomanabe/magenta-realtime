@@ -355,6 +355,7 @@ JOBS="${13}"
 cd "$REMOTE_DIR"
 export PATH="$HOME/.local/bin:$PATH"
 export MAGENTA_HOME="${MAGENTA_HOME:-$HOME/Documents/Magenta/magenta-rt-v2}"
+export HF_HUB_DISABLE_XET="${HF_HUB_DISABLE_XET:-1}"
 mkdir -p "$MAGENTA_HOME"
 
 if [[ "$SKIP_INSTALL" != "1" ]]; then
