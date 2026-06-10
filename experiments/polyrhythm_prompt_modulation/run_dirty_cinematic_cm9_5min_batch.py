@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import json
 import math
 import shutil
@@ -828,6 +829,136 @@ def write_manifest(path: Path, manifest: dict) -> None:
     path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
 
 
+def render_take(
+    *,
+    take_index: int,
+    output_dir: Path,
+    midi: Path,
+    args: argparse.Namespace,
+) -> dict:
+    paths = paths_for_take(output_dir, take_index, args.duration)
+    paths["dir"].mkdir(parents=True, exist_ok=True)
+    prompt_slots = prompt_slots_for_take(take_index)
+    modulation = modulation_for_take(take_index)
+    write_prompt_library(paths["prompts"], prompt_slots)
+    print(
+        "take "
+        f"{take_index:03d}: prompts="
+        + ", ".join(str(slot["label"]) for slot in prompt_slots),
+        flush=True,
+    )
+    print(
+        "take "
+        f"{take_index:03d}: modulation={modulation['label']} "
+        f"macro_ref={float(modulation['macro_reference_seconds']):.3f}s "
+        f"meter_speed={float(modulation['meter_speed_scale']):.3f} "
+        f"meter_depth={float(modulation['meter_depth']):.3f} "
+        f"macro_depth={float(modulation['macro_depth']):.3f} "
+        f"macro_mix={float(modulation['macro_mix']):.3f}",
+        flush=True,
+    )
+
+    summary = None
+    phase_offset = 0.0
+    batch_variant = take_index
+    attempt = 0
+    last_error: Exception | None = None
+    for attempt in range(1, args.max_attempts + 1):
+        batch_variant = take_index + (attempt - 1) * 1000
+        phase_offset = (
+            macro_phase_offset_for_take(batch_variant) + float(modulation["phase_offset"])
+        ) % 1.0
+        print(
+            f"take {take_index:03d}: attempt={attempt} "
+            f"batch_variant={batch_variant} macro_phase_offset={phase_offset:.6f}",
+            flush=True,
+        )
+
+        existing = all(paths[key].exists() for key in ["prompts", "wav", "report", "weights"])
+        if args.force or attempt > 1:
+            existing = False
+        if not existing:
+            if args.skip_render:
+                raise RuntimeError(f"Missing rendered files for take {take_index:03d}")
+            run_logged(
+                [
+                    str(args.binary),
+                    "--midi",
+                    str(midi),
+                    "--profile",
+                    "dirty_cinematic_ambient_cm9",
+                    "--duration",
+                    f"{args.duration:.3f}",
+                    "--weight-mode",
+                    "meter_macro_sine",
+                    "--control-mode",
+                    "ambient_crescendo",
+                    "--macro-reference-seconds",
+                    f"{float(modulation['macro_reference_seconds']):.3f}",
+                    "--macro-phase-offset",
+                    f"{phase_offset:.9f}",
+                    "--meter-speed-scale",
+                    f"{float(modulation['meter_speed_scale']):.6f}",
+                    "--meter-depth",
+                    f"{float(modulation['meter_depth']):.6f}",
+                    "--macro-depth",
+                    f"{float(modulation['macro_depth']):.6f}",
+                    "--macro-mix",
+                    f"{float(modulation['macro_mix']):.6f}",
+                    "--batch-variant",
+                    str(batch_variant),
+                    "--midi-refresh-seconds",
+                    f"{MIDI_REFRESH_SECONDS:.3f}",
+                    "--prompt-library",
+                    str(paths["prompts"]),
+                    "--prompt-page-seconds",
+                    f"{args.duration + 1.0:.3f}",
+                    "--transition",
+                    "0.000",
+                    "--output",
+                    str(paths["wav"]),
+                    "--report",
+                    str(paths["report"]),
+                    "--weights-output",
+                    str(paths["weights"]),
+                    "--text-prompts",
+                ],
+                paths["log"],
+            )
+        else:
+            print(f"take {take_index:03d}: existing render found, validating", flush=True)
+
+        try:
+            summary = validate_take(paths, args.duration)
+            break
+        except RuntimeError as exc:
+            last_error = exc
+            print(
+                f"take {take_index:03d}: validation failed on attempt {attempt}: {exc}",
+                flush=True,
+            )
+            if attempt == args.max_attempts:
+                raise
+
+    if summary is None:
+        raise RuntimeError(f"take {take_index:03d}: all attempts failed: {last_error}")
+    summary.update({
+        "take_index": take_index,
+        "macro_phase_offset": phase_offset,
+        "batch_variant": batch_variant,
+        "attempt": attempt,
+        "modulation": modulation,
+        "prompt_set": prompt_manifest(prompt_slots),
+    })
+    print(
+        f"take {take_index:03d}: ok "
+        f"rms={summary['rms']:.6f} "
+        f"quiet={summary['audio_activity']['quiet_window_count']}",
+        flush=True,
+    )
+    return summary
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--binary", type=Path, default=DEFAULT_BINARY)
@@ -838,6 +969,7 @@ def main() -> int:
     parser.add_argument("--force", action="store_true")
     parser.add_argument("--skip-render", action="store_true")
     parser.add_argument("--max-attempts", type=int, default=1)
+    parser.add_argument("--jobs", type=int, default=1)
     args = parser.parse_args()
 
     if not args.binary.exists():
@@ -848,6 +980,8 @@ def main() -> int:
         raise SystemExit("--duration must be positive")
     if args.max_attempts <= 0:
         raise SystemExit("--max-attempts must be positive")
+    if args.jobs <= 0:
+        raise SystemExit("--jobs must be positive")
 
     output_dir = args.output_dir.resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -875,6 +1009,7 @@ def main() -> int:
         "duration_seconds": args.duration,
         "count_requested": args.count,
         "start_index": args.start_index,
+        "jobs": args.jobs,
         "macro_reference_seconds": MACRO_REFERENCE_SECONDS,
         "midi": str(midi.relative_to(ROOT)),
         "prompt_variant_mode": "per_take_four_prompt_tsv",
@@ -900,130 +1035,47 @@ def main() -> int:
         "takes": [],
     }
 
-    for take_index in range(args.start_index, args.start_index + args.count):
-        paths = paths_for_take(output_dir, take_index, args.duration)
-        paths["dir"].mkdir(parents=True, exist_ok=True)
-        prompt_slots = prompt_slots_for_take(take_index)
-        modulation = modulation_for_take(take_index)
-        write_prompt_library(paths["prompts"], prompt_slots)
-        print(
-            "take "
-            f"{take_index:03d}: prompts="
-            + ", ".join(str(slot["label"]) for slot in prompt_slots),
-            flush=True,
-        )
-        print(
-            "take "
-            f"{take_index:03d}: modulation={modulation['label']} "
-            f"macro_ref={float(modulation['macro_reference_seconds']):.3f}s "
-            f"meter_speed={float(modulation['meter_speed_scale']):.3f} "
-            f"meter_depth={float(modulation['meter_depth']):.3f} "
-            f"macro_depth={float(modulation['macro_depth']):.3f} "
-            f"macro_mix={float(modulation['macro_mix']):.3f}",
-            flush=True,
-        )
-
-        summary = None
-        phase_offset = 0.0
-        batch_variant = take_index
-        last_error: Exception | None = None
-        for attempt in range(1, args.max_attempts + 1):
-            batch_variant = take_index + (attempt - 1) * 1000
-            phase_offset = (
-                macro_phase_offset_for_take(batch_variant) + float(modulation["phase_offset"])
-            ) % 1.0
-            print(
-                f"take {take_index:03d}: attempt={attempt} "
-                f"batch_variant={batch_variant} macro_phase_offset={phase_offset:.6f}",
-                flush=True,
+    take_indices = list(range(args.start_index, args.start_index + args.count))
+    if args.jobs == 1:
+        for take_index in take_indices:
+            summary = render_take(
+                take_index=take_index,
+                output_dir=output_dir,
+                midi=midi,
+                args=args,
             )
-
-            existing = all(paths[key].exists() for key in ["prompts", "wav", "report", "weights"])
-            if args.force or attempt > 1:
-                existing = False
-            if not existing:
-                if args.skip_render:
-                    raise RuntimeError(f"Missing rendered files for take {take_index:03d}")
-                run_logged(
-                    [
-                        str(args.binary),
-                        "--midi",
-                        str(midi),
-                        "--profile",
-                        "dirty_cinematic_ambient_cm9",
-                        "--duration",
-                        f"{args.duration:.3f}",
-                        "--weight-mode",
-                        "meter_macro_sine",
-                        "--control-mode",
-                        "ambient_crescendo",
-                        "--macro-reference-seconds",
-                        f"{float(modulation['macro_reference_seconds']):.3f}",
-                        "--macro-phase-offset",
-                        f"{phase_offset:.9f}",
-                        "--meter-speed-scale",
-                        f"{float(modulation['meter_speed_scale']):.6f}",
-                        "--meter-depth",
-                        f"{float(modulation['meter_depth']):.6f}",
-                        "--macro-depth",
-                        f"{float(modulation['macro_depth']):.6f}",
-                        "--macro-mix",
-                        f"{float(modulation['macro_mix']):.6f}",
-                        "--batch-variant",
-                        str(batch_variant),
-                        "--midi-refresh-seconds",
-                        f"{MIDI_REFRESH_SECONDS:.3f}",
-                        "--prompt-library",
-                        str(paths["prompts"]),
-                        "--prompt-page-seconds",
-                        f"{args.duration + 1.0:.3f}",
-                        "--transition",
-                        "0.000",
-                        "--output",
-                        str(paths["wav"]),
-                        "--report",
-                        str(paths["report"]),
-                        "--weights-output",
-                        str(paths["weights"]),
-                        "--text-prompts",
-                    ],
-                    paths["log"],
-                )
-            else:
-                print(f"take {take_index:03d}: existing render found, validating", flush=True)
-
-            try:
-                summary = validate_take(paths, args.duration)
-                break
-            except RuntimeError as exc:
-                last_error = exc
+            manifest["takes"].append(summary)
+            manifest["takes"].sort(key=lambda take: take["take_index"])
+            manifest["completed_count"] = len(manifest["takes"])
+            write_manifest(manifest_path, manifest)
+    else:
+        print(f"Running up to {args.jobs} renders in parallel", flush=True)
+        with ThreadPoolExecutor(max_workers=args.jobs) as executor:
+            futures = {
+                executor.submit(
+                    render_take,
+                    take_index=take_index,
+                    output_dir=output_dir,
+                    midi=midi,
+                    args=args,
+                ): take_index
+                for take_index in take_indices
+            }
+            for future in as_completed(futures):
+                take_index = futures[future]
+                summary = future.result()
+                manifest["takes"].append(summary)
+                manifest["takes"].sort(key=lambda take: take["take_index"])
+                manifest["completed_count"] = len(manifest["takes"])
+                write_manifest(manifest_path, manifest)
                 print(
-                    f"take {take_index:03d}: validation failed on attempt {attempt}: {exc}",
+                    f"take {take_index:03d}: manifest updated "
+                    f"completed={manifest['completed_count']}/{args.count}",
                     flush=True,
                 )
-                if attempt == args.max_attempts:
-                    raise
 
-        if summary is None:
-            raise RuntimeError(f"take {take_index:03d}: all attempts failed: {last_error}")
-        summary.update({
-            "take_index": take_index,
-            "macro_phase_offset": phase_offset,
-            "batch_variant": batch_variant,
-            "attempt": attempt,
-            "modulation": modulation,
-            "prompt_set": prompt_manifest(prompt_slots),
-        })
-        manifest["takes"].append(summary)
-        manifest["completed_count"] = len(manifest["takes"])
-        write_manifest(manifest_path, manifest)
-        print(
-            f"take {take_index:03d}: ok "
-            f"rms={summary['rms']:.6f} "
-            f"quiet={summary['audio_activity']['quiet_window_count']}",
-            flush=True,
-        )
-
+    manifest["takes"].sort(key=lambda take: take["take_index"])
+    manifest["completed_count"] = len(manifest["takes"])
     write_manifest(manifest_path, manifest)
     print(f"Wrote {manifest_path}")
     return 0
