@@ -48,6 +48,28 @@ MACRO_CYCLES_PER_REFERENCE = [1.0, 1.5, 2.5, 3.5]
 MACRO_PHASE_OFFSETS = [0.0, 0.23, 0.47, 0.71]
 
 
+def parse_take_indices(value: str) -> set[int]:
+    indices: set[int] = set()
+    if not value.strip():
+        return indices
+    for part in value.split(","):
+        item = part.strip()
+        if not item:
+            continue
+        if "-" in item:
+            start_text, end_text = item.split("-", 1)
+            start = int(start_text)
+            end = int(end_text)
+            if end < start:
+                raise argparse.ArgumentTypeError(f"Invalid take range: {item}")
+            indices.update(range(start, end + 1))
+        else:
+            indices.add(int(item))
+    if any(index < 1 for index in indices):
+        raise argparse.ArgumentTypeError("--take-indices are 1-based")
+    return indices
+
+
 def clamp(value: float, lo: float, hi: float) -> float:
     return max(lo, min(hi, value))
 
@@ -389,25 +411,7 @@ def load_sources(source_dir: Path, output_dir: Path, duration: float) -> list[di
     return sources
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--source-dir", type=Path, default=DEFAULT_SOURCE_DIR)
-    parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
-    parser.add_argument("--model", default=MODEL)
-    parser.add_argument("--duration", type=float, default=DURATION_SECONDS)
-    parser.add_argument("--chunk-seconds", type=float, default=1.0)
-    parser.add_argument("--target-rms", type=float, default=TARGET_RMS)
-    parser.add_argument("--peak-ceiling", type=float, default=PEAK_CEILING)
-    parser.add_argument("--limit", type=int, default=0, help="Limit take count for smoke tests.")
-    parser.add_argument("--dry-run", action="store_true", help="Write prompts/weights/manifest without loading JAX.")
-    args = parser.parse_args()
-
-    args.source_dir = args.source_dir if args.source_dir.is_absolute() else ROOT / args.source_dir
-    args.output_dir = args.output_dir if args.output_dir.is_absolute() else ROOT / args.output_dir
-    if args.chunk_seconds <= 0.0:
-        raise SystemExit("--chunk-seconds must be positive")
-
-    sources = load_sources(args.source_dir, args.output_dir, args.duration)
+def build_tasks(sources: list[dict]) -> list[dict]:
     tasks = []
     take_index = 1
     for source in sources:
@@ -419,8 +423,50 @@ def main() -> int:
                 "latch_midi": source["latch_midi"],
             })
             take_index += 1
+    return tasks
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--source-dir", type=Path, default=DEFAULT_SOURCE_DIR)
+    parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
+    parser.add_argument("--model", default=MODEL)
+    parser.add_argument("--duration", type=float, default=DURATION_SECONDS)
+    parser.add_argument("--chunk-seconds", type=float, default=1.0)
+    parser.add_argument("--target-rms", type=float, default=TARGET_RMS)
+    parser.add_argument("--peak-ceiling", type=float, default=PEAK_CEILING)
+    parser.add_argument("--limit", type=int, default=0, help="Limit take count for smoke tests.")
+    parser.add_argument(
+        "--take-indices",
+        type=parse_take_indices,
+        default=set(),
+        help="Comma-separated 1-based take indices or ranges, e.g. 1,3,5-8.",
+    )
+    parser.add_argument(
+        "--manifest-name",
+        default="manifest.json",
+        help="Manifest filename under output dir. Parallel workers should use unique names.",
+    )
+    parser.add_argument("--dry-run", action="store_true", help="Write prompts/weights/manifest without loading JAX.")
+    args = parser.parse_args()
+
+    args.source_dir = args.source_dir if args.source_dir.is_absolute() else ROOT / args.source_dir
+    args.output_dir = args.output_dir if args.output_dir.is_absolute() else ROOT / args.output_dir
+    if args.chunk_seconds <= 0.0:
+        raise SystemExit("--chunk-seconds must be positive")
+
+    sources = load_sources(args.source_dir, args.output_dir, args.duration)
+    tasks = build_tasks(sources)
+    if args.take_indices:
+        all_indices = {task["take_index"] for task in tasks}
+        missing = sorted(args.take_indices - all_indices)
+        if missing:
+            raise SystemExit(f"Unknown take indices: {missing}")
+        tasks = [task for task in tasks if task["take_index"] in args.take_indices]
     if args.limit:
         tasks = tasks[:args.limit]
+    if not tasks:
+        raise SystemExit("No takes selected")
 
     device_summary: list[str] = []
     mrt = None
@@ -458,9 +504,12 @@ def main() -> int:
         "model": args.model,
         "devices": device_summary,
         "dry_run": args.dry_run,
+        "selected_take_indices": [task["take_index"] for task in tasks],
+        "manifest_name": args.manifest_name,
         "takes": [],
     }
-    manifest_path = args.output_dir / "manifest.json"
+    manifest_path = args.output_dir / args.manifest_name
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
     manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
 
     completed = []

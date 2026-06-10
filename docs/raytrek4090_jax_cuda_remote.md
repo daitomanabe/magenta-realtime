@@ -35,6 +35,15 @@ scripts/raytrek4090_magenta_dark_ambient_batch.sh \
   --limit 1
 ```
 
+Parallel 16-take CUDA/JAX render:
+
+```bash
+scripts/raytrek4090_magenta_dark_ambient_batch.sh \
+  --remote-exec windows-wsl \
+  --wsl-distro Ubuntu \
+  --jobs 4
+```
+
 Full 16-take render:
 
 ```bash
@@ -54,3 +63,8 @@ scripts/raytrek4090_magenta_dark_ambient_batch.sh \
 - The default JAX CUDA extra is `cuda12`, which is usually safest for current
   RTX 4090 drivers. Use `--jax-cuda-extra cuda13` only when the installed NVIDIA
   driver supports it.
+- `--jobs N` launches N independent JAX processes and distributes take indices
+  across them. The script sets `XLA_PYTHON_CLIENT_PREALLOCATE=false` and divides
+  the JAX memory fraction across workers to reduce GPU memory contention.
+- Worker logs are written as `parallel_job_XX.log`; worker manifests are merged
+  into `manifest.json` after all workers finish.

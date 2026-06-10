@@ -14,6 +14,7 @@ MODEL="mrt2_small"
 DURATION="256.0"
 CHUNK_SECONDS="1.0"
 LIMIT="0"
+JOBS="${RAYTREK4090_JOBS:-1}"
 SKIP_SYNC="0"
 SKIP_INSTALL="0"
 SKIP_MODELS="0"
@@ -44,6 +45,7 @@ Options:
   --duration SECONDS       Render duration (default: 256.0)
   --chunk-seconds SECONDS  JAX control-update chunk size (default: 1.0)
   --limit N                Smoke-test first N takes; 0 means all
+  --jobs N                 Parallel JAX worker processes (default: 1)
   --skip-sync              Do not rsync local repo to raytrek before running
   --skip-install           Do not create/update the remote venv or JAX deps
   --skip-uv-bootstrap      Do not install uv automatically when it is missing
@@ -59,6 +61,7 @@ Environment:
   RAYTREK4090_WSL_USER     Same as --wsl-user
   RAYTREK4090_JAX_CUDA_EXTRA
                             Same as --jax-cuda-extra
+  RAYTREK4090_JOBS         Same as --jobs
 
 Examples:
   # Windows SSH host, run everything inside WSL2 Linux + CUDA + JAX.
@@ -105,6 +108,8 @@ while [[ $# -gt 0 ]]; do
       CHUNK_SECONDS="$2"; shift 2 ;;
     --limit)
       LIMIT="$2"; shift 2 ;;
+    --jobs)
+      JOBS="$2"; shift 2 ;;
     --skip-sync)
       SKIP_SYNC="1"; shift ;;
     --skip-install)
@@ -135,6 +140,12 @@ esac
 
 if [[ -z "$JAX_CUDA_EXTRA" ]]; then
   die "--jax-cuda-extra must not be empty"
+fi
+if ! [[ "$JOBS" =~ ^[0-9]+$ ]] || [[ "$JOBS" -lt 1 ]]; then
+  die "--jobs must be a positive integer"
+fi
+if ! [[ "$LIMIT" =~ ^[0-9]+$ ]]; then
+  die "--limit must be a non-negative integer"
 fi
 
 if [[ ! -d "$ROOT/$SOURCE_DIR_REL" ]]; then
@@ -321,7 +332,7 @@ fi
 echo "== Remote JAX batch =="
 remote_bash \
   "$REMOTE_DIR" "$SOURCE_DIR_REL" "$OUTPUT_DIR_REL" "$MODEL" "$DURATION" "$CHUNK_SECONDS" \
-  "$LIMIT" "$SKIP_INSTALL" "$SKIP_MODELS" "$DRY_RUN" "$JAX_CUDA_EXTRA" "$AUTO_INSTALL_UV" <<'REMOTE'
+  "$LIMIT" "$SKIP_INSTALL" "$SKIP_MODELS" "$DRY_RUN" "$JAX_CUDA_EXTRA" "$AUTO_INSTALL_UV" "$JOBS" <<'REMOTE'
 set -euo pipefail
 
 REMOTE_DIR="$1"
@@ -336,6 +347,7 @@ SKIP_MODELS="$9"
 DRY_RUN="${10}"
 JAX_CUDA_EXTRA="${11}"
 AUTO_INSTALL_UV="${12}"
+JOBS="${13}"
 
 cd "$REMOTE_DIR"
 export PATH="$HOME/.local/bin:$PATH"
@@ -405,8 +417,103 @@ if [[ "$DRY_RUN" == "1" ]]; then
   args+=(--dry-run)
 fi
 
-echo "+ ${args[*]}"
-"${args[@]}"
+if [[ "$JOBS" -le 1 ]]; then
+  echo "+ ${args[*]}"
+  started="$(date +%s)"
+  "${args[@]}"
+  ended="$(date +%s)"
+  echo "elapsed_seconds=$((ended - started))"
+else
+  TOTAL_TAKES="$LIMIT"
+  if [[ "$TOTAL_TAKES" == "0" ]]; then
+    TOTAL_TAKES="16"
+  fi
+  if [[ "$JOBS" -gt "$TOTAL_TAKES" ]]; then
+    JOBS="$TOTAL_TAKES"
+  fi
+
+  mkdir -p "$OUTPUT_DIR_REL"
+  MEM_FRACTION="$(awk -v jobs="$JOBS" 'BEGIN { f = 0.88 / jobs; if (f < 0.08) f = 0.08; printf "%.3f", f }')"
+  echo "parallel_jobs=$JOBS total_takes=$TOTAL_TAKES xla_mem_fraction=$MEM_FRACTION"
+
+  pids=()
+  logs=()
+  started="$(date +%s)"
+  for worker in $(seq 1 "$JOBS"); do
+    indices=()
+    for ((take = 1; take <= TOTAL_TAKES; take += 1)); do
+      if (( (take - 1) % JOBS == (worker - 1) )); then
+        indices+=("$take")
+      fi
+    done
+    if [[ "${#indices[@]}" -eq 0 ]]; then
+      continue
+    fi
+    joined="$(IFS=,; echo "${indices[*]}")"
+    manifest_name="$(printf 'manifest.job_%02d.json' "$worker")"
+    log_path="$(printf '%s/parallel_job_%02d.log' "$OUTPUT_DIR_REL" "$worker")"
+    worker_args=("${args[@]}" --take-indices "$joined" --manifest-name "$manifest_name")
+    echo "+ worker=$worker takes=$joined ${worker_args[*]} > $log_path"
+    (
+      export XLA_PYTHON_CLIENT_PREALLOCATE=false
+      export XLA_PYTHON_CLIENT_MEM_FRACTION="$MEM_FRACTION"
+      export TF_FORCE_GPU_ALLOW_GROWTH=true
+      "${worker_args[@]}"
+    ) >"$log_path" 2>&1 &
+    pids+=("$!")
+    logs+=("$log_path")
+  done
+
+  failed=0
+  for index in "${!pids[@]}"; do
+    if ! wait "${pids[$index]}"; then
+      failed=1
+      echo "worker_failed log=${logs[$index]}" >&2
+      tail -120 "${logs[$index]}" >&2 || true
+    fi
+  done
+  ended="$(date +%s)"
+  elapsed="$((ended - started))"
+  if [[ "$failed" != "0" ]]; then
+    exit 1
+  fi
+
+  "$PYTHON" - "$OUTPUT_DIR_REL" "$JOBS" "$elapsed" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+output_dir = Path(sys.argv[1])
+jobs = int(sys.argv[2])
+elapsed = float(sys.argv[3])
+manifests = sorted(output_dir.glob("manifest.job_*.json"))
+if not manifests:
+    raise SystemExit("No worker manifests found")
+
+combined = json.loads(manifests[0].read_text())
+takes = []
+devices = []
+for manifest_path in manifests:
+    manifest = json.loads(manifest_path.read_text())
+    takes.extend(manifest.get("takes", []))
+    devices.extend(manifest.get("devices", []))
+
+takes.sort(key=lambda take: int(take["take_index"]))
+combined["schema"] = "mrt-dark-ambient-harmonies-128bars-prompt2-jax-parallel-batch-v1"
+combined["manifest_name"] = "manifest.json"
+combined["selected_take_indices"] = [take["take_index"] for take in takes]
+combined["devices"] = sorted(set(devices))
+combined["parallel"] = {
+    "jobs": jobs,
+    "elapsed_seconds": elapsed,
+    "worker_manifests": [str(path.name) for path in manifests],
+}
+combined["takes"] = takes
+(output_dir / "manifest.json").write_text(json.dumps(combined, indent=2) + "\n", encoding="utf-8")
+print(f"merged {len(takes)} takes into {output_dir / 'manifest.json'}")
+PY
+  echo "elapsed_seconds=$elapsed"
+fi
 REMOTE
 
 if [[ "$NO_SYNC_BACK" != "1" ]]; then
