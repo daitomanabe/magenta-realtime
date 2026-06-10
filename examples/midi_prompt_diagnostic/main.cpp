@@ -15,8 +15,9 @@
 // mrt2_midi_prompt_diagnostic
 //
 // Offline diagnostic renderer that drives the official C++ MLXEngine MIDI
-// path. It parses a Standard MIDI File, schedules note_on/note_off events via
-// MLXEngine::set_note_on/off, blends cached prompt embeddings through
+// path. It parses a Standard MIDI File, schedules MIDI note state updates via
+// MLXEngine::set_note_on/off, supports Note-On-only latch MIDI for sustained
+// drones, blends cached prompt embeddings through
 // reblend_musiccoca_tokens(), modulates CFG/temperature/top-k, and writes a
 // float WAV plus a JSON report.
 
@@ -77,12 +78,22 @@ struct MidiNote {
     int channel = 0;
     double start_seconds = 0.0;
     double end_seconds = 0.0;
+    bool inferred_end = false;
 };
 
 struct MidiEvent {
     double time_seconds = 0.0;
     int pitch = 0;
     bool on = false;
+};
+
+struct RawMidiNote {
+    int start_tick = 0;
+    int end_tick = 0;
+    int pitch = 0;
+    int velocity = 0;
+    int channel = 0;
+    bool inferred_end = false;
 };
 
 struct MidiData {
@@ -284,7 +295,7 @@ MidiData parse_midi(const std::filesystem::path& path) {
     offset = 8 + header_size;
 
     std::vector<std::pair<int, int>> tempos;
-    std::vector<std::tuple<int, int, int, int, int>> raw_notes;
+    std::vector<RawMidiNote> raw_notes;
 
     for (int track_index = 0; track_index < midi.tracks; ++track_index) {
         if (read_ascii(data, offset, 4) != "MTrk") {
@@ -355,7 +366,7 @@ MidiData parse_midi(const std::filesystem::path& path) {
                     if (!starts.empty()) {
                         auto [start_tick, start_velocity] = starts.front();
                         starts.erase(starts.begin());
-                        raw_notes.push_back({start_tick, absolute_tick, pitch, start_velocity, channel});
+                        raw_notes.push_back({start_tick, absolute_tick, pitch, start_velocity, channel, false});
                     }
                     midi.events.push_back({0.0, pitch, false});
                 }
@@ -366,6 +377,20 @@ MidiData parse_midi(const std::filesystem::path& path) {
                 pos += 1;
             } else {
                 throw std::runtime_error("Unsupported MIDI status");
+            }
+        }
+
+        for (const auto& entry : active) {
+            int channel = entry.first.first;
+            int pitch = entry.first.second;
+            for (const auto& start : entry.second) {
+                int start_tick = start.first;
+                int velocity = start.second;
+                int inferred_end_tick = std::max(absolute_tick, start_tick);
+                if (inferred_end_tick > start_tick) {
+                    raw_notes.push_back({start_tick, inferred_end_tick, pitch, velocity, channel, true});
+                    midi.end_tick = std::max(midi.end_tick, inferred_end_tick);
+                }
             }
         }
     }
@@ -379,16 +404,19 @@ MidiData parse_midi(const std::filesystem::path& path) {
     midi.events.clear();
     for (const auto& item : raw_notes) {
         MidiNote note;
-        note.start_tick = std::get<0>(item);
-        note.end_tick = std::get<1>(item);
-        note.pitch = std::get<2>(item);
-        note.velocity = std::get<3>(item);
-        note.channel = std::get<4>(item);
+        note.start_tick = item.start_tick;
+        note.end_tick = item.end_tick;
+        note.pitch = item.pitch;
+        note.velocity = item.velocity;
+        note.channel = item.channel;
+        note.inferred_end = item.inferred_end;
         note.start_seconds = tick_to_seconds(note.start_tick, tempos, midi.ppq);
         note.end_seconds = tick_to_seconds(note.end_tick, tempos, midi.ppq);
         midi.notes.push_back(note);
         midi.events.push_back({note.start_seconds, note.pitch, true});
-        midi.events.push_back({note.end_seconds, note.pitch, false});
+        if (!note.inferred_end) {
+            midi.events.push_back({note.end_seconds, note.pitch, false});
+        }
     }
     std::sort(midi.notes.begin(), midi.notes.end(),
               [](const MidiNote& a, const MidiNote& b) {
@@ -431,9 +459,12 @@ MidiData repeat_midi_to_duration(const MidiData& source, double duration_seconds
             note.end_seconds = end;
             note.start_tick = src_note.start_tick + cycle * source.end_tick;
             note.end_tick = src_note.end_tick + cycle * source.end_tick;
+            note.inferred_end = src_note.inferred_end;
             midi.notes.push_back(note);
             midi.events.push_back({note.start_seconds, note.pitch, true});
-            midi.events.push_back({note.end_seconds, note.pitch, false});
+            if (!note.inferred_end) {
+                midi.events.push_back({note.end_seconds, note.pitch, false});
+            }
         }
     }
 
@@ -1861,6 +1892,19 @@ bool write_report(const std::filesystem::path& path,
         sum += v * v;
     }
     double rms = interleaved.empty() ? 0.0 : std::sqrt(sum / interleaved.size());
+    size_t note_on_events = 0;
+    size_t note_off_events = 0;
+    for (const auto& event : midi.events) {
+        if (event.on) {
+            ++note_on_events;
+        } else {
+            ++note_off_events;
+        }
+    }
+    size_t inferred_held_notes = 0;
+    for (const auto& note : midi.notes) {
+        if (note.inferred_end) ++inferred_held_notes;
+    }
 
     out << std::fixed << std::setprecision(6);
     out << "{\n";
@@ -1909,7 +1953,10 @@ bool write_report(const std::filesystem::path& path,
     out << "    \"ppq\": " << midi.ppq << ",\n";
     out << "    \"bpm\": " << midi.bpm << ",\n";
     out << "    \"time_signature\": \"" << json_escape(midi.time_signature) << "\",\n";
-    out << "    \"notes\": " << midi.notes.size() << "\n";
+    out << "    \"notes\": " << midi.notes.size() << ",\n";
+    out << "    \"note_on_events\": " << note_on_events << ",\n";
+    out << "    \"note_off_events\": " << note_off_events << ",\n";
+    out << "    \"inferred_held_notes\": " << inferred_held_notes << "\n";
     out << "  },\n";
     out << "  \"control_roles\": {\n";
     out << "    \"primary\": \"prompt embedding mix via reblend_musiccoca_tokens\",\n";
@@ -1917,7 +1964,7 @@ bool write_report(const std::filesystem::path& path,
     out << "    \"expression\": \"temperature, optionally shaped by control_mode\",\n";
     out << "    \"exploration\": \"top_k, optionally shaped by control_mode\",\n";
     out << "    \"stability\": \"fixed 25 Hz frames / 1920 sample chunks\",\n";
-    out << "    \"midi\": \"MLXEngine::set_note_on/off -> MidiNoteTracker -> generate_frame\"\n";
+    out << "    \"midi\": \"MLXEngine MIDI note state -> MidiNoteTracker -> generate_frame; initial_latch sends only the initial Note On set\"\n";
     out << "  },\n";
     out << "  \"segments\": [\n";
     for (int segment = 0; segment < 4; ++segment) {
@@ -2147,8 +2194,8 @@ void print_usage(const char* argv0) {
         "  --macro-depth N          Depth for macro_sine prompt-weight contrast\n"
         "  --macro-mix N            Amount of macro_sine blended into meter_macro_sine\n"
         "  --batch-variant INDEX    Variant index folded into meter_macro_sine macro phases\n"
-        "  --midi-mode NAME         scheduled or initial_latch (default: scheduled)\n"
-        "  --midi-refresh-seconds N Re-send active MIDI notes every N seconds during render\n"
+        "  --midi-mode NAME         scheduled or initial_latch; initial_latch sends initial Note On only (default: scheduled)\n"
+        "  --midi-refresh-seconds N Re-send active MIDI notes every N seconds during scheduled render\n"
         "  --duration SECONDS       Repeat/clip the MIDI progression to this duration\n"
         "  --transition SECONDS     Prompt crossfade duration at segment boundaries\n"
         "  --text-prompts           Use text prompts instead of MIDI-derived audio prompt embeddings\n"

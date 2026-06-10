@@ -27,7 +27,8 @@ BPM = 120
 BEATS_PER_BAR = 4
 DURATION_SECONDS = 300.0
 MACRO_REFERENCE_SECONDS = 128.0
-MIDI_REFRESH_SECONDS = 2.75
+MIDI_MODE = "initial_latch"
+MIDI_REFRESH_SECONDS = 0.0
 SAMPLE_RATE = 48000
 CHANNELS = 2
 BYTES_PER_SAMPLE = 4
@@ -543,7 +544,7 @@ def vlq(value: int) -> bytes:
     return bytes(out)
 
 
-def write_cm9_hold_midi(path: Path, duration_seconds: float) -> None:
+def write_cm9_noteon_latch_midi(path: Path, duration_seconds: float) -> None:
     ppq = 480
     tempo_us = round(60_000_000 / BPM)
     beats = int(round(duration_seconds * BPM / 60.0))
@@ -560,9 +561,7 @@ def write_cm9_hold_midi(path: Path, duration_seconds: float) -> None:
     add(0, b"\xff\x58\x04" + bytes([4, 2, 24, 8]))
     for note in CHORD:
         add(0, bytes([0x90, note, 84]))
-    for index, note in enumerate(CHORD):
-        add(end_ticks if index == 0 else 0, bytes([0x80, note, 0]))
-    add(0, b"\xff\x2f\x00")
+    add(end_ticks, b"\xff\x2f\x00")
 
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("wb") as f:
@@ -1067,6 +1066,8 @@ def render_take(
                     f"{float(modulation['macro_mix']):.6f}",
                     "--batch-variant",
                     str(batch_variant),
+                    "--midi-mode",
+                    MIDI_MODE,
                     "--midi-refresh-seconds",
                     f"{MIDI_REFRESH_SECONDS:.3f}",
                     "--prompt-library",
@@ -1145,8 +1146,8 @@ def main() -> int:
 
     output_dir = args.output_dir.resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
-    midi = output_dir / f"dirty_cinematic_cm9_{duration_stem_label(args.duration)}_bpm120_hold.mid"
-    write_cm9_hold_midi(midi, args.duration)
+    midi = output_dir / f"dirty_cinematic_cm9_{duration_stem_label(args.duration)}_bpm120_noteon_latch.mid"
+    write_cm9_noteon_latch_midi(midi, args.duration)
 
     free_bytes = shutil.disk_usage(output_dir).free
     estimated_wav_bytes = args.count * args.duration * SAMPLE_RATE * CHANNELS * BYTES_PER_SAMPLE
@@ -1172,6 +1173,8 @@ def main() -> int:
         "jobs": args.jobs,
         "macro_reference_seconds": MACRO_REFERENCE_SECONDS,
         "midi": str(midi.relative_to(ROOT)),
+        "midi_mode": MIDI_MODE,
+        "midi_note_output": "single Cm9 Note On chord at tick 0; no MIDI Note Off events",
         "prompt_variant_mode": "per_take_four_prompt_tsv",
         "prompt_variant_count": len(TAKE_VARIANTS),
         "control_targets": {
@@ -1181,6 +1184,7 @@ def main() -> int:
             "top_k": [51, 103],
             "buffer_chunk": "fixed 25 Hz frames / 1920 sample chunks",
             "midi_refresh_seconds": MIDI_REFRESH_SECONDS,
+            "midi_mode": MIDI_MODE,
             "meter_speed_scale": "per_take",
             "meter_depth": "per_take",
             "macro_reference_seconds": "per_take",
