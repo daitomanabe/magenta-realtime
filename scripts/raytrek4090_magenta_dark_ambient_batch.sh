@@ -284,7 +284,10 @@ else
   echo "uv=missing"
 fi
 if command -v rsync >/dev/null 2>&1; then
-  rsync --version | head -1
+  set +e
+  rsync_version="$(rsync --version 2>/dev/null)"
+  set -e
+  printf '%s\n' "${rsync_version%%$'\n'*}"
 else
   echo "rsync=missing"
 fi
