@@ -260,6 +260,12 @@ def relative_string(path: Path) -> str:
         return str(path)
 
 
+def modulation_for_take(take_index: int, fixed_modulation_index: int) -> dict:
+    if fixed_modulation_index:
+        return dark_batch.MODULATION_VARIANTS[fixed_modulation_index - 1]
+    return dark_batch.MODULATION_VARIANTS[(take_index - 1) % len(dark_batch.MODULATION_VARIANTS)]
+
+
 def render_take(mrt, task: dict, args: argparse.Namespace, device_summary: list[str]) -> dict:
     source = task["source"]
     take_index = task["take_index"]
@@ -269,7 +275,7 @@ def render_take(mrt, task: dict, args: argparse.Namespace, device_summary: list[
 
     slots = dark_batch.prompt_slots(prompt_set, source, take_index)
     batch.write_prompt_library(paths["prompts"], slots)
-    modulation = dark_batch.MODULATION_VARIANTS[(take_index - 1) % len(dark_batch.MODULATION_VARIANTS)]
+    modulation = modulation_for_take(take_index, args.fixed_modulation_index)
     batch_variant = take_index
     phase = (batch.macro_phase_offset_for_take(batch_variant) + modulation["phase_offset"]) % 1.0
     frames = build_weight_frames(args.duration, modulation, batch_variant, phase, slots)
@@ -429,11 +435,22 @@ def load_sources(source_dir: Path, output_dir: Path, duration: float) -> list[di
     return sources
 
 
-def build_tasks(sources: list[dict]) -> list[dict]:
+def selected_prompt_sets(prompt_set_short: str) -> list[dict]:
+    if prompt_set_short == "all":
+        return dark_batch.PROMPT_SETS
+    matches = [prompt_set for prompt_set in dark_batch.PROMPT_SETS if prompt_set["short"] == prompt_set_short]
+    if not matches:
+        valid = ", ".join(["all"] + [prompt_set["short"] for prompt_set in dark_batch.PROMPT_SETS])
+        raise SystemExit(f"Unknown --prompt-set-short {prompt_set_short!r}; valid values: {valid}")
+    return matches
+
+
+def build_tasks(sources: list[dict], prompt_set_short: str) -> list[dict]:
     tasks = []
     take_index = 1
+    prompt_sets = selected_prompt_sets(prompt_set_short)
     for source in sources:
-        for prompt_set in dark_batch.PROMPT_SETS:
+        for prompt_set in prompt_sets:
             tasks.append({
                 "take_index": take_index,
                 "source": source,
@@ -455,6 +472,17 @@ def main() -> int:
     parser.add_argument("--peak-ceiling", type=float, default=PEAK_CEILING)
     parser.add_argument("--noise-floor-rms", type=float, default=0.0012)
     parser.add_argument("--limit", type=int, default=0, help="Limit take count for smoke tests.")
+    parser.add_argument(
+        "--prompt-set-short",
+        default="all",
+        help="Prompt set short name to render, or 'all' for the full 8 MIDI x 2 prompt batch.",
+    )
+    parser.add_argument(
+        "--fixed-modulation-index",
+        type=int,
+        default=0,
+        help="1-based modulation variant to use for every take. 0 keeps the per-take variant rotation.",
+    )
     parser.add_argument(
         "--notes-mode",
         choices=("chord", "none"),
@@ -481,9 +509,14 @@ def main() -> int:
         raise SystemExit("--chunk-seconds must be positive")
     if args.noise_floor_rms < 0.0:
         raise SystemExit("--noise-floor-rms must be non-negative")
+    if args.fixed_modulation_index < 0 or args.fixed_modulation_index > len(dark_batch.MODULATION_VARIANTS):
+        raise SystemExit(
+            f"--fixed-modulation-index must be 0 or 1-{len(dark_batch.MODULATION_VARIANTS)}"
+        )
 
     sources = load_sources(args.source_dir, args.output_dir, args.duration)
-    tasks = build_tasks(sources)
+    prompt_sets = selected_prompt_sets(args.prompt_set_short)
+    tasks = build_tasks(sources, args.prompt_set_short)
     if args.take_indices:
         all_indices = {task["take_index"] for task in tasks}
         missing = sorted(args.take_indices - all_indices)
@@ -529,7 +562,12 @@ def main() -> int:
         "midi_note_output": "source MIDI pitches copied to Note-On-only latch MIDI; no Note Off events in render MIDI",
         "weight_mode": "meter_macro_sine",
         "control_mode": "jax_stable_ambient_crescendo",
-        "prompt_sets": dark_batch.PROMPT_SETS,
+        "prompt_set_short": args.prompt_set_short,
+        "prompt_sets": prompt_sets,
+        "fixed_modulation_index": args.fixed_modulation_index,
+        "fixed_modulation": None
+        if not args.fixed_modulation_index
+        else dark_batch.MODULATION_VARIANTS[args.fixed_modulation_index - 1],
         "model": args.model,
         "devices": device_summary,
         "dry_run": args.dry_run,

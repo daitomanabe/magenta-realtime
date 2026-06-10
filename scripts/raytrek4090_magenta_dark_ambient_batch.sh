@@ -17,6 +17,8 @@ LIMIT="0"
 JOBS="${RAYTREK4090_JOBS:-1}"
 NOTES_MODE="${RAYTREK4090_NOTES_MODE:-chord}"
 NOISE_FLOOR_RMS="${RAYTREK4090_NOISE_FLOOR_RMS:-0.0012}"
+PROMPT_SET_SHORT="${RAYTREK4090_PROMPT_SET_SHORT:-all}"
+FIXED_MODULATION_INDEX="${RAYTREK4090_FIXED_MODULATION_INDEX:-0}"
 SKIP_SYNC="0"
 SKIP_INSTALL="0"
 SKIP_MODELS="0"
@@ -50,6 +52,9 @@ Options:
   --jobs N                 Parallel JAX worker processes (default: 1)
   --notes-mode MODE        chord or none (default: chord)
   --noise-floor-rms VALUE  Low continuous floor to prevent silent windows (default: 0.0012)
+  --prompt-set-short NAME  Prompt set short name, or all (default: all)
+  --fixed-modulation-index N
+                            Use one 1-based modulation variant for every take; 0 rotates per take
   --skip-sync              Do not rsync local repo to raytrek before running
   --skip-install           Do not create/update the remote venv or JAX deps
   --skip-uv-bootstrap      Do not install uv automatically when it is missing
@@ -69,6 +74,10 @@ Environment:
   RAYTREK4090_NOTES_MODE   Same as --notes-mode
   RAYTREK4090_NOISE_FLOOR_RMS
                             Same as --noise-floor-rms
+  RAYTREK4090_PROMPT_SET_SHORT
+                            Same as --prompt-set-short
+  RAYTREK4090_FIXED_MODULATION_INDEX
+                            Same as --fixed-modulation-index
 
 Examples:
   # Windows SSH host, run everything inside WSL2 Linux + CUDA + JAX.
@@ -121,6 +130,10 @@ while [[ $# -gt 0 ]]; do
       NOTES_MODE="$2"; shift 2 ;;
     --noise-floor-rms)
       NOISE_FLOOR_RMS="$2"; shift 2 ;;
+    --prompt-set-short)
+      PROMPT_SET_SHORT="$2"; shift 2 ;;
+    --fixed-modulation-index)
+      FIXED_MODULATION_INDEX="$2"; shift 2 ;;
     --skip-sync)
       SKIP_SYNC="1"; shift ;;
     --skip-install)
@@ -164,6 +177,9 @@ case "$NOTES_MODE" in
 esac
 if ! [[ "$NOISE_FLOOR_RMS" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
   die "--noise-floor-rms must be a non-negative number"
+fi
+if ! [[ "$FIXED_MODULATION_INDEX" =~ ^[0-9]+$ ]]; then
+  die "--fixed-modulation-index must be a non-negative integer"
 fi
 
 if [[ ! -d "$ROOT/$SOURCE_DIR_REL" ]]; then
@@ -353,7 +369,8 @@ fi
 echo "== Remote JAX batch =="
 remote_bash \
   "$REMOTE_DIR" "$SOURCE_DIR_REL" "$OUTPUT_DIR_REL" "$MODEL" "$DURATION" "$CHUNK_SECONDS" \
-  "$LIMIT" "$SKIP_INSTALL" "$SKIP_MODELS" "$DRY_RUN" "$JAX_CUDA_EXTRA" "$AUTO_INSTALL_UV" "$JOBS" "$NOTES_MODE" "$NOISE_FLOOR_RMS" <<'REMOTE'
+  "$LIMIT" "$SKIP_INSTALL" "$SKIP_MODELS" "$DRY_RUN" "$JAX_CUDA_EXTRA" "$AUTO_INSTALL_UV" "$JOBS" "$NOTES_MODE" "$NOISE_FLOOR_RMS" \
+  "$PROMPT_SET_SHORT" "$FIXED_MODULATION_INDEX" <<'REMOTE'
 set -euo pipefail
 
 REMOTE_DIR="$1"
@@ -371,6 +388,8 @@ AUTO_INSTALL_UV="${12}"
 JOBS="${13}"
 NOTES_MODE="${14}"
 NOISE_FLOOR_RMS="${15}"
+PROMPT_SET_SHORT="${16}"
+FIXED_MODULATION_INDEX="${17}"
 
 cd "$REMOTE_DIR"
 export PATH="$HOME/.local/bin:$PATH"
@@ -436,6 +455,8 @@ args=(
   --chunk-seconds "$CHUNK_SECONDS"
   --notes-mode "$NOTES_MODE"
   --noise-floor-rms "$NOISE_FLOOR_RMS"
+  --prompt-set-short "$PROMPT_SET_SHORT"
+  --fixed-modulation-index "$FIXED_MODULATION_INDEX"
 )
 if [[ "$LIMIT" != "0" ]]; then
   args+=(--limit "$LIMIT")
@@ -453,7 +474,11 @@ if [[ "$JOBS" -le 1 ]]; then
 else
   TOTAL_TAKES="$LIMIT"
   if [[ "$TOTAL_TAKES" == "0" ]]; then
-    TOTAL_TAKES="16"
+    if [[ "$PROMPT_SET_SHORT" == "all" ]]; then
+      TOTAL_TAKES="16"
+    else
+      TOTAL_TAKES="8"
+    fi
   fi
   if [[ "$JOBS" -gt "$TOTAL_TAKES" ]]; then
     JOBS="$TOTAL_TAKES"
