@@ -203,6 +203,10 @@ struct RenderConfig {
     int batch_variant = 0;
     double macro_phase_offset = 0.0;
     double macro_reference_seconds = 128.0;
+    double meter_speed_scale = 1.0;
+    double meter_depth = 1.0;
+    double macro_depth = 1.0;
+    double macro_mix = 1.0;
     double midi_refresh_seconds = 0.0;
     std::string midi_mode = "scheduled";
 };
@@ -904,12 +908,16 @@ std::array<float, 4> normalize_prompt_weights(std::array<float, 4> weights) {
 
 std::array<float, 4> meter_sine_raw_weights(double time_seconds, const RenderConfig& config) {
     double beat_position = time_seconds * config.bpm / 60.0;
+    double speed_scale = std::max(0.001, config.meter_speed_scale);
+    double depth = std::clamp(config.meter_depth, 0.0, 2.0);
     std::array<float, 4> weights = {0.0f, 0.0f, 0.0f, 0.0f};
     for (size_t i = 0; i < weights.size(); ++i) {
         double phase =
-            2.0 * kPi * (beat_position / kMeterQuarterNotePeriods[i] + kMeterPhaseOffsets[i]);
+            2.0 * kPi * (speed_scale * beat_position / kMeterQuarterNotePeriods[i] +
+                          kMeterPhaseOffsets[i]);
         double lfo = 0.5 + 0.5 * std::sin(phase);
-        weights[i] = static_cast<float>(0.015 + std::pow(lfo, 3.0));
+        double shaped = std::clamp(0.5 + (std::pow(lfo, 3.0) - 0.5) * depth, 0.0, 1.35);
+        weights[i] = static_cast<float>(0.015 + shaped);
     }
     return weights;
 }
@@ -919,12 +927,14 @@ std::array<float, 4> macro_sine_raw_weights(double time_seconds, const RenderCon
     double normalized_time = time_seconds / reference_seconds;
     double variant_phase = config.macro_phase_offset +
                            0.017 * static_cast<double>(config.batch_variant);
+    double depth = std::clamp(config.macro_depth, 0.0, 2.0);
     std::array<float, 4> weights = {0.0f, 0.0f, 0.0f, 0.0f};
     for (size_t i = 0; i < weights.size(); ++i) {
         double slot_phase = kMacroPhaseOffsets[i] + variant_phase * static_cast<double>(i + 1);
         double phase = 2.0 * kPi * (normalized_time * kMacroCyclesPerReference[i] + slot_phase);
         double lfo = 0.5 + 0.5 * std::sin(phase);
-        weights[i] = static_cast<float>(0.04 + std::pow(lfo, 1.8));
+        double shaped = std::clamp(0.5 + (std::pow(lfo, 1.8) - 0.5) * depth, 0.0, 1.35);
+        weights[i] = static_cast<float>(0.04 + shaped);
     }
     return weights;
 }
@@ -1063,12 +1073,14 @@ std::array<float, 4> prompt_weights(double time_seconds, const RenderConfig& con
     if (config.weight_mode == "meter_macro_sine") {
         auto meter = meter_sine_raw_weights(time_seconds, config);
         auto macro = macro_sine_raw_weights(time_seconds, config);
+        double macro_mix = std::clamp(config.macro_mix, 0.0, 1.5);
         std::array<float, 4> weights = {0.0f, 0.0f, 0.0f, 0.0f};
         for (size_t i = 0; i < weights.size(); ++i) {
             double micro = std::pow(std::max(0.0001f, meter[i]), 0.72);
             double slow = std::pow(std::max(0.0001f, macro[i]), 1.05);
-            weights[i] = static_cast<float>(0.020 + 0.82 * micro * slow +
-                                            0.10 * micro + 0.08 * slow);
+            double slow_mix = (1.0 - macro_mix) + macro_mix * slow;
+            weights[i] = static_cast<float>(0.020 + 0.82 * micro * slow_mix +
+                                            0.10 * micro + 0.08 * macro_mix * slow);
         }
         return normalize_prompt_weights(weights);
     }
@@ -1866,6 +1878,10 @@ bool write_report(const std::filesystem::path& path,
     out << "  \"batch_variant\": " << config.batch_variant << ",\n";
     out << "  \"macro_phase_offset\": " << config.macro_phase_offset << ",\n";
     out << "  \"macro_reference_seconds\": " << config.macro_reference_seconds << ",\n";
+    out << "  \"meter_speed_scale\": " << config.meter_speed_scale << ",\n";
+    out << "  \"meter_depth\": " << config.meter_depth << ",\n";
+    out << "  \"macro_depth\": " << config.macro_depth << ",\n";
+    out << "  \"macro_mix\": " << config.macro_mix << ",\n";
     out << "  \"midi_mode\": \"" << json_escape(config.midi_mode) << "\",\n";
     out << "  \"midi_refresh_seconds\": " << config.midi_refresh_seconds << ",\n";
     out << "  \"bpm\": " << config.bpm << ",\n";
@@ -1965,6 +1981,10 @@ bool write_weight_frames(const std::filesystem::path& path,
     out << "  \"batch_variant\": " << config.batch_variant << ",\n";
     out << "  \"macro_phase_offset\": " << config.macro_phase_offset << ",\n";
     out << "  \"macro_reference_seconds\": " << config.macro_reference_seconds << ",\n";
+    out << "  \"meter_speed_scale\": " << config.meter_speed_scale << ",\n";
+    out << "  \"meter_depth\": " << config.meter_depth << ",\n";
+    out << "  \"macro_depth\": " << config.macro_depth << ",\n";
+    out << "  \"macro_mix\": " << config.macro_mix << ",\n";
     out << "  \"midi_mode\": \"" << json_escape(config.midi_mode) << "\",\n";
     out << "  \"midi_refresh_seconds\": " << config.midi_refresh_seconds << ",\n";
     if (config.weight_mode == "meter_sine" || config.weight_mode == "meter_macro_sine") {
@@ -2122,6 +2142,10 @@ void print_usage(const char* argv0) {
         "  --prompt-page-seconds N  Seconds per four-prompt library page (default: 4.0)\n"
         "  --macro-reference-seconds N  Reference duration for meter_macro_sine macro LFOs\n"
         "  --macro-phase-offset N   Extra phase offset for meter_macro_sine macro LFOs\n"
+        "  --meter-speed-scale N    Scale meter_sine speed while keeping BPM metadata fixed\n"
+        "  --meter-depth N          Depth for meter_sine prompt-weight contrast\n"
+        "  --macro-depth N          Depth for macro_sine prompt-weight contrast\n"
+        "  --macro-mix N            Amount of macro_sine blended into meter_macro_sine\n"
         "  --batch-variant INDEX    Variant index folded into meter_macro_sine macro phases\n"
         "  --midi-mode NAME         scheduled or initial_latch (default: scheduled)\n"
         "  --midi-refresh-seconds N Re-send active MIDI notes every N seconds during render\n"
@@ -2179,6 +2203,14 @@ bool parse_args(int argc, char** argv, RenderConfig& config) {
             config.macro_reference_seconds = std::stod(need_value("--macro-reference-seconds"));
         } else if (arg == "--macro-phase-offset") {
             config.macro_phase_offset = std::stod(need_value("--macro-phase-offset"));
+        } else if (arg == "--meter-speed-scale") {
+            config.meter_speed_scale = std::stod(need_value("--meter-speed-scale"));
+        } else if (arg == "--meter-depth") {
+            config.meter_depth = std::stod(need_value("--meter-depth"));
+        } else if (arg == "--macro-depth") {
+            config.macro_depth = std::stod(need_value("--macro-depth"));
+        } else if (arg == "--macro-mix") {
+            config.macro_mix = std::stod(need_value("--macro-mix"));
         } else if (arg == "--batch-variant") {
             config.batch_variant = std::stoi(need_value("--batch-variant"));
         } else if (arg == "--midi-mode") {

@@ -158,6 +158,212 @@ TAKE_VARIANTS = [
     },
 ]
 
+TAKE_DETAIL_VARIANTS = [
+    {
+        "emphasis": "burnt transformer grain and a matte black low end",
+        "motion": "uneven half-speed phase sag with no repeating cycle",
+        "post": "soft diode clipping, dull tape print-through, and a dry-wet reverb swell",
+        "drone_edge": "a scorched transformer edge",
+        "noise_color": "matte-black dust and filtered electrical residue",
+        "glitch_behavior": "slowly oxidized codec flakes suspended inside the sustain",
+        "pad_color": "smudged charcoal harmonics",
+    },
+    {
+        "emphasis": "cold silver air, pressure drift, and distant machine skin",
+        "motion": "very slow spectral thawing that drifts off-grid",
+        "post": "frozen hall blur, restrained shimmer, and gentle high-cut damping",
+        "drone_edge": "brushed silver detune and soft high-frequency frost",
+        "noise_color": "silver pressure hiss with no tick transients",
+        "glitch_behavior": "ice-like spectral grains stretched into a continuous sheet",
+        "pad_color": "pale glass harmonics with a cold chorus halo",
+    },
+    {
+        "emphasis": "charcoal sub pressure and heavy tunnel resonance",
+        "motion": "slow stereo pressure shifts that never lock to tempo",
+        "post": "dark convolution reflections, tape crush, and low-mid saturation",
+        "drone_edge": "charred subharmonic bloom",
+        "noise_color": "smoky charcoal air and compressed tunnel rumble",
+        "glitch_behavior": "digital ash suspended without cuts or stutters",
+        "pad_color": "buried carbon-glass upper partials",
+    },
+    {
+        "emphasis": "rusted neon harmonic bleed and corroded voltage",
+        "motion": "unstable analog drift with no tremolo or clocked pulse",
+        "post": "blurred reverse reflections, oxide saturation, and dark plate reverb",
+        "drone_edge": "rust-neon sidebands and worn oscillator smear",
+        "noise_color": "oxide floor noise and transformer buzz softened into air",
+        "glitch_behavior": "bit erosion that behaves like continuous corrosion",
+        "pad_color": "neon spectral haze dulled by magnetic wear",
+    },
+    {
+        "emphasis": "mineral density, storm-static, and granite weight",
+        "motion": "weather-like density drift over the whole take",
+        "post": "stone-room compression, muted phasing, and distant sub bloom",
+        "drone_edge": "granite pressure-wave detune",
+        "noise_color": "storm-static bed with low cinematic rumble",
+        "glitch_behavior": "soft cracked storm buffer edges with no rhythmic flicker",
+        "pad_color": "gray additive dust and mineral shimmer",
+    },
+    {
+        "emphasis": "viscous oil-glass movement and wet dark pressure",
+        "motion": "fluid stereo bending that avoids periodic wobble",
+        "post": "glossy atrium reflections, muted formant drift, and soft overdrive",
+        "drone_edge": "oil-thick pitch smear",
+        "noise_color": "viscous dark noise and wet sub pressure",
+        "glitch_behavior": "liquid buffer smear without bubbles becoming pulses",
+        "pad_color": "black glass harmonic bands with oily diffusion",
+    },
+    {
+        "emphasis": "burnt data ash, organ-like width, and cathedral depth",
+        "motion": "long harmonic breathing with uneven phrase lengths",
+        "post": "cathedral tail, spectral blur, and dusty digital smear",
+        "drone_edge": "burnt digital undertones below the Cm9 body",
+        "noise_color": "ashen fan hiss and dark server-room air",
+        "glitch_behavior": "static buffer choir decomposed into one continuous tone",
+        "pad_color": "dusty organ bloom and wide spectral haze",
+    },
+    {
+        "emphasis": "chrome dust, metallic horizon, and cold stereo width",
+        "motion": "slow widening and damping with no rhythmic LFO",
+        "post": "blurred metallic reflections, dirty chorus, and high-mid shade",
+        "drone_edge": "chrome-coated sine beating flattened into sustain",
+        "noise_color": "bright dust filtered down into a dark bed",
+        "glitch_behavior": "broken codec artifacts stretched until they stop clicking",
+        "pad_color": "cold chrome shimmer with glassy dirt",
+    },
+    {
+        "emphasis": "old memory-room hiss and worn tape oscillation",
+        "motion": "gradual texture aging across the full render",
+        "post": "small-to-vast room morph, saturated tail, and low-pass settling",
+        "drone_edge": "basalt-dark tape wobble kept below pulse speed",
+        "noise_color": "filtered dust, old room hiss, and a steady sub floor",
+        "glitch_behavior": "soft memory corruption blurred into a frozen layer",
+        "pad_color": "cracked glass harmonics under dim spectral dust",
+    },
+    {
+        "emphasis": "violet electrical weather and diffuse machine cloud",
+        "motion": "asymmetric filter color changes that do not repeat",
+        "post": "dark plate reverb, soft chorus, and post-effect diffusion",
+        "drone_edge": "dirty modular chord pressure with violet overtones",
+        "noise_color": "electrical weather noise softened into low cloud",
+        "glitch_behavior": "machine-glitch residue suspended without rhythmic cuts",
+        "pad_color": "diffuse violet glass overtones",
+    },
+    {
+        "emphasis": "magnetic brownout, dim filament hum, and slow voltage sinking",
+        "motion": "one-way tonal darkening with tiny non-periodic returns",
+        "post": "brown tape saturation, low shelf compression, and dull spring diffusion",
+        "drone_edge": "filament hum folded into the low Cm9 sustain",
+        "noise_color": "brownout static and old amplifier air",
+        "glitch_behavior": "melted sample-hold dust with no clock feel",
+        "pad_color": "dim amber partials buried under tape haze",
+    },
+    {
+        "emphasis": "blue-black vacuum pressure and distant frozen radio air",
+        "motion": "subtle spectral pressure drift with irregular timing",
+        "post": "vacuum-like reverb, high-cut spectral smear, and soft limiter glue",
+        "drone_edge": "blue-black oscillator pressure",
+        "noise_color": "distant radio air flattened into a stable bed",
+        "glitch_behavior": "frozen radio fragments stretched into texture only",
+        "pad_color": "blue glass harmonics with a muted upper edge",
+    },
+    {
+        "emphasis": "molten ceramic resonance and low metallic heat",
+        "motion": "slow heat-bend detune that never becomes vibrato",
+        "post": "ceramic room reflections, wavefolder warmth, and dark notch drift",
+        "drone_edge": "molten low-register resonance",
+        "noise_color": "heated ceramic hiss and low metallic air",
+        "glitch_behavior": "soft thermal bit smear with no stutter pattern",
+        "pad_color": "warm mineral harmonics with a glass tail",
+    },
+    {
+        "emphasis": "deep sea cable pressure and submerged digital sediment",
+        "motion": "slow underwater filter buoyancy with no pulse",
+        "post": "submerged convolution tail, damped chorus, and low-pass sediment",
+        "drone_edge": "pressure-bent cable hum",
+        "noise_color": "submerged broadband sediment and distant cable hiss",
+        "glitch_behavior": "waterlogged buffer dust without rhythmic droplets",
+        "pad_color": "dark aquatic harmonics and soft detune haze",
+    },
+    {
+        "emphasis": "white-hot CRT bloom and blackened phosphor smear",
+        "motion": "uneven phosphor afterglow drifting slower than breath",
+        "post": "CRT saturation, soft scanline blur without rhythm, and smoky hall reverb",
+        "drone_edge": "phosphor-bloom sidebands around the Cm9 root",
+        "noise_color": "blackened CRT hiss flattened into static air",
+        "glitch_behavior": "visual-sounding phosphor flakes held as a continuous sheet",
+        "pad_color": "white-hot glass harmonics dimmed by smoke",
+    },
+    {
+        "emphasis": "iron fog, buried machinery, and distant low resonance",
+        "motion": "heavy non-metric resonance shifts across a wide stereo field",
+        "post": "iron chamber reflections, low-mid tape glue, and muted comb shadows",
+        "drone_edge": "buried machine resonance under the Cm9 chord",
+        "noise_color": "iron fog and low mechanical room tone",
+        "glitch_behavior": "submerged machine dust without audible cuts",
+        "pad_color": "dull steel harmonics behind a fogged glass layer",
+    },
+    {
+        "emphasis": "polar night shimmer and granular snow suspended in the chord",
+        "motion": "non-repeating aurora-like detune drift",
+        "post": "wide polar reverb, muted shimmer, and gentle spectral freeze",
+        "drone_edge": "cold aurora detune under a stable low register",
+        "noise_color": "fine snow noise with no grains popping forward",
+        "glitch_behavior": "granular snow stretched until it becomes a smooth cloud",
+        "pad_color": "polar glass shimmer with softened edges",
+    },
+    {
+        "emphasis": "black resin, slow pressure bloom, and sticky harmonic smear",
+        "motion": "very slow resin-like stretching without cyclic movement",
+        "post": "sticky saturation, dark reverb bloom, and low-pass resin damping",
+        "drone_edge": "black resin harmonic drag",
+        "noise_color": "sticky dark air and soft pressure bloom",
+        "glitch_behavior": "resin-trapped digital dust held inside the sustain",
+        "pad_color": "smeared resin-glass harmonics",
+    },
+    {
+        "emphasis": "distant orbital debris, cold telemetry haze, and sub vacuum",
+        "motion": "slow orbital drift with irregular phase offsets",
+        "post": "large vacuum tail, telemetry blur, and restrained stereo expansion",
+        "drone_edge": "cold orbital sine pressure",
+        "noise_color": "telemetry haze filtered into a dark continuous floor",
+        "glitch_behavior": "debris-like digital flecks stretched away from rhythm",
+        "pad_color": "cold satellite glass with diffuse high air",
+    },
+    {
+        "emphasis": "smoke-filled glasshouse resonance and late-night voltage dust",
+        "motion": "wandering filter color that never returns on the barline",
+        "post": "smoke-room reverb, soft tape compression, and blurred chorus width",
+        "drone_edge": "late-night voltage dust around the oscillator body",
+        "noise_color": "smoky glasshouse air and distant electrical haze",
+        "glitch_behavior": "tiny suspended voltage crumbs without click rhythm",
+        "pad_color": "smoke-stained glass harmonics",
+    },
+]
+
+MODULATION_VARIANTS = [
+    {"label": "slow wide macro, shallow meter", "macro_reference_seconds": 176.0, "meter_speed_scale": 0.750, "meter_depth": 0.82, "macro_depth": 1.22, "macro_mix": 1.12, "phase_offset": 0.000},
+    {"label": "medium macro, deep meter contrast", "macro_reference_seconds": 144.0, "meter_speed_scale": 1.000, "meter_depth": 1.28, "macro_depth": 0.92, "macro_mix": 0.74, "phase_offset": 0.071},
+    {"label": "slow triplet-feel meter drift", "macro_reference_seconds": 160.0, "meter_speed_scale": 0.667, "meter_depth": 1.05, "macro_depth": 1.08, "macro_mix": 1.00, "phase_offset": 0.143},
+    {"label": "fast macro pressure, soft meter", "macro_reference_seconds": 104.0, "meter_speed_scale": 0.875, "meter_depth": 0.76, "macro_depth": 1.34, "macro_mix": 1.24, "phase_offset": 0.211},
+    {"label": "one-and-quarter meter speed, balanced depth", "macro_reference_seconds": 128.0, "meter_speed_scale": 1.250, "meter_depth": 1.00, "macro_depth": 1.00, "macro_mix": 0.92, "phase_offset": 0.287},
+    {"label": "half-speed meter, deep macro wash", "macro_reference_seconds": 192.0, "meter_speed_scale": 0.500, "meter_depth": 0.90, "macro_depth": 1.42, "macro_mix": 1.28, "phase_offset": 0.337},
+    {"label": "four-thirds meter polyrhythm, light macro", "macro_reference_seconds": 152.0, "meter_speed_scale": 1.333, "meter_depth": 1.18, "macro_depth": 0.84, "macro_mix": 0.62, "phase_offset": 0.409},
+    {"label": "three-halves meter speed, strong macro blend", "macro_reference_seconds": 120.0, "meter_speed_scale": 1.500, "meter_depth": 0.96, "macro_depth": 1.26, "macro_mix": 1.18, "phase_offset": 0.463},
+    {"label": "long macro arc, deep meter valley", "macro_reference_seconds": 208.0, "meter_speed_scale": 1.125, "meter_depth": 1.36, "macro_depth": 0.90, "macro_mix": 0.82, "phase_offset": 0.527},
+    {"label": "short macro rotation, narrow meter", "macro_reference_seconds": 96.0, "meter_speed_scale": 0.800, "meter_depth": 0.72, "macro_depth": 1.10, "macro_mix": 1.04, "phase_offset": 0.601},
+    {"label": "eleven-eighth meter feel, deep dual modulation", "macro_reference_seconds": 136.0, "meter_speed_scale": 1.375, "meter_depth": 1.24, "macro_depth": 1.24, "macro_mix": 1.10, "phase_offset": 0.019},
+    {"label": "five-sixths meter drag, shallow macro", "macro_reference_seconds": 184.0, "meter_speed_scale": 0.833, "meter_depth": 1.10, "macro_depth": 0.78, "macro_mix": 0.58, "phase_offset": 0.109},
+    {"label": "double-time prompt shimmer, restrained depth", "macro_reference_seconds": 148.0, "meter_speed_scale": 2.000, "meter_depth": 0.70, "macro_depth": 0.86, "macro_mix": 0.72, "phase_offset": 0.173},
+    {"label": "seven-four style meter skew, heavy macro", "macro_reference_seconds": 112.0, "meter_speed_scale": 1.750, "meter_depth": 1.06, "macro_depth": 1.38, "macro_mix": 1.30, "phase_offset": 0.259},
+    {"label": "slow 5-over-4 feeling, broad macro breath", "macro_reference_seconds": 168.0, "meter_speed_scale": 0.625, "meter_depth": 0.88, "macro_depth": 1.18, "macro_mix": 0.96, "phase_offset": 0.319},
+    {"label": "near-grid meter with high macro depth", "macro_reference_seconds": 116.0, "meter_speed_scale": 1.062, "meter_depth": 0.94, "macro_depth": 1.46, "macro_mix": 1.34, "phase_offset": 0.389},
+    {"label": "slow meter, low macro mix", "macro_reference_seconds": 200.0, "meter_speed_scale": 0.700, "meter_depth": 1.30, "macro_depth": 0.82, "macro_mix": 0.54, "phase_offset": 0.449},
+    {"label": "fast meter, medium macro turn", "macro_reference_seconds": 132.0, "meter_speed_scale": 1.625, "meter_depth": 1.12, "macro_depth": 1.06, "macro_mix": 0.88, "phase_offset": 0.557},
+    {"label": "wide shallow breathing, off-grid phase", "macro_reference_seconds": 156.0, "meter_speed_scale": 0.917, "meter_depth": 0.78, "macro_depth": 0.94, "macro_mix": 0.66, "phase_offset": 0.643},
+    {"label": "deep final macro sweep, dense meter", "macro_reference_seconds": 108.0, "meter_speed_scale": 1.200, "meter_depth": 1.40, "macro_depth": 1.30, "macro_mix": 1.22, "phase_offset": 0.707},
+]
+
 
 def vlq(value: int) -> bytes:
     buffer = value & 0x7F
@@ -231,12 +437,14 @@ def clean_tsv(value: str) -> str:
 
 def prompt_slots_for_take(take_index: int) -> list[dict[str, str | float | int]]:
     variant = TAKE_VARIANTS[(take_index - 1) % len(TAKE_VARIANTS)]
+    detail = TAKE_DETAIL_VARIANTS[(take_index - 1) % len(TAKE_DETAIL_VARIANTS)]
     scene = variant["scene"]
     slug = variant["slug"]
     common = (
-        "Keep one continuous Cm9 sustained environment for the full five minutes at 120 BPM. "
+        "Keep one continuous Cm9 sustained environment for the full requested duration at 120 BPM. "
         "The material is dirty, cinematic, ambient, textural, and beatless. "
         "Let post effects and filters evolve slowly, but do not create a rhythm. "
+        f"For this take, emphasize {detail['emphasis']}, {detail['motion']}, and {detail['post']}. "
         "Avoid drums, percussion, kick, snare, hats, impacts, risers, arpeggios, "
         "sequencer patterns, rhythmic pulses, tremolo, gated motion, delay taps, "
         "vocals, lead melody, drops, fade-outs, sudden cuts, and silence."
@@ -248,7 +456,8 @@ def prompt_slots_for_take(take_index: int) -> list[dict[str, str | float | int]]
             "category": "analog_drone",
             "prompt": (
                 f"Create an original sustained synthesizer texture called {scene} Voltage Drone. "
-                f"A continuous Cm9 low-register modular synth sustain made from {variant['drone']}. "
+                f"A continuous Cm9 low-register modular synth sustain made from {variant['drone']} "
+                f"with {detail['drone_edge']}. "
                 f"Use {variant['filter']}, {variant['motion']}, and a stable low end. "
                 f"Add {variant['space']}. {common}"
             ),
@@ -265,7 +474,8 @@ def prompt_slots_for_take(take_index: int) -> list[dict[str, str | float | int]]
             "category": "cinema_noise",
             "prompt": (
                 f"Create an original sustained synthesizer texture called {scene} Cinema Floor. "
-                f"A continuous Cm9 cinematic noise bed built from {variant['noise']}. "
+                f"A continuous Cm9 cinematic noise bed built from {variant['noise']} "
+                f"with {detail['noise_color']}. "
                 f"Shape it with {variant['filter']} and {variant['motion']}. "
                 f"Add {variant['space']} while keeping the sound heavy and wide. {common}"
             ),
@@ -283,7 +493,8 @@ def prompt_slots_for_take(take_index: int) -> list[dict[str, str | float | int]]
             "prompt": (
                 f"Create an original sustained synthesizer texture called {scene} Glitch Sheet. "
                 f"A continuous Cm9 frozen-buffer synth sheet made from {variant['glitch']}. "
-                f"The glitches are texture only: no stutters, no clicks as rhythm, and no beat grid. "
+                f"The glitches are texture only: {detail['glitch_behavior']}; "
+                "no stutters, no clicks as rhythm, and no beat grid. "
                 f"Use {variant['filter']}, {variant['motion']}, and {variant['space']}. {common}"
             ),
             "guide_kind": "granular_glitch",
@@ -299,7 +510,8 @@ def prompt_slots_for_take(take_index: int) -> list[dict[str, str | float | int]]
             "category": "spectral_pad",
             "prompt": (
                 f"Create an original sustained synthesizer texture called {scene} Glass Texture. "
-                f"A continuous Cm9 spectral pad made from {variant['pad']}. "
+                f"A continuous Cm9 spectral pad made from {variant['pad']} "
+                f"with {detail['pad_color']}. "
                 f"Use {variant['filter']}, {variant['motion']}, gentle chorus, and slow post-effect diffusion. "
                 f"Add {variant['space']} while keeping the tone sustained and non-melodic. {common}"
             ),
@@ -520,9 +732,23 @@ def macro_phase_offset_for_take(take_index: int) -> float:
     return ((take_index - 1) * 0.13750352374993502) % 1.0
 
 
-def paths_for_take(output_dir: Path, take_index: int) -> dict[str, Path]:
+def modulation_for_take(take_index: int) -> dict[str, float | str]:
+    return MODULATION_VARIANTS[(take_index - 1) % len(MODULATION_VARIANTS)]
+
+
+def duration_stem_label(duration_seconds: float) -> str:
+    minutes = duration_seconds / 60.0
+    if abs(minutes - round(minutes)) < 1e-6:
+        return f"{int(round(minutes))}min"
+    return f"{int(round(duration_seconds))}s"
+
+
+def paths_for_take(output_dir: Path, take_index: int, duration_seconds: float) -> dict[str, Path]:
     take_dir = output_dir / f"take_{take_index:03d}"
-    stem = f"dirty_cinematic_cm9_take_{take_index:03d}_meter_macro_sine_5min"
+    stem = (
+        f"dirty_cinematic_cm9_take_{take_index:03d}_meter_macro_sine_"
+        f"{duration_stem_label(duration_seconds)}"
+    )
     return {
         "dir": take_dir,
         "prompts": take_dir / f"{stem}.prompts.tsv",
@@ -611,6 +837,7 @@ def main() -> int:
     parser.add_argument("--duration", type=float, default=DURATION_SECONDS)
     parser.add_argument("--force", action="store_true")
     parser.add_argument("--skip-render", action="store_true")
+    parser.add_argument("--max-attempts", type=int, default=1)
     args = parser.parse_args()
 
     if not args.binary.exists():
@@ -619,10 +846,12 @@ def main() -> int:
         raise SystemExit("--count must be positive")
     if args.duration <= 0:
         raise SystemExit("--duration must be positive")
+    if args.max_attempts <= 0:
+        raise SystemExit("--max-attempts must be positive")
 
     output_dir = args.output_dir.resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
-    midi = output_dir / "dirty_cinematic_cm9_5min_bpm120_hold.mid"
+    midi = output_dir / f"dirty_cinematic_cm9_{duration_stem_label(args.duration)}_bpm120_hold.mid"
     write_cm9_hold_midi(midi, args.duration)
 
     free_bytes = shutil.disk_usage(output_dir).free
@@ -657,80 +886,132 @@ def main() -> int:
             "top_k": [51, 103],
             "buffer_chunk": "fixed 25 Hz frames / 1920 sample chunks",
             "midi_refresh_seconds": MIDI_REFRESH_SECONDS,
+            "meter_speed_scale": "per_take",
+            "meter_depth": "per_take",
+            "macro_reference_seconds": "per_take",
+            "macro_depth": "per_take",
+            "macro_mix": "per_take",
             "window_rms_stabilization": {"enabled": False},
         },
         "mix_modulation": {
-            "micro": "BPM120 meter_sine for 4/4, 3/4, 6/8, 4/4 phase offset 0.25",
-            "macro": "128-second macro sine cycles multiplied into the prompt mix",
+            "micro": "BPM120 meter_sine for 4/4, 3/4, 6/8, 4/4 phase offset 0.25, with per-take speed/depth scaling",
+            "macro": "per-take macro sine reference length, depth, mix amount, and phase offset",
         },
         "takes": [],
     }
 
     for take_index in range(args.start_index, args.start_index + args.count):
-        paths = paths_for_take(output_dir, take_index)
+        paths = paths_for_take(output_dir, take_index, args.duration)
         paths["dir"].mkdir(parents=True, exist_ok=True)
-        phase_offset = macro_phase_offset_for_take(take_index)
         prompt_slots = prompt_slots_for_take(take_index)
+        modulation = modulation_for_take(take_index)
         write_prompt_library(paths["prompts"], prompt_slots)
-        print(f"take {take_index:03d}: macro_phase_offset={phase_offset:.6f}", flush=True)
         print(
             "take "
             f"{take_index:03d}: prompts="
             + ", ".join(str(slot["label"]) for slot in prompt_slots),
             flush=True,
         )
+        print(
+            "take "
+            f"{take_index:03d}: modulation={modulation['label']} "
+            f"macro_ref={float(modulation['macro_reference_seconds']):.3f}s "
+            f"meter_speed={float(modulation['meter_speed_scale']):.3f} "
+            f"meter_depth={float(modulation['meter_depth']):.3f} "
+            f"macro_depth={float(modulation['macro_depth']):.3f} "
+            f"macro_mix={float(modulation['macro_mix']):.3f}",
+            flush=True,
+        )
 
-        existing = all(paths[key].exists() for key in ["prompts", "wav", "report", "weights"])
-        if args.force:
-            existing = False
-        if not existing:
-            if args.skip_render:
-                raise RuntimeError(f"Missing rendered files for take {take_index:03d}")
-            run_logged(
-                [
-                    str(args.binary),
-                    "--midi",
-                    str(midi),
-                    "--profile",
-                    "dirty_cinematic_ambient_cm9",
-                    "--duration",
-                    f"{args.duration:.3f}",
-                    "--weight-mode",
-                    "meter_macro_sine",
-                    "--control-mode",
-                    "ambient_crescendo",
-                    "--macro-reference-seconds",
-                    f"{MACRO_REFERENCE_SECONDS:.3f}",
-                    "--macro-phase-offset",
-                    f"{phase_offset:.9f}",
-                    "--batch-variant",
-                    str(take_index),
-                    "--midi-refresh-seconds",
-                    f"{MIDI_REFRESH_SECONDS:.3f}",
-                    "--prompt-library",
-                    str(paths["prompts"]),
-                    "--prompt-page-seconds",
-                    f"{args.duration + 1.0:.3f}",
-                    "--transition",
-                    "0.000",
-                    "--output",
-                    str(paths["wav"]),
-                    "--report",
-                    str(paths["report"]),
-                    "--weights-output",
-                    str(paths["weights"]),
-                    "--text-prompts",
-                ],
-                paths["log"],
+        summary = None
+        phase_offset = 0.0
+        batch_variant = take_index
+        last_error: Exception | None = None
+        for attempt in range(1, args.max_attempts + 1):
+            batch_variant = take_index + (attempt - 1) * 1000
+            phase_offset = (
+                macro_phase_offset_for_take(batch_variant) + float(modulation["phase_offset"])
+            ) % 1.0
+            print(
+                f"take {take_index:03d}: attempt={attempt} "
+                f"batch_variant={batch_variant} macro_phase_offset={phase_offset:.6f}",
+                flush=True,
             )
-        else:
-            print(f"take {take_index:03d}: existing render found, validating", flush=True)
 
-        summary = validate_take(paths, args.duration)
+            existing = all(paths[key].exists() for key in ["prompts", "wav", "report", "weights"])
+            if args.force or attempt > 1:
+                existing = False
+            if not existing:
+                if args.skip_render:
+                    raise RuntimeError(f"Missing rendered files for take {take_index:03d}")
+                run_logged(
+                    [
+                        str(args.binary),
+                        "--midi",
+                        str(midi),
+                        "--profile",
+                        "dirty_cinematic_ambient_cm9",
+                        "--duration",
+                        f"{args.duration:.3f}",
+                        "--weight-mode",
+                        "meter_macro_sine",
+                        "--control-mode",
+                        "ambient_crescendo",
+                        "--macro-reference-seconds",
+                        f"{float(modulation['macro_reference_seconds']):.3f}",
+                        "--macro-phase-offset",
+                        f"{phase_offset:.9f}",
+                        "--meter-speed-scale",
+                        f"{float(modulation['meter_speed_scale']):.6f}",
+                        "--meter-depth",
+                        f"{float(modulation['meter_depth']):.6f}",
+                        "--macro-depth",
+                        f"{float(modulation['macro_depth']):.6f}",
+                        "--macro-mix",
+                        f"{float(modulation['macro_mix']):.6f}",
+                        "--batch-variant",
+                        str(batch_variant),
+                        "--midi-refresh-seconds",
+                        f"{MIDI_REFRESH_SECONDS:.3f}",
+                        "--prompt-library",
+                        str(paths["prompts"]),
+                        "--prompt-page-seconds",
+                        f"{args.duration + 1.0:.3f}",
+                        "--transition",
+                        "0.000",
+                        "--output",
+                        str(paths["wav"]),
+                        "--report",
+                        str(paths["report"]),
+                        "--weights-output",
+                        str(paths["weights"]),
+                        "--text-prompts",
+                    ],
+                    paths["log"],
+                )
+            else:
+                print(f"take {take_index:03d}: existing render found, validating", flush=True)
+
+            try:
+                summary = validate_take(paths, args.duration)
+                break
+            except RuntimeError as exc:
+                last_error = exc
+                print(
+                    f"take {take_index:03d}: validation failed on attempt {attempt}: {exc}",
+                    flush=True,
+                )
+                if attempt == args.max_attempts:
+                    raise
+
+        if summary is None:
+            raise RuntimeError(f"take {take_index:03d}: all attempts failed: {last_error}")
         summary.update({
             "take_index": take_index,
             "macro_phase_offset": phase_offset,
-            "batch_variant": take_index,
+            "batch_variant": batch_variant,
+            "attempt": attempt,
+            "modulation": modulation,
             "prompt_set": prompt_manifest(prompt_slots),
         })
         manifest["takes"].append(summary)
