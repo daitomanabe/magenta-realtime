@@ -227,6 +227,18 @@ def gain_match(samples: np.ndarray, target_rms: float, peak_ceiling: float) -> n
     return np.clip(samples * gain, -1.0, 1.0).astype(np.float32)
 
 
+def add_noise_floor(samples: np.ndarray, floor_rms: float, seed: int) -> np.ndarray:
+    if floor_rms <= 0.0 or samples.size == 0:
+        return samples
+    rng = np.random.default_rng(seed)
+    floor = rng.standard_normal(samples.shape[0]).astype(np.float32)
+    rms = float(np.sqrt(np.mean(np.square(floor))))
+    if rms <= 1e-9:
+        return samples
+    floor *= floor_rms / rms
+    return np.clip(samples + floor[:, None], -1.0, 1.0).astype(np.float32)
+
+
 def paths_for(output_dir: Path, take_index: int, midi_meta: dict, prompt_set: dict) -> dict[str, Path]:
     take_dir = output_dir / f"take_{take_index:03d}"
     stem = f"dark_ambient_{midi_meta['name']}_{prompt_set['short']}_128bars_jax"
@@ -319,6 +331,7 @@ def render_take(mrt, task: dict, args: argparse.Namespace, device_summary: list[
 
     samples = np.concatenate(generated, axis=0).astype(np.float32)
     samples = gain_match(samples, args.target_rms, args.peak_ceiling)
+    samples = add_noise_floor(samples, args.noise_floor_rms, seed=1000 + take_index)
     sf.write(paths["wav"], samples, 48000, subtype="FLOAT")
     audio_check = batch.analyze_float_wav_stream(paths["wav"].resolve())
     paths["audio_check"].write_text(json.dumps(audio_check, indent=2) + "\n", encoding="utf-8")
@@ -355,6 +368,7 @@ def render_take(mrt, task: dict, args: argparse.Namespace, device_summary: list[
         "weight_mode": "meter_macro_sine",
         "control_mode": "jax_stable_ambient_crescendo",
         "chunk_seconds": args.chunk_seconds,
+        "noise_floor_rms": args.noise_floor_rms,
         "controls": controls,
         "audio_activity": {
             "quiet_window_count": audio_check["quiet_window_count"],
@@ -439,6 +453,7 @@ def main() -> int:
     parser.add_argument("--chunk-seconds", type=float, default=1.0)
     parser.add_argument("--target-rms", type=float, default=TARGET_RMS)
     parser.add_argument("--peak-ceiling", type=float, default=PEAK_CEILING)
+    parser.add_argument("--noise-floor-rms", type=float, default=0.0012)
     parser.add_argument("--limit", type=int, default=0, help="Limit take count for smoke tests.")
     parser.add_argument(
         "--notes-mode",
@@ -464,6 +479,8 @@ def main() -> int:
     args.output_dir = args.output_dir if args.output_dir.is_absolute() else ROOT / args.output_dir
     if args.chunk_seconds <= 0.0:
         raise SystemExit("--chunk-seconds must be positive")
+    if args.noise_floor_rms < 0.0:
+        raise SystemExit("--noise-floor-rms must be non-negative")
 
     sources = load_sources(args.source_dir, args.output_dir, args.duration)
     tasks = build_tasks(sources)
@@ -506,6 +523,7 @@ def main() -> int:
         "bars": BARS,
         "duration_seconds": args.duration,
         "chunk_seconds": args.chunk_seconds,
+        "noise_floor_rms": args.noise_floor_rms,
         "midi_mode": "initial_latch",
         "notes_mode": args.notes_mode,
         "midi_note_output": "source MIDI pitches copied to Note-On-only latch MIDI; no Note Off events in render MIDI",

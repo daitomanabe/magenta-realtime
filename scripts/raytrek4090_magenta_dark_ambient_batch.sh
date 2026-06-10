@@ -16,6 +16,7 @@ CHUNK_SECONDS="1.0"
 LIMIT="0"
 JOBS="${RAYTREK4090_JOBS:-1}"
 NOTES_MODE="${RAYTREK4090_NOTES_MODE:-chord}"
+NOISE_FLOOR_RMS="${RAYTREK4090_NOISE_FLOOR_RMS:-0.0012}"
 SKIP_SYNC="0"
 SKIP_INSTALL="0"
 SKIP_MODELS="0"
@@ -48,6 +49,7 @@ Options:
   --limit N                Smoke-test first N takes; 0 means all
   --jobs N                 Parallel JAX worker processes (default: 1)
   --notes-mode MODE        chord or none (default: chord)
+  --noise-floor-rms VALUE  Low continuous floor to prevent silent windows (default: 0.0012)
   --skip-sync              Do not rsync local repo to raytrek before running
   --skip-install           Do not create/update the remote venv or JAX deps
   --skip-uv-bootstrap      Do not install uv automatically when it is missing
@@ -65,6 +67,8 @@ Environment:
                             Same as --jax-cuda-extra
   RAYTREK4090_JOBS         Same as --jobs
   RAYTREK4090_NOTES_MODE   Same as --notes-mode
+  RAYTREK4090_NOISE_FLOOR_RMS
+                            Same as --noise-floor-rms
 
 Examples:
   # Windows SSH host, run everything inside WSL2 Linux + CUDA + JAX.
@@ -115,6 +119,8 @@ while [[ $# -gt 0 ]]; do
       JOBS="$2"; shift 2 ;;
     --notes-mode)
       NOTES_MODE="$2"; shift 2 ;;
+    --noise-floor-rms)
+      NOISE_FLOOR_RMS="$2"; shift 2 ;;
     --skip-sync)
       SKIP_SYNC="1"; shift ;;
     --skip-install)
@@ -156,6 +162,9 @@ case "$NOTES_MODE" in
   chord|none) ;;
   *) die "--notes-mode must be chord or none" ;;
 esac
+if ! [[ "$NOISE_FLOOR_RMS" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
+  die "--noise-floor-rms must be a non-negative number"
+fi
 
 if [[ ! -d "$ROOT/$SOURCE_DIR_REL" ]]; then
   die "Missing source MIDI dir: $ROOT/$SOURCE_DIR_REL"
@@ -344,7 +353,7 @@ fi
 echo "== Remote JAX batch =="
 remote_bash \
   "$REMOTE_DIR" "$SOURCE_DIR_REL" "$OUTPUT_DIR_REL" "$MODEL" "$DURATION" "$CHUNK_SECONDS" \
-  "$LIMIT" "$SKIP_INSTALL" "$SKIP_MODELS" "$DRY_RUN" "$JAX_CUDA_EXTRA" "$AUTO_INSTALL_UV" "$JOBS" "$NOTES_MODE" <<'REMOTE'
+  "$LIMIT" "$SKIP_INSTALL" "$SKIP_MODELS" "$DRY_RUN" "$JAX_CUDA_EXTRA" "$AUTO_INSTALL_UV" "$JOBS" "$NOTES_MODE" "$NOISE_FLOOR_RMS" <<'REMOTE'
 set -euo pipefail
 
 REMOTE_DIR="$1"
@@ -361,6 +370,7 @@ JAX_CUDA_EXTRA="${11}"
 AUTO_INSTALL_UV="${12}"
 JOBS="${13}"
 NOTES_MODE="${14}"
+NOISE_FLOOR_RMS="${15}"
 
 cd "$REMOTE_DIR"
 export PATH="$HOME/.local/bin:$PATH"
@@ -425,6 +435,7 @@ args=(
   --duration "$DURATION"
   --chunk-seconds "$CHUNK_SECONDS"
   --notes-mode "$NOTES_MODE"
+  --noise-floor-rms "$NOISE_FLOOR_RMS"
 )
 if [[ "$LIMIT" != "0" ]]; then
   args+=(--limit "$LIMIT")
