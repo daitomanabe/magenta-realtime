@@ -463,6 +463,7 @@ else
       export XLA_PYTHON_CLIENT_PREALLOCATE=false
       export XLA_PYTHON_CLIENT_MEM_FRACTION="$MEM_FRACTION"
       export TF_FORCE_GPU_ALLOW_GROWTH=true
+      export TF_GPU_ALLOCATOR="${TF_GPU_ALLOCATOR:-cuda_malloc_async}"
       "${worker_args[@]}"
     ) >"$log_path" 2>&1 &
     pids+=("$!")
