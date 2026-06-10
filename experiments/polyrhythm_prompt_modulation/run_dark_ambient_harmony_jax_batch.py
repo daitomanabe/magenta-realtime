@@ -299,7 +299,9 @@ def render_take(mrt, task: dict, args: argparse.Namespace, device_summary: list[
             controls = control_values(time_mid, args.duration)
             waveform, state = mrt.generate(
                 style=mixed_embedding,
-                notes=note_conditioning(source["pitches"], first_chunk=(frame_cursor == 0)),
+                notes=None
+                if args.notes_mode == "none"
+                else note_conditioning(source["pitches"], first_chunk=(frame_cursor == 0)),
                 drums=[0],
                 cfg_musiccoca=float(controls["cfg_musiccoca"]),
                 cfg_notes=float(controls["cfg_notes"]),
@@ -341,11 +343,13 @@ def render_take(mrt, task: dict, args: argparse.Namespace, device_summary: list[
         "peak": peak,
         "non_silent": rms > 0.0001 and peak > 0.001,
         "midi_mode": "initial_latch",
+        "notes_mode": args.notes_mode,
         "midi": {
             "notes": len(source["pitches"]),
             "note_on_events": len(source["pitches"]),
             "note_off_events": 0,
             "inferred_held_notes": len(source["pitches"]),
+            "conditioned": args.notes_mode != "none",
         },
         "embedding_source": "text_embedding_mix",
         "weight_mode": "meter_macro_sine",
@@ -437,6 +441,12 @@ def main() -> int:
     parser.add_argument("--peak-ceiling", type=float, default=PEAK_CEILING)
     parser.add_argument("--limit", type=int, default=0, help="Limit take count for smoke tests.")
     parser.add_argument(
+        "--notes-mode",
+        choices=("chord", "none"),
+        default="chord",
+        help="Use chord note conditioning, or disable notes for prompt-only fallback.",
+    )
+    parser.add_argument(
         "--take-indices",
         type=parse_take_indices,
         default=set(),
@@ -497,6 +507,7 @@ def main() -> int:
         "duration_seconds": args.duration,
         "chunk_seconds": args.chunk_seconds,
         "midi_mode": "initial_latch",
+        "notes_mode": args.notes_mode,
         "midi_note_output": "source MIDI pitches copied to Note-On-only latch MIDI; no Note Off events in render MIDI",
         "weight_mode": "meter_macro_sine",
         "control_mode": "jax_stable_ambient_crescendo",

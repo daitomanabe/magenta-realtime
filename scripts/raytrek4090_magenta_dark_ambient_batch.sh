@@ -15,6 +15,7 @@ DURATION="256.0"
 CHUNK_SECONDS="1.0"
 LIMIT="0"
 JOBS="${RAYTREK4090_JOBS:-1}"
+NOTES_MODE="${RAYTREK4090_NOTES_MODE:-chord}"
 SKIP_SYNC="0"
 SKIP_INSTALL="0"
 SKIP_MODELS="0"
@@ -46,6 +47,7 @@ Options:
   --chunk-seconds SECONDS  JAX control-update chunk size (default: 1.0)
   --limit N                Smoke-test first N takes; 0 means all
   --jobs N                 Parallel JAX worker processes (default: 1)
+  --notes-mode MODE        chord or none (default: chord)
   --skip-sync              Do not rsync local repo to raytrek before running
   --skip-install           Do not create/update the remote venv or JAX deps
   --skip-uv-bootstrap      Do not install uv automatically when it is missing
@@ -62,6 +64,7 @@ Environment:
   RAYTREK4090_JAX_CUDA_EXTRA
                             Same as --jax-cuda-extra
   RAYTREK4090_JOBS         Same as --jobs
+  RAYTREK4090_NOTES_MODE   Same as --notes-mode
 
 Examples:
   # Windows SSH host, run everything inside WSL2 Linux + CUDA + JAX.
@@ -110,6 +113,8 @@ while [[ $# -gt 0 ]]; do
       LIMIT="$2"; shift 2 ;;
     --jobs)
       JOBS="$2"; shift 2 ;;
+    --notes-mode)
+      NOTES_MODE="$2"; shift 2 ;;
     --skip-sync)
       SKIP_SYNC="1"; shift ;;
     --skip-install)
@@ -147,6 +152,10 @@ fi
 if ! [[ "$LIMIT" =~ ^[0-9]+$ ]]; then
   die "--limit must be a non-negative integer"
 fi
+case "$NOTES_MODE" in
+  chord|none) ;;
+  *) die "--notes-mode must be chord or none" ;;
+esac
 
 if [[ ! -d "$ROOT/$SOURCE_DIR_REL" ]]; then
   die "Missing source MIDI dir: $ROOT/$SOURCE_DIR_REL"
@@ -335,7 +344,7 @@ fi
 echo "== Remote JAX batch =="
 remote_bash \
   "$REMOTE_DIR" "$SOURCE_DIR_REL" "$OUTPUT_DIR_REL" "$MODEL" "$DURATION" "$CHUNK_SECONDS" \
-  "$LIMIT" "$SKIP_INSTALL" "$SKIP_MODELS" "$DRY_RUN" "$JAX_CUDA_EXTRA" "$AUTO_INSTALL_UV" "$JOBS" <<'REMOTE'
+  "$LIMIT" "$SKIP_INSTALL" "$SKIP_MODELS" "$DRY_RUN" "$JAX_CUDA_EXTRA" "$AUTO_INSTALL_UV" "$JOBS" "$NOTES_MODE" <<'REMOTE'
 set -euo pipefail
 
 REMOTE_DIR="$1"
@@ -351,6 +360,7 @@ DRY_RUN="${10}"
 JAX_CUDA_EXTRA="${11}"
 AUTO_INSTALL_UV="${12}"
 JOBS="${13}"
+NOTES_MODE="${14}"
 
 cd "$REMOTE_DIR"
 export PATH="$HOME/.local/bin:$PATH"
@@ -414,6 +424,7 @@ args=(
   --model "$MODEL"
   --duration "$DURATION"
   --chunk-seconds "$CHUNK_SECONDS"
+  --notes-mode "$NOTES_MODE"
 )
 if [[ "$LIMIT" != "0" ]]; then
   args+=(--limit "$LIMIT")
