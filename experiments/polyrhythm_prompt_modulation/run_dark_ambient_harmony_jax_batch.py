@@ -135,11 +135,11 @@ def control_values(time_seconds: float, duration: float) -> dict:
     temp_shape = clamp(smoothstep(progress) + temp_wobble, 0.0, 1.0)
     topk_shape = clamp(smoothstep(progress) + topk_wobble, 0.0, 1.0)
     return {
-        "cfg_musiccoca": 5.8 + 2.0 * rise,
-        "cfg_notes": 5.6 + 0.8 * rise,
+        "cfg_musiccoca": 3.0 + 2.0 * rise,
+        "cfg_notes": 0.1 + 0.9 * rise,
         "cfg_drums": 0.0,
-        "temperature": 0.6075 + (0.7205 - 0.6075) * temp_shape,
-        "top_k": int(round(51.0 + (103.0 - 51.0) * topk_shape)),
+        "temperature": 0.85 + (1.05 - 0.85) * temp_shape,
+        "top_k": int(round(40.0 + (80.0 - 40.0) * topk_shape)),
     }
 
 
@@ -169,7 +169,7 @@ def write_weight_json(path: Path, duration: float, modulation: dict, batch_varia
         "backend": "jax_cuda",
         "profile": "beatless_drone_ambient_cm9",
         "weight_mode": "meter_macro_sine",
-        "control_mode": "ambient_crescendo",
+        "control_mode": "jax_stable_ambient_crescendo",
         "bpm": BPM,
         "duration_seconds": duration,
         "frame_rate": WEIGHT_FRAME_RATE,
@@ -349,7 +349,7 @@ def render_take(mrt, task: dict, args: argparse.Namespace, device_summary: list[
         },
         "embedding_source": "text_embedding_mix",
         "weight_mode": "meter_macro_sine",
-        "control_mode": "ambient_crescendo",
+        "control_mode": "jax_stable_ambient_crescendo",
         "chunk_seconds": args.chunk_seconds,
         "controls": controls,
         "audio_activity": {
@@ -479,10 +479,10 @@ def main() -> int:
             raise SystemExit(f"JAX GPU device not available: {device_summary}")
         mrt = MagentaRT2Jax(
             size=args.model,
-            temperature=0.6075,
-            top_k=51,
-            cfg_musiccoca=5.8,
-            cfg_notes=5.6,
+            temperature=0.85,
+            top_k=40,
+            cfg_musiccoca=3.0,
+            cfg_notes=0.1,
             cfg_drums=0.0,
         )
 
@@ -499,7 +499,7 @@ def main() -> int:
         "midi_mode": "initial_latch",
         "midi_note_output": "source MIDI pitches copied to Note-On-only latch MIDI; no Note Off events in render MIDI",
         "weight_mode": "meter_macro_sine",
-        "control_mode": "ambient_crescendo",
+        "control_mode": "jax_stable_ambient_crescendo",
         "prompt_sets": dark_batch.PROMPT_SETS,
         "model": args.model,
         "devices": device_summary,
