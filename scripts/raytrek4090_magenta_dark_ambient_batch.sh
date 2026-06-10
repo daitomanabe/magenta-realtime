@@ -354,9 +354,10 @@ JOBS="${13}"
 
 cd "$REMOTE_DIR"
 export PATH="$HOME/.local/bin:$PATH"
-export MAGENTA_HOME="${MAGENTA_HOME:-$HOME/Documents/Magenta/magenta-rt-v2}"
+export MAGENTA_HOME="${MAGENTA_HOME:-$HOME/Documents/Magenta}"
 export HF_HUB_DISABLE_XET="${HF_HUB_DISABLE_XET:-1}"
-mkdir -p "$MAGENTA_HOME"
+MAGENTA_DOWNLOAD_PATH="${MAGENTA_DOWNLOAD_PATH:-$MAGENTA_HOME/magenta-rt-v2}"
+mkdir -p "$MAGENTA_DOWNLOAD_PATH"
 
 if [[ "$SKIP_INSTALL" != "1" ]]; then
   UV="$(command -v uv || true)"
@@ -402,8 +403,8 @@ if [[ "$DRY_RUN" != "1" && "$SKIP_MODELS" != "1" ]]; then
     echo "mrt CLI was not found after environment setup." >&2
     exit 1
   }
-  mrt models init --download-path "$MAGENTA_HOME"
-  mrt checkpoints download "${MODEL}.safetensors" --download-path "$MAGENTA_HOME"
+  mrt models init --download-path "$MAGENTA_DOWNLOAD_PATH"
+  mrt checkpoints download "${MODEL}.safetensors" --download-path "$MAGENTA_DOWNLOAD_PATH"
 fi
 
 args=(
